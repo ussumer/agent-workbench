@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "plan_version": "1.0",
+  "tasks": {
+    "T00": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T01": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T02": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T03": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T04": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T05": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T06": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T07": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T08": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T09": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T10": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T11": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T12": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T13": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T14": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T15": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T16": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T17": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T18": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T19": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T20": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T21": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T22": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T23": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    },
+    "T24": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": ""
+    }
+  }
+}

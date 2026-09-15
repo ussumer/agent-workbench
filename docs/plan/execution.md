@@ -1,0 +1,60 @@
+# 编码执行协议
+
+## 唯一状态和阅读顺序
+
+`tasks.json` 定义任务依赖、要求和必读规格；`state.json` 记录进度；`HANDOFF.md` 解释现场。Markdown 任务说明提供具体步骤。发生冲突时以用户最新决定、已接受 ADR、契约、任务包的顺序处理；不能自行挑容易的版本。
+
+每次会话：读入口及交接 -> plan_guard check -> next -> packet -> 读 packet 指定的规格与已有代码 -> 实现 -> gate -> 修复 -> 登记/交接。不要每个任务把整份 PDF、所有规格和整个仓库塞满上下文。
+
+T00、T11-T13、T17、T20、T22还应读 [易错实现顺序](implementation-notes.md)。其中的状态窗口和跨进程边界属于实现约束。
+
+任务状态：pending、in_progress、blocked、done。最多一个 in_progress；done 需要该任务 gate 证据和所有依赖 done。用户审阅字段独立为 not_reviewed/accepted/changes_requested，不伪造用户接受。
+
+## 每个任务怎么做
+
+1. 确认所有前置任务证据存在；读相关代码，保留用户修改。运行最小已有回归，识别基线失败。
+2. 向用户简述本包目标和将改动的文件。只写本包相关实现、测试、配置与运行说明。
+3. 先确定输入输出和失败条件，再实现真实行为；外部 SDK 先查已安装签名，不凭记忆补参数。
+4. 新测试应断言业务结果、状态或协议，不只验证函数被调用。依赖 fake 放 tests，不能混入 live 模式。
+5. 执行 `python3 scripts/gate.py TXX`。该脚本由 T00 实现；现在尚未存在，不能把本行当已完成代码。
+6. 查失败根因，修复后新建 attempt 保留旧记录。gate 成功后，把 receipt 路径写 state，并更新 HANDOFF。
+7. 给用户代码阅读入口、完成能力、证据和下一任务。不自动提交 Git、不部署到外部服务，不把代码审核状态改为 accepted。
+
+单任务超出会话上下文时，拆分本包内部检查点并保留 in_progress，不新造没有 gate 的 done 子任务。用户未要求停下时继续完成当前包；完成后按授权继续下一包，但不能同时改多个包并混写证据。
+
+## Gate 的证据合同
+
+T00 实现 runner，读取每个任务 `checks`，依次用参数数组启动命令，不 shell eval。每次生成 `artifacts/tasks/TXX/<attempt>/`，至少包含：
+
+- receipt.json：schema_version=1、task_id、status、started_at、finished_at、source_revision、checks、artifacts。
+- 每个 check：id、mode、argv、cwd、exit_code、status、tests_total、tests_failed、tests_skipped、log、log_sha256、report。command 类型可无测试计数；test 类型必须 >0 且达到任务最低数。
+- 原始命令输出和 JUnit/JSON 测试报告；结构化失败原因；每个证据文件相对仓库路径和 SHA-256。
+- source_revision：若有 Git，记录 HEAD 和工作区差异摘要；否则记录实现源文件清单与 hash。方案 checker 不证明 hash 覆盖足够，应由用户复核。
+
+外部无凭据返回 blocked（退出码 2），测试失败返回 failed（退出码 1），成功返回 passed（0）。禁止 `|| true`、捕获异常后 return success、仅依赖测试命令的退出码忽略零收集。
+
+同任务的所有 required checks 均 passed 才生成 passed receipt。日志中同一轮出现失败后，只有真实重跑对应失败检查才可替换该轮结果；不能只手工修改 JSON。runner 不修改 state，编码 Agent 在校验 receipt 后登记。
+
+## 防止标准逐步降低
+
+- REQUIRED 能力都有 R 编号，任何删除、延期或替换先与用户讨论。任务“太复杂”不是变成 optional 的理由。
+- 不许将生产实现替换为测试专用路径而保留假 live 标签。集成 profile 必须打印实际服务类型和脱敏端点。
+- 不能靠增加重试次数无限运行直到碰巧成功；真实模型尝试全部计入总数。
+- 验收失败不能改掉固定 seed 预期、审批语义、幂等约束、必测案例或通过比例。修订规格需要说明原因和用户决定。
+- 允许用高质量库；禁止自行手写 LangGraph、MCP、OpenSandbox 或浏览器 SSE 核心协议的简陋替身。
+- 不能用代码行数、文件数量、TODO 清零或“我已经完成”作为质量指标。
+- 有写仓库权限的模型可以修改检查器，文档和 hash 都不能提供对抗性保证。用户独立审阅关键测试、抽查新输入和现场演示仍必要。
+
+## 阻塞与续跑
+
+缺密钥、容器不可达、库 API 不匹配、任务契约矛盾分别记录。先尝试与问题直接相关的两种有依据修复；禁止反复随机降级依赖或删除功能。记录尝试命令、错误、结论以及缺少的信息。
+
+blocked 任务允许让出唯一活动位，继续其他依赖已满足的任务。重新尝试时显式把 blocked 改为 in_progress，不丢弃历史失败。不存在可继续任务时把具体缺项交给用户，不伪装项目已完成。
+
+上下文不足时填写 HANDOFF：当前 task、已改文件、真实命令、未通过项、服务和端口、下一条精确命令。新模型先复查文件与证据，不把交接文字直接当事实。
+
+## 变更控制
+
+无需额外许可：补齐未指定字段的局部实现、添加必要测试、修复 bug、按已批准栈锁补丁版。必须先讨论：框架/数据库/沙箱/外部服务替换、课程能力删减、取消审批、缩减真实验收。
+
+用户要求修改计划时先更新契约与影响任务，再改代码。只为难逆转且有真实取舍的决定写 ADR。不要把每个函数或调参写成 ADR。

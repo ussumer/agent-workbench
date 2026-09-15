@@ -1,0 +1,1024 @@
+{
+  "schema_version": 1,
+  "plan_version": "1.0",
+  "tasks": [
+    {
+      "id": "T00",
+      "title": "建立工程、依赖锁与验收入口",
+      "file": "docs/plan/tasks/T00.md",
+      "depends_on": [],
+      "requirements": [
+        "R01"
+      ],
+      "reads": [
+        "docs/plan/architecture.md",
+        "docs/plan/dependencies.md",
+        "docs/plan/execution.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t00.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        },
+        {
+          "id": "java-build",
+          "mode": "integration",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "./mvnw",
+            "-B",
+            "verify"
+          ],
+          "cwd": "erp"
+        },
+        {
+          "id": "frontend-build",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "cwd": "frontend"
+        }
+      ]
+    },
+    {
+      "id": "T01",
+      "title": "固定业务种子与契约测试数据",
+      "file": "docs/plan/tasks/T01.md",
+      "depends_on": [
+        "T00"
+      ],
+      "requirements": [
+        "R02"
+      ],
+      "reads": [
+        "docs/plan/contracts/erp.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/skills-memory.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 10,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t01.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T02",
+      "title": "Java目录查询与库存预警",
+      "file": "docs/plan/tasks/T02.md",
+      "depends_on": [
+        "T01"
+      ],
+      "requirements": [
+        "R02"
+      ],
+      "reads": [
+        "docs/plan/contracts/erp.md",
+        "docs/plan/architecture.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t02.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        },
+        {
+          "id": "java-build",
+          "mode": "integration",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "./mvnw",
+            "-B",
+            "verify"
+          ],
+          "cwd": "erp"
+        }
+      ]
+    },
+    {
+      "id": "T03",
+      "title": "Java订单事务、版本和幂等",
+      "file": "docs/plan/tasks/T03.md",
+      "depends_on": [
+        "T02"
+      ],
+      "requirements": [
+        "R03"
+      ],
+      "reads": [
+        "docs/plan/contracts/erp.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 18,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t03.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        },
+        {
+          "id": "java-build",
+          "mode": "integration",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "./mvnw",
+            "-B",
+            "verify"
+          ],
+          "cwd": "erp"
+        }
+      ]
+    },
+    {
+      "id": "T04",
+      "title": "真实MCP网关与八个ERP工具",
+      "file": "docs/plan/tasks/T04.md",
+      "depends_on": [
+        "T03"
+      ],
+      "requirements": [
+        "R04"
+      ],
+      "reads": [
+        "docs/plan/contracts/mcp.md",
+        "docs/plan/contracts/erp.md",
+        "docs/plan/dependencies.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t04.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T05",
+      "title": "报价站与技能下载资源",
+      "file": "docs/plan/tasks/T05.md",
+      "depends_on": [
+        "T01"
+      ],
+      "requirements": [
+        "R05"
+      ],
+      "reads": [
+        "docs/plan/contracts/external.md",
+        "docs/plan/contracts/skills-memory.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 10,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t05.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T06",
+      "title": "真实模型与框架兼容性验证",
+      "file": "docs/plan/tasks/T06.md",
+      "depends_on": [
+        "T00"
+      ],
+      "requirements": [
+        "R06"
+      ],
+      "reads": [
+        "docs/plan/dependencies.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/storage-sandbox.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "live",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t06.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T07",
+      "title": "Mongo会话、checkpoint与Store",
+      "file": "docs/plan/tasks/T07.md",
+      "depends_on": [
+        "T00"
+      ],
+      "requirements": [
+        "R07"
+      ],
+      "reads": [
+        "docs/plan/contracts/storage-sandbox.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/dependencies.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t07.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T08",
+      "title": "OpenSandbox协议适配和执行环境",
+      "file": "docs/plan/tasks/T08.md",
+      "depends_on": [
+        "T00",
+        "T05"
+      ],
+      "requirements": [
+        "R08"
+      ],
+      "reads": [
+        "docs/plan/contracts/storage-sandbox.md",
+        "docs/plan/dependencies.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t08.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T09",
+      "title": "用户沙箱池、稳定代理和恢复",
+      "file": "docs/plan/tasks/T09.md",
+      "depends_on": [
+        "T07",
+        "T08"
+      ],
+      "requirements": [
+        "R09"
+      ],
+      "reads": [
+        "docs/plan/contracts/storage-sandbox.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 14,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t09.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T10",
+      "title": "CompositeBackend与预置技能发现",
+      "file": "docs/plan/tasks/T10.md",
+      "depends_on": [
+        "T07",
+        "T09"
+      ],
+      "requirements": [
+        "R10",
+        "R11"
+      ],
+      "reads": [
+        "docs/plan/contracts/storage-sandbox.md",
+        "docs/plan/contracts/skills-memory.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t10.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T11",
+      "title": "主Agent、YAML子Agent与规划",
+      "file": "docs/plan/tasks/T11.md",
+      "depends_on": [
+        "T04",
+        "T06",
+        "T10"
+      ],
+      "requirements": [
+        "R12",
+        "R13"
+      ],
+      "reads": [
+        "docs/plan/architecture.md",
+        "docs/plan/contracts/mcp.md",
+        "docs/plan/contracts/skills-memory.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t11.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T12",
+      "title": "双层HITL、批准绑定与重放防重",
+      "file": "docs/plan/tasks/T12.md",
+      "depends_on": [
+        "T03",
+        "T07",
+        "T11"
+      ],
+      "requirements": [
+        "R14"
+      ],
+      "reads": [
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/mcp.md",
+        "docs/plan/contracts/erp.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 16,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t12.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T13",
+      "title": "FastAPI SSE、历史和恢复接口",
+      "file": "docs/plan/tasks/T13.md",
+      "depends_on": [
+        "T12"
+      ],
+      "requirements": [
+        "R15"
+      ],
+      "reads": [
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/storage-sandbox.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 18,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t13.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T14",
+      "title": "Vue工作界面与浏览器交互",
+      "file": "docs/plan/tasks/T14.md",
+      "depends_on": [
+        "T13"
+      ],
+      "requirements": [
+        "R16"
+      ],
+      "reads": [
+        "docs/plan/contracts/chat.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t14.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        },
+        {
+          "id": "frontend-build",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "cwd": "frontend"
+        }
+      ]
+    },
+    {
+      "id": "T15",
+      "title": "真实搜索与统一图表入口",
+      "file": "docs/plan/tasks/T15.md",
+      "depends_on": [
+        "T04",
+        "T06"
+      ],
+      "requirements": [
+        "R17",
+        "R18"
+      ],
+      "reads": [
+        "docs/plan/contracts/external.md",
+        "docs/plan/dependencies.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "live",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t15.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T16",
+      "title": "预置抓取分析技能与报告下载",
+      "file": "docs/plan/tasks/T16.md",
+      "depends_on": [
+        "T05",
+        "T10",
+        "T11",
+        "T15"
+      ],
+      "requirements": [
+        "R19"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/contracts/external.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t16.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T17",
+      "title": "技能创建、下载、验证、分配和持久化",
+      "file": "docs/plan/tasks/T17.md",
+      "depends_on": [
+        "T07",
+        "T16"
+      ],
+      "requirements": [
+        "R20"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/contracts/storage-sandbox.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 18,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t17.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T18",
+      "title": "长期偏好与自动采购记忆",
+      "file": "docs/plan/tasks/T18.md",
+      "depends_on": [
+        "T07",
+        "T11"
+      ],
+      "requirements": [
+        "R21"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/contracts/storage-sandbox.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t18.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T19",
+      "title": "上下文压缩、熔断和共享预算",
+      "file": "docs/plan/tasks/T19.md",
+      "depends_on": [
+        "T09",
+        "T11",
+        "T18"
+      ],
+      "requirements": [
+        "R22",
+        "R23"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 14,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t19.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T20",
+      "title": "Agent Protocol异步分析子Agent",
+      "file": "docs/plan/tasks/T20.md",
+      "depends_on": [
+        "T06",
+        "T11",
+        "T14",
+        "T16"
+      ],
+      "requirements": [
+        "R24"
+      ],
+      "reads": [
+        "docs/plan/contracts/external.md",
+        "docs/plan/dependencies.md",
+        "docs/plan/contracts/storage-sandbox.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 10,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t20.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T21",
+      "title": "恢复、隔离和跨模块故障联调",
+      "file": "docs/plan/tasks/T21.md",
+      "depends_on": [
+        "T14",
+        "T17",
+        "T19",
+        "T20"
+      ],
+      "requirements": [
+        "R25"
+      ],
+      "reads": [
+        "docs/plan/verification.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/storage-sandbox.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 16,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t21.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T22",
+      "title": "完整确定性回归与课程覆盖审计",
+      "file": "docs/plan/tasks/T22.md",
+      "depends_on": [
+        "T21"
+      ],
+      "requirements": [
+        "R26"
+      ],
+      "reads": [
+        "docs/plan/coverage.md",
+        "docs/plan/verification.md",
+        "docs/plan/execution.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 22,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t22.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        },
+        {
+          "id": "java-build",
+          "mode": "integration",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "./mvnw",
+            "-B",
+            "verify"
+          ],
+          "cwd": "erp"
+        },
+        {
+          "id": "frontend-build",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "cwd": "frontend"
+        }
+      ]
+    },
+    {
+      "id": "T23",
+      "title": "真实模型演示与资产验证",
+      "file": "docs/plan/tasks/T23.md",
+      "depends_on": [
+        "T22",
+        "T15"
+      ],
+      "requirements": [
+        "R27"
+      ],
+      "reads": [
+        "docs/plan/demo.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "live",
+          "kind": "test",
+          "required": true,
+          "min_tests": 24,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t23.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        }
+      ]
+    },
+    {
+      "id": "T24",
+      "title": "打包、运行手册和学习交付",
+      "file": "docs/plan/tasks/T24.md",
+      "depends_on": [
+        "T23"
+      ],
+      "requirements": [
+        "R28"
+      ],
+      "reads": [
+        "docs/plan/runbook.md",
+        "docs/plan/review.md",
+        "docs/plan/coverage.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t24.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        },
+        {
+          "id": "java-build",
+          "mode": "integration",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "./mvnw",
+            "-B",
+            "verify"
+          ],
+          "cwd": "erp"
+        },
+        {
+          "id": "frontend-build",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "cwd": "frontend"
+        }
+      ]
+    }
+  ]
+}
