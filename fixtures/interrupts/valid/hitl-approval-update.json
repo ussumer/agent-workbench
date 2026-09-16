@@ -1,0 +1,26 @@
+{
+  "interrupt_id": "int-approval-0002",
+  "interrupt_type": "hitl_approval",
+  "thread_id": "thread-demo-a-0001",
+  "run_id": "run-demo-a-0002",
+  "source": "procurement-order",
+  "tool_call_id": "call_0002",
+  "payload": {
+    "tool_name": "order_update",
+    "operation_id": "op-demo-a-0002",
+    "action": "update",
+    "supplier_id": "S001",
+    "currency": "CNY",
+    "total_amount": "1530.00",
+    "payload_sha256": "c0a82375981e5fe8e42b78d0dd7f1c1f2faf4c4f8f4b6b0c2b0a4d1e3f5a7b9c",
+    "before": {
+      "order_id": "O-20260916-0001",
+      "version": 1,
+      "total_amount": "1275.00",
+      "lines": [{ "part_id": "P001", "quantity": 50, "unit_price": "25.50", "line_amount": "1275.00" }]
+    },
+    "lines": [
+      { "part_id": "P001", "quantity": 60, "unit_price": "25.50", "line_amount": "1530.00" }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "supplier_id": "S001",
+  "currency": "CNY",
+  "lines": [
+    { "part_id": "P001", "quantity": 2, "unit_price": "25.50" },
+    { "part_id": "P002", "quantity": 3, "unit_price": "12.00" }
+  ],
+  "note": "多行订单，总额 87.00"
+}

@@ -1,0 +1,6 @@
+{
+  "supplier_id": "S001",
+  "currency": "CNY",
+  "lines": [{ "part_id": "P005", "quantity": 10, "unit_price": "5.00" }],
+  "note": "P005 已停用，不可下单"
+}

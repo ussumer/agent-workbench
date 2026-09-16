@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rush-harness:schema:seed:v1",
+  "title": "Fixed business seed for the procurement mini-ERP",
+  "description": "Java 初始化、报价站与验收共同引用的唯一基线。结构性约束在此声明；跨字段约束（target_stock >= warning_threshold）与唯一性由测试和数据库约束落实。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "seed_id",
+    "currency",
+    "suppliers",
+    "parts",
+    "supplier_parts",
+    "inventory",
+    "orders"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "seed_id": { "const": "seed-v1" },
+    "currency": { "const": "CNY" },
+    "description": { "type": "string" },
+    "suppliers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["supplier_id", "name", "active", "contact"],
+        "properties": {
+          "supplier_id": { "type": "string", "pattern": "^S[0-9]{3}$" },
+          "name": { "type": "string", "minLength": 1 },
+          "active": { "type": "boolean" },
+          "contact": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "parts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["part_id", "sku", "name", "unit", "active"],
+        "properties": {
+          "part_id": { "type": "string", "pattern": "^P[0-9]{3}$" },
+          "sku": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "unit": { "const": "piece" },
+          "active": { "type": "boolean" }
+        }
+      }
+    },
+    "supplier_parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["supplier_id", "part_id", "catalog_price", "currency", "lead_days"],
+        "properties": {
+          "supplier_id": { "type": "string", "pattern": "^S[0-9]{3}$" },
+          "part_id": { "type": "string", "pattern": "^P[0-9]{3}$" },
+          "catalog_price": {
+            "type": "string",
+            "pattern": "^(?:0\\.(?:0[1-9]|[1-9][0-9])|[1-9][0-9]{0,5}\\.[0-9]{2})$"
+          },
+          "currency": { "const": "CNY" },
+          "lead_days": { "type": "integer", "minimum": 0, "maximum": 365 }
+        }
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["part_id", "on_hand", "warning_threshold", "target_stock"],
+        "properties": {
+          "part_id": { "type": "string", "pattern": "^P[0-9]{3}$" },
+          "on_hand": { "type": "integer", "minimum": 0 },
+          "warning_threshold": { "type": "integer", "minimum": 0 },
+          "target_stock": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "orders": {
+      "description": "基础订单集为空；演示创建从空库开始",
+      "type": "array",
+      "maxItems": 0
+    },
+    "rejection_cases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inactive_supplier", "inactive_part", "unsupported_pair", "note"],
+      "properties": {
+        "inactive_supplier": { "type": "string", "pattern": "^S[0-9]{3}$" },
+        "inactive_part": { "type": "string", "pattern": "^P[0-9]{3}$" },
+        "unsupported_pair": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["supplier_id", "part_id"],
+          "properties": {
+            "supplier_id": { "type": "string", "pattern": "^S[0-9]{3}$" },
+            "part_id": { "type": "string", "pattern": "^P[0-9]{3}$" }
+          }
+        },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

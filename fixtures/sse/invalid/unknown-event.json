@@ -1,0 +1,17 @@
+{
+  "name": "unknown-event",
+  "description": "事件名不在契约枚举内，必须被 schema 拒绝。",
+  "thread_id": "thread-demo-a-0001",
+  "run_id": "run-demo-a-0001",
+  "chunks": [
+    "id: run-demo-a-0001:1\nevent: tool_chunk\ndata: {}\n\n"
+  ],
+  "expected_events": [
+    {
+      "event": "tool_chunk",
+      "seq": 1,
+      "source": "main",
+      "payload": {}
+    }
+  ]
+}

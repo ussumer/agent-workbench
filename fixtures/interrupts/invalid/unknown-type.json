@@ -1,0 +1,10 @@
+{
+  "interrupt_id": "int-unknown-0001",
+  "interrupt_type": "policy_confirmation",
+  "thread_id": "thread-demo-a-0001",
+  "run_id": "run-demo-a-0003",
+  "source": "procurement-order",
+  "payload": {
+    "message": "本 Demo 只支持补充信息与审批两种中断，未知类型必须被拒绝"
+  }
+}

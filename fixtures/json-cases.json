@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "description": "所有 JSON 契约样例的登记表。kind=valid 必须通过对应 schema；kind=schema_invalid 必须被 schema 拒绝；kind=business_rejected 结构合法但必须被业务规则拒绝（业务规则由 Java 在 T03 实现，本表只固定样例与拒绝原因）。",
+  "schemas_dir": "schemas",
+  "cases": [
+    {
+      "path": "orders/valid/create-p001-50.json",
+      "schema": "order-create.schema.json",
+      "kind": "valid",
+      "expected_total_amount": "1275.00"
+    },
+    {
+      "path": "orders/valid/update-p001-60.json",
+      "schema": "order-update.schema.json",
+      "kind": "valid",
+      "expected_total_amount": "1530.00"
+    },
+    {
+      "path": "orders/valid/create-multiline.json",
+      "schema": "order-create.schema.json",
+      "kind": "valid",
+      "expected_total_amount": "87.00"
+    },
+    {
+      "path": "orders/valid/order-response-p001-50.json",
+      "schema": "order.schema.json",
+      "kind": "valid"
+    },
+    {
+      "path": "orders/invalid/create-missing-lines.json",
+      "schema": "order-create.schema.json",
+      "kind": "schema_invalid",
+      "reason": "缺少必填字段 lines"
+    },
+    {
+      "path": "orders/invalid/create-empty-lines.json",
+      "schema": "order-create.schema.json",
+      "kind": "schema_invalid",
+      "reason": "lines 为空的订单没有意义"
+    },
+    {
+      "path": "orders/invalid/create-quantity-zero.json",
+      "schema": "order-create.schema.json",
+      "kind": "schema_invalid",
+      "reason": "数量必须为 1..10000"
+    },
+    {
+      "path": "orders/invalid/create-price-three-decimals.json",
+      "schema": "order-create.schema.json",
+      "kind": "schema_invalid",
+      "reason": "金额三位小数；拒绝而不是隐式四舍五入"
+    },
+    {
+      "path": "orders/invalid/update-missing-version.json",
+      "schema": "order-update.schema.json",
+      "kind": "schema_invalid",
+      "reason": "缺少 expected_version；修改禁止模糊 patch"
+    },
+    {
+      "path": "orders/invalid/create-total-amount-supplied.json",
+      "schema": "order-create.schema.json",
+      "kind": "schema_invalid",
+      "reason": "模型不得提交 total_amount，金额由服务端计算"
+    },
+    {
+      "path": "orders/rejected/create-duplicate-part.json",
+      "schema": "order-create.schema.json",
+      "kind": "business_rejected",
+      "rejection": "DUPLICATE_PART",
+      "reason": "同一订单内同一物料不得重复出现"
+    },
+    {
+      "path": "orders/rejected/create-inactive-supplier.json",
+      "schema": "order-create.schema.json",
+      "kind": "business_rejected",
+      "rejection": "INACTIVE_SUPPLIER",
+      "reason": "停用供应商 S003 不可新下单"
+    },
+    {
+      "path": "orders/rejected/create-inactive-part.json",
+      "schema": "order-create.schema.json",
+      "kind": "business_rejected",
+      "rejection": "INACTIVE_PART",
+      "reason": "停用物料 P005 不可下单"
+    },
+    {
+      "path": "orders/rejected/create-unsupported-pair.json",
+      "schema": "order-create.schema.json",
+      "kind": "business_rejected",
+      "rejection": "UNSUPPORTED_PART",
+      "reason": "S002 与 P003 之间没有供货关系"
+    },
+    {
+      "path": "interrupts/valid/order-info-supplement.json",
+      "schema": "interrupt.schema.json",
+      "kind": "valid"
+    },
+    {
+      "path": "interrupts/valid/hitl-approval-create.json",
+      "schema": "interrupt.schema.json",
+      "kind": "valid",
+      "frozen_payload": "orders/valid/create-p001-50.json"
+    },
+    {
+      "path": "interrupts/valid/hitl-approval-update.json",
+      "schema": "interrupt.schema.json",
+      "kind": "valid"
+    },
+    {
+      "path": "interrupts/invalid/unknown-type.json",
+      "schema": "interrupt.schema.json",
+      "kind": "schema_invalid",
+      "reason": "只支持 order_info_supplement 与 hitl_approval"
+    },
+    {
+      "path": "interrupts/invalid/approval-missing-frozen-hash.json",
+      "schema": "interrupt.schema.json",
+      "kind": "schema_invalid",
+      "reason": "审批必须携带冻结请求体 hash 与 operation_id，否则无法保证重放一致"
+    },
+    {
+      "path": "sse/valid/token-utf8-split.json",
+      "schema": "sse-stream.schema.json",
+      "kind": "valid"
+    },
+    {
+      "path": "sse/valid/tool-args-fragmented.json",
+      "schema": "sse-stream.schema.json",
+      "kind": "valid"
+    },
+    {
+      "path": "sse/invalid/unknown-event.json",
+      "schema": "sse-stream.schema.json",
+      "kind": "schema_invalid",
+      "reason": "事件名不在契约枚举内"
+    },
+    {
+      "path": "skills/valid/reorder-cost-summary-v1.manifest.json",
+      "schema": "skill-manifest.schema.json",
+      "kind": "valid"
+    },
+    {
+      "path": "skills/invalid/reorder-cost-summary-v1.manifest.json",
+      "schema": "skill-manifest.schema.json",
+      "kind": "schema_invalid",
+      "reason": "slug 非法、status 不在状态机内、文件路径为绝对路径或包含 .."
+    }
+  ]
+}

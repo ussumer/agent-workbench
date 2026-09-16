@@ -1,0 +1,6 @@
+{
+  "supplier_id": "S002",
+  "currency": "CNY",
+  "lines": [{ "part_id": "P003", "quantity": 15, "unit_price": "68.00" }],
+  "note": "S002 与 P003 之间没有供货关系"
+}

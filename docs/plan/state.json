@@ -3,16 +3,16 @@
   "plan_version": "1.0",
   "tasks": {
     "T00": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T00/20260916T003019Z/receipt.json",
+      "notes": "uv.lock/package-lock.json/mvnw locked; gate.py implemented; 23 acceptance tests, java-build and frontend-build passed. Versions resolved, not yet verified against live services (T06)."
     },
     "T01": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T01/20260916T011614Z/receipt.json",
+      "notes": "seed-v1.json + expected-v1.json + 6 schemas + 24 JSON 契约样例 + json-cases.json 登记表；30 个验收用例通过。建议数量仅对预警行给出（P002/P005 有缺口但不在预警集）。"
     },
     "T02": {
       "status": "pending",

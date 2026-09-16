@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rush-harness:schema:interrupt:v1",
+  "title": "Two-layer human-in-the-loop interrupt payload",
+  "description": "第一层 order_info_supplement 补字段；第二层 hitl_approval 必须在 MCP 写执行前停住图。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["interrupt_id", "interrupt_type", "thread_id", "run_id", "source", "payload"],
+  "properties": {
+    "interrupt_id": { "type": "string", "minLength": 1 },
+    "interrupt_type": { "enum": ["order_info_supplement", "hitl_approval"] },
+    "thread_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "minLength": 1 },
+    "tool_call_id": { "type": "string" },
+    "payload": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "interrupt_type": { "const": "order_info_supplement" } },
+        "required": ["interrupt_type"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["missing_fields", "candidate_values", "message"],
+            "properties": {
+              "missing_fields": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "enum": [
+                    "supplier_id",
+                    "currency",
+                    "lines",
+                    "part_id",
+                    "quantity",
+                    "unit_price"
+                  ]
+                }
+              },
+              "candidate_values": { "type": "object" },
+              "message": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "interrupt_type": { "const": "hitl_approval" } },
+        "required": ["interrupt_type"]
+      },
+      "then": {
+        "required": ["tool_call_id"],
+        "properties": {
+          "tool_call_id": { "type": "string", "minLength": 1 },
+          "payload": {
+            "type": "object",
+            "required": [
+              "tool_name",
+              "operation_id",
+              "action",
+              "supplier_id",
+              "currency",
+              "lines",
+              "total_amount",
+              "payload_sha256",
+              "before"
+            ],
+            "properties": {
+              "tool_name": { "enum": ["order_create", "order_update"] },
+              "operation_id": { "type": "string", "minLength": 1 },
+              "action": { "enum": ["create", "update"] },
+              "supplier_id": { "type": "string", "pattern": "^S[0-9]{3}$" },
+              "currency": { "const": "CNY" },
+              "total_amount": { "type": "string", "pattern": "^[0-9]{1,9}\\.[0-9]{2}$" },
+              "payload_sha256": {
+                "description": "冻结请求体原始 UTF-8 字节的 SHA-256；重发必须逐字节一致",
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "before": {
+                "description": "create 为 null；update 为修改前的完整订单快照",
+                "type": ["object", "null"]
+              },
+              "lines": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "required": ["part_id", "quantity", "unit_price", "line_amount"],
+                  "properties": {
+                    "part_id": { "type": "string", "pattern": "^P[0-9]{3}$" },
+                    "quantity": { "type": "integer", "minimum": 1, "maximum": 10000 },
+                    "unit_price": { "type": "string", "pattern": "^[0-9]{1,6}\\.[0-9]{2}$" },
+                    "line_amount": { "type": "string", "pattern": "^[0-9]{1,9}\\.[0-9]{2}$" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

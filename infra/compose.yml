@@ -1,0 +1,49 @@
+# Local service topology for the Harness demo. This file is the single source of
+# truth for host ports, the shared network and persistent volumes.
+#
+# Host port map (they match docs/plan/architecture.md):
+#   frontend :3000   FastAPI :8090   MCP gateway :8000   Java ERP :8080
+#   MongoDB  :27017  OpenSandbox :18080   fixtures site :8088   Agent Protocol :8123
+#
+# Services for the ERP, MCP gateway, FastAPI app, Agent Protocol service and the
+# fixtures site are added by T02/T04/T05/T13/T20; MongoDB is defined here because
+# T07 (the first consumer) depends on T00.
+
+name: rush-harness
+
+services:
+  mongo:
+    # Pinned by version tag and manifest digest; never a floating `latest`.
+    image: mongo:7.0.43@sha256:9854f7139445d766a9523571d6f047530c45547460ffcf8259eb2bf4264632ca
+    container_name: rush-harness-mongo
+    restart: unless-stopped
+    command: ["mongod", "--bind_ip_all", "--quiet"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - harness
+
+# OpenSandbox control service requirements (implemented in T08):
+#   * The manager process needs access to the host Docker daemon to create
+#     execution containers; business sandboxes must NOT receive that socket.
+#   * Container-internal port 8080 is remapped to host 18080, because the Java
+#     ERP already owns host 8080. The SDK is configured with the host mapping.
+#   * The control plane and the execution containers are separate concerns; only
+#     the control plane talks to Docker.
+
+volumes:
+  mongo-data:
+  mongo-config:
+
+networks:
+  harness:
+    driver: bridge

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "slug": "reorder-cost-summary",
+  "version": "1.0.0",
+  "status": "persisted",
+  "created_at": "2026-09-16T00:00:00Z",
+  "created_by": "demo-a",
+  "source": "package",
+  "source_sha256": "208b443095ab40fb86e6fc6cd107e5adb3e81be0ee524657ce1ae792d99911d2",
+  "scripts_entry": "scripts/summarise.py",
+  "files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "39519f2a49ad3205b82ebbdda46e3a20cef8ab0f0e28608605eeefdd33ac69c7",
+      "size": 2041
+    },
+    {
+      "path": "scripts/summarise.py",
+      "sha256": "e304244999096e00b7e2eecaa8597a427b71e0d02664b06de24f150afe1a4d55",
+      "size": 6117
+    },
+    {
+      "path": "examples/input.json",
+      "sha256": "cc96c78a51b6e7502ef796963dea2f21853992e02977ce5dceec682993d362fa",
+      "size": 480
+    }
+  ],
+  "manifest_sha256": "5d2b409cff72d3e65b5b34262765a5c7043bcb7e3f11b98369446264b7eb7ea5",
+  "total_size": 8638
+}

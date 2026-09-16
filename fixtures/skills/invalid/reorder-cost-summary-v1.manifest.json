@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "slug": "Reorder_Cost",
+  "version": "1.0.0",
+  "status": "published",
+  "created_at": "2026-09-16T00:00:00Z",
+  "created_by": "demo-a",
+  "source": "package",
+  "source_sha256": "208b443095ab40fb86e6fc6cd107e5adb3e81be0ee524657ce1ae792d99911d2",
+  "scripts_entry": "scripts/summarise.py",
+  "files": [
+    {
+      "path": "/etc/passwd",
+      "sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+      "size": 1
+    },
+    {
+      "path": "../../escape.py",
+      "sha256": "a1fce4363854ff888cff4b8e7875d600c2682390412a8cf79b37d0b11148b0fa",
+      "size": 1
+    }
+  ],
+  "manifest_sha256": "5d2b409cff72d3e65b5b34262765a5c7043bcb7e3f11b98369446264b7eb7ea5",
+  "total_size": 2
+}

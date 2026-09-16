@@ -1,0 +1,32 @@
+# Secrets
+.env
+.env.local
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-tmp/
+.pytest-basetemp/
+.mypy_cache/
+.ruff_cache/
+
+# Java
+erp/target/
+erp/data/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Evidence and runtime output
+artifacts/
+download/
+*.log
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

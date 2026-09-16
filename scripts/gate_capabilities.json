@@ -1,0 +1,9 @@
+{
+  "note": "Tasks whose checks need user-provided credentials. Local services (Java ERP, MongoDB, OpenSandbox, MCP gateway, fixtures site) are started from infra/compose.yml and are not listed here; a test that cannot reach them reports GATE_BLOCKED at runtime. Checks with mode=live always require the 'model' capability as well.",
+  "schema_version": 1,
+  "tasks": {
+    "T06": ["model"],
+    "T15": ["model", "search", "chart"],
+    "T23": ["model", "search", "chart"]
+  }
+}

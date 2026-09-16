@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rush-harness:schema:sse-stream:v1",
+  "title": "Recorded SSE stream fixture for POST /api/chat/stream",
+  "description": "chunks 是原样收到的网络分片；expected_events 是归一化后应当得到的事件序列。分片可以切开 UTF-8 多字节字符、跨 chunk 拆开 data 行。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "chunks", "expected_events"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "thread_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "chunks": {
+      "description": "网络分片。字符串表示已解码文本；对象形式 {\"base64\": ...} 表示原始字节，可在 UTF-8 多字节字符中间切开，用于验证流式 TextDecoder。",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["base64"],
+            "properties": {
+              "base64": { "type": "string", "minLength": 1 }
+            }
+          }
+        ]
+      }
+    },
+    "expected_events": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/expected" }
+    }
+  },
+  "$defs": {
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event", "seq", "source", "payload"],
+      "properties": {
+        "event": {
+          "enum": [
+            "run_started",
+            "token",
+            "tool_start",
+            "tool_args",
+            "tool_result",
+            "tool_end",
+            "todos",
+            "interrupt",
+            "artifact",
+            "error",
+            "done"
+          ]
+        },
+        "seq": { "type": "integer", "minimum": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "message_id": { "type": "string" },
+        "tool_call_id": { "type": "string" },
+        "payload": { "type": "object" }
+      }
+    }
+  }
+}

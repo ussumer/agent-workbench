@@ -1,0 +1,6 @@
+{
+  "supplier_id": "S001",
+  "currency": "CNY",
+  "total_amount": "1.00",
+  "lines": [{ "part_id": "P001", "quantity": 50, "unit_price": "25.50" }]
+}

@@ -1,0 +1,16 @@
+{
+  "interrupt_id": "int-supplement-0001",
+  "interrupt_type": "order_info_supplement",
+  "thread_id": "thread-demo-a-0001",
+  "run_id": "run-demo-a-0001",
+  "source": "procurement-order",
+  "payload": {
+    "missing_fields": ["quantity", "supplier_id"],
+    "candidate_values": {
+      "part_id": "P001",
+      "currency": "CNY",
+      "unit_price": "25.50"
+    },
+    "message": "请补充刹车片（P001）的采购数量和供应商。我不会猜测数量或价格。"
+  }
+}

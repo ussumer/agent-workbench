@@ -1,0 +1,47 @@
+{
+  "name": "token-utf8-split",
+  "description": "token 文本在 UTF-8 多字节字符中间被切开，解析器必须用流式解码器缓冲后再按空行分帧。",
+  "thread_id": "thread-demo-a-0001",
+  "run_id": "run-demo-a-0001",
+  "chunks": [
+    {
+      "base64": "aWQ6IHJ1bi1kZW1vLWEtMDAwMToxCmV2ZW50OiBydW5fc3RhcnRlZApkYXRhOiB7InYiOjEsInRocmVhZF9pZCI6InRocmVhZC1kZW1vLWEtMDAwMSIsInJ1bl9pZCI6InJ1bi1kZW1vLWEtMDAwMSIsInNlcSI6MSwic291cmNlIjoibWFpbiIsInBheWxvYWQiOnsicmVxdWVzdF9pZCI6InJlcS0wMDAxIiwic3RhdHVzIjoicnVubmluZyJ9fQoKaWQ6IHJ1bi1kZW1vLWEtMDAwMToyCmV2ZW50OiB0b2tlbgpkYXRhOiB7InYiOjEsInRocmVhZF9pZCI6InRocmVhZC1kZW1vLWEtMDAwMSIsInJ1bl9pZCI6InJ1bi1kZW1vLWEtMDAwMSIsInNlcSI6Miwic291cmNlIjoibWFpbiIsInBheWxvYWQiOnsidGV4dCI6IuY="
+    },
+    {
+      "base64": "raPl"
+    },
+    {
+      "base64": "nKjmn6Xor6LlupPlrZjpooTorabvvIzor7fnqI3lgJkiLCJtZXNzYWdlX2lkIjoibXNnLTAwMDEifX0KCmlkOiBydW4tZGVtby1hLTAwMDE6MwpldmVudDogZG9uZQpkYXRhOiB7InYiOjEsInRocmVhZF9pZCI6InRocmVhZC1kZW1vLWEtMDAwMSIsInJ1bl9pZCI6InJ1bi1kZW1vLWEtMDAwMSIsInNlcSI6Mywic291cmNlIjoibWFpbiIsInBheWxvYWQiOnsic3RhdHVzIjoiY29tcGxldGVkIiwiaW50ZXJydXB0ZWQiOmZhbHNlfX0KCg=="
+    }
+  ],
+  "expected_events": [
+    {
+      "event": "run_started",
+      "seq": 1,
+      "source": "main",
+      "payload": {
+        "request_id": "req-0001",
+        "status": "running"
+      }
+    },
+    {
+      "event": "token",
+      "seq": 2,
+      "source": "main",
+      "message_id": "msg-0001",
+      "payload": {
+        "text": "正在查询库存预警，请稍候",
+        "message_id": "msg-0001"
+      }
+    },
+    {
+      "event": "done",
+      "seq": 3,
+      "source": "main",
+      "payload": {
+        "status": "completed",
+        "interrupted": false
+      }
+    }
+  ]
+}

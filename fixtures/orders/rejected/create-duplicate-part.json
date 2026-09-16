@@ -1,0 +1,9 @@
+{
+  "supplier_id": "S001",
+  "currency": "CNY",
+  "lines": [
+    { "part_id": "P001", "quantity": 2, "unit_price": "25.50" },
+    { "part_id": "P001", "quantity": 3, "unit_price": "25.50" }
+  ],
+  "note": "同一物料重复出现；schema 合法但业务必须拒绝"
+}

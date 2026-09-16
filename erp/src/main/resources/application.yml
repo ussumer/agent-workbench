@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: procurement-erp
+  datasource:
+    # File-backed H2 so restart persistence is real. Memory URLs are forbidden by the plan.
+    url: jdbc:h2:file:./data/erp/rush_harness_demo;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: never
+  h2:
+    console:
+      enabled: false
+  jackson:
+    default-property-inclusion: always
+
+logging:
+  level:
+    root: INFO
+    com.rushharness.erp: INFO

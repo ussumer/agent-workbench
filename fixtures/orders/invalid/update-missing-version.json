@@ -1,0 +1,6 @@
+{
+  "supplier_id": "S001",
+  "currency": "CNY",
+  "lines": [{ "part_id": "P001", "quantity": 60, "unit_price": "25.50" }],
+  "note": "缺少 expected_version；修改禁止模糊 patch"
+}

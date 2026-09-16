@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rush-harness:schema:order-update:v1",
+  "title": "ERP update order request (PUT /api/erp/v1/orders/{order_id}) - whole-order replacement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["expected_version", "supplier_id", "currency", "lines"],
+  "properties": {
+    "expected_version": {
+      "description": "乐观锁版本；条件更新 WHERE version=? 且成功后加一",
+      "type": "integer",
+      "minimum": 1
+    },
+    "supplier_id": { "type": "string", "pattern": "^S[0-9]{3}$" },
+    "currency": { "const": "CNY" },
+    "note": { "type": "string", "maxLength": 500 },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/line" }
+    }
+  },
+  "$defs": {
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["part_id", "quantity", "unit_price"],
+      "properties": {
+        "part_id": { "type": "string", "pattern": "^P[0-9]{3}$" },
+        "quantity": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "unit_price": {
+          "type": "string",
+          "pattern": "^(?:0\\.(?:0[1-9]|[1-9][0-9])|[1-9][0-9]{0,5}\\.[0-9]{2})$"
+        }
+      }
+    }
+  }
+}

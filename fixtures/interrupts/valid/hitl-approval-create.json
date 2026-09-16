@@ -1,0 +1,22 @@
+{
+  "interrupt_id": "int-approval-0001",
+  "interrupt_type": "hitl_approval",
+  "thread_id": "thread-demo-a-0001",
+  "run_id": "run-demo-a-0001",
+  "source": "procurement-order",
+  "tool_call_id": "call_0001",
+  "payload": {
+    "tool_name": "order_create",
+    "operation_id": "op-demo-a-0001",
+    "action": "create",
+    "supplier_id": "S001",
+    "currency": "CNY",
+    "total_amount": "1275.00",
+    "payload_file": "orders/valid/create-p001-50.json",
+    "payload_sha256": "fed665e791d972e9b71acd468b682a77f5208f1c8265fa50d3604db3c26f838f",
+    "before": null,
+    "lines": [
+      { "part_id": "P001", "quantity": 50, "unit_price": "25.50", "line_amount": "1275.00" }
+    ]
+  }
+}

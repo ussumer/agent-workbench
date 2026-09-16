@@ -1,0 +1,83 @@
+{
+  "name": "tool-args-fragmented",
+  "description": "工具参数跨多个分片到达，参数 JSON 在中途被截断；并包含一个重复帧，按 seq upsert 后不得重复出现。",
+  "thread_id": "thread-demo-a-0001",
+  "run_id": "run-demo-a-0001",
+  "chunks": [
+    "id: run-demo-a-0001:1\nevent: run_started\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":1,\"source\":\"main\",\"payload\":{\"request_id\":\"req-0002\",\"status\":\"running\"}}\n\n",
+    "id: run-demo-a-0001:2\nevent: tool_start\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":2,\"source\":\"procurement-order\",\"payload\":{\"name\":\"order_create\"}}\n\nid: run-demo-a-0001:",
+    "id: run-demo-a-0001:2\nevent: tool_start\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":2,\"source\":\"procurement-order\",\"payload\":{\"name\":\"order_create\"}}\n\n",
+    "3\nevent: tool_args\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":3,\"source\":\"procurement-order\",\"payload\":{\"delta\":\"{\\\"supplier_id\\\":\\\"S001\\\",\\\"currency\\\":\\\"CNY\\\",\\\"lines\\\":[{\\\"part_id\\\":\\\"P001\\\",\"}}\n\nid: run-demo-a-0001:4\nevent: tool_args\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":4,\"source\":\"procurement-order\",\"payload\":{\"delta\":\"\\\"quantity\\\":50,\\\"unit_price\\\":\\\"25.50\\\"}]}\"}}\n\nid: run-demo-a-0001:5\nevent: tool_result\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":5,\"source\":\"procurement-order\",\"payload\":{\"ok\":true,\"data\":{\"order_id\":\"O-20260916-0001\",\"total_amount\":\"1275.00\"},\"error\":null,\"request_id\":\"req-0002\"}}\n\nid: run-demo-a-0001:6\nevent: tool_end\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":6,\"source\":\"procurement-order\",\"payload\":{\"status\":\"completed\"}}\n\nid: run-demo-a-0001:7\nevent: done\ndata: {\"v\":1,\"thread_id\":\"thread-demo-a-0001\",\"run_id\":\"run-demo-a-0001\",\"seq\":7,\"source\":\"main\",\"payload\":{\"status\":\"completed\",\"interrupted\":false}}\n\n"
+  ],
+  "expected_events": [
+    {
+      "event": "run_started",
+      "seq": 1,
+      "source": "main",
+      "payload": {
+        "request_id": "req-0002",
+        "status": "running"
+      }
+    },
+    {
+      "event": "tool_start",
+      "seq": 2,
+      "source": "procurement-order",
+      "tool_call_id": "call-0002",
+      "payload": {
+        "name": "order_create"
+      }
+    },
+    {
+      "event": "tool_args",
+      "seq": 3,
+      "source": "procurement-order",
+      "tool_call_id": "call-0002",
+      "payload": {
+        "delta": "{\"supplier_id\":\"S001\",\"currency\":\"CNY\",\"lines\":[{\"part_id\":\"P001\","
+      }
+    },
+    {
+      "event": "tool_args",
+      "seq": 4,
+      "source": "procurement-order",
+      "tool_call_id": "call-0002",
+      "payload": {
+        "delta": "\"quantity\":50,\"unit_price\":\"25.50\"}]}"
+      }
+    },
+    {
+      "event": "tool_result",
+      "seq": 5,
+      "source": "procurement-order",
+      "tool_call_id": "call-0002",
+      "payload": {
+        "ok": true,
+        "data": {
+          "order_id": "O-20260916-0001",
+          "total_amount": "1275.00"
+        },
+        "error": null,
+        "request_id": "req-0002"
+      }
+    },
+    {
+      "event": "tool_end",
+      "seq": 6,
+      "source": "procurement-order",
+      "tool_call_id": "call-0002",
+      "payload": {
+        "status": "completed"
+      }
+    },
+    {
+      "event": "done",
+      "seq": 7,
+      "source": "main",
+      "payload": {
+        "status": "completed",
+        "interrupted": false
+      }
+    }
+  ]
+}

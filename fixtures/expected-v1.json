@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "seed_id": "seed-v1",
+  "description": "相对 seed-v1.json 的固定预期。每项都记录输入来源，禁止为了让实现通过而修改预期。金额一律两位小数字符串。",
+  "warning_rule": {
+    "predicate": "on_hand < warning_threshold",
+    "source": "docs/plan/contracts/erp.md#固定-seed-v1"
+  },
+  "suggestion_rule": {
+    "formula": "max(target_stock - on_hand, 0)",
+    "source": "docs/plan/contracts/erp.md#固定-seed-v1"
+  },
+  "inventory_warning": {
+    "part_ids": ["P001", "P003", "P004"],
+    "suggested_quantity": {
+      "P001": 42,
+      "P003": 15,
+      "P004": 30
+    },
+    "derivation": {
+      "P001": "target_stock 50 - on_hand 8",
+      "P003": "target_stock 20 - on_hand 5",
+      "P004": "target_stock 30 - on_hand 0"
+    },
+    "not_warned": {
+      "P002": "on_hand 40 >= warning_threshold 15",
+      "P005": "on_hand 30 >= warning_threshold 10（且 P005 已停用）"
+    },
+    "suggestion_scope": "建议数量只对预警行给出（on_hand < warning_threshold）。P002 与 P005 虽然低于 target_stock，但不属于预警，因此没有建议数量；T02 不得扩大该集合。",
+    "source": "docs/plan/contracts/erp.md#固定-seed-v1"
+  },
+  "order_totals": [
+    {
+      "case_id": "V02-create-p001-50",
+      "description": "创建 P001×50×25.50",
+      "lines": [{ "part_id": "P001", "quantity": 50, "unit_price": "25.50" }],
+      "total_amount": "1275.00",
+      "derivation": "50 × 25.50",
+      "source": "docs/plan/contracts/erp.md#固定-seed-v1"
+    },
+    {
+      "case_id": "V05-update-p001-60",
+      "description": "把上面的订单整单替换为 60 件（expected_version=1）",
+      "expected_version": 1,
+      "lines": [{ "part_id": "P001", "quantity": 60, "unit_price": "25.50" }],
+      "total_amount": "1530.00",
+      "derivation": "60 × 25.50",
+      "source": "docs/plan/contracts/erp.md#固定-seed-v1"
+    },
+    {
+      "case_id": "multi-line-v1",
+      "description": "多行订单 P001×2×25.50 + P002×3×12.00",
+      "lines": [
+        { "part_id": "P001", "quantity": 2, "unit_price": "25.50" },
+        { "part_id": "P002", "quantity": 3, "unit_price": "12.00" }
+      ],
+      "total_amount": "87.00",
+      "derivation": "(2 × 25.50) + (3 × 12.00) = 51.00 + 36.00",
+      "source": "docs/plan/contracts/erp.md#固定-seed-v1"
+    }
+  ],
+  "reorder_cost_summary": {
+    "skill": "reorder-cost-summary",
+    "lines": [
+      { "part_id": "P001", "supplier_id": "S002", "quantity": 42, "unit_price": "24.00", "currency": "CNY", "source_url": "http://localhost:8088/suppliers/S002/quotes" },
+      { "part_id": "P004", "supplier_id": "S002", "quantity": 30, "unit_price": "17.50", "currency": "CNY", "source_url": "http://localhost:8088/suppliers/S002/quotes" }
+    ],
+    "total_amount": "1533.00",
+    "derivation": "(42 × 24.00) + (30 × 17.50) = 1008.00 + 525.00",
+    "source": "docs/plan/contracts/skills-memory.md#新技能案例及接口"
+  },
+  "quote_comparison": {
+    "rule": "只比较同物料同币种，取最低单价；相同价格以 supplier_id 升序确定推荐",
+    "lines": [
+      { "part_id": "P001", "supplier_id": "S002", "quantity": 42, "unit_price": "24.00", "amount": "1008.00" },
+      { "part_id": "P003", "supplier_id": "S001", "quantity": 15, "unit_price": "68.00", "amount": "1020.00" },
+      { "part_id": "P004", "supplier_id": "S002", "quantity": 30, "unit_price": "17.50", "amount": "525.00" }
+    ],
+    "total_amount": "2553.00",
+    "derivation": "1008.00 + 1020.00 + 525.00；P001 取 S002 的 24.00 而非 S001 的 25.50",
+    "source": "docs/plan/contracts/external.md#演示报价和技能资源站"
+  }
+}
