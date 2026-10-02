@@ -33,6 +33,10 @@ pytestmark = pytest.mark.unit
 FRAMEWORK_IMPORTS: tuple[tuple[str, str], ...] = (
     ("deepagents", "create_deep_agent"),
     ("deepagents", "AsyncSubAgent"),
+    # Chat model used by the agent runtime. Added in T06: the model endpoint is
+    # OpenAI-compatible and configured through a generic base URL, so this is the
+    # client that drives it.
+    ("langchain_openai", "ChatOpenAI"),
     ("deepagents.backends", "CompositeBackend"),
     ("deepagents.backends", "StoreBackend"),
     ("langgraph.graph", "StateGraph"),
@@ -44,7 +48,12 @@ FRAMEWORK_IMPORTS: tuple[tuple[str, str], ...] = (
     ("langgraph.store.memory", "InMemoryStore"),
     ("mcp.server.fastmcp", "FastMCP"),
     ("langchain_mcp_adapters.client", "MultiServerMCPClient"),
+    # Both sandbox clients, because T08 needs the async surface too and the
+    # `opensandbox-sdk` distribution (which exports only `Sandbox`) cannot talk to
+    # opensandbox-server 0.2.3 at all — see docs/runtime/versions.md.
     ("opensandbox", "Sandbox"),
+    ("opensandbox.sync", "SandboxSync"),
+    ("opensandbox.config.connection_sync", "ConnectionConfigSync"),
     ("fastapi", "FastAPI"),
 )
 

@@ -324,11 +324,12 @@ def test_every_business_rejected_sample_breaks_its_stated_rule():
             assert len(part_ids) != len(set(part_ids)), case["path"]
         elif rejection == "INACTIVE_SUPPLIER":
             assert payload["supplier_id"] not in active_suppliers, case["path"]
-        elif rejection == "INACTIVE_PART":
-            assert any(part_id not in active_parts for part_id in part_ids), case["path"]
         elif rejection == "UNSUPPORTED_PART":
+            # 停用物料与「无供货关系」共用同一个错误码，因此两种底层原因都算成立。
             assert any(
-                (payload["supplier_id"], part_id) not in pairs for part_id in part_ids
+                part_id not in active_parts
+                or (payload["supplier_id"], part_id) not in pairs
+                for part_id in part_ids
             ), case["path"]
         else:  # pragma: no cover - guards against a typo in the registry
             pytest.fail(f"未知拒绝类型 {rejection}")

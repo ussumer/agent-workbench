@@ -4,6 +4,9 @@
 
 # Python
 .venv/
+# Isolated environment for the standalone Agent Protocol service. It cannot live in
+# the main lock: langgraph-api pins grpcio<1.82 and opensandbox-server needs >=1.83.
+.venv-agent-protocol/
 __pycache__/
 *.py[cod]
 .pytest_cache/

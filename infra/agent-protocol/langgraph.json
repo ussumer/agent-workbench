@@ -1,0 +1,6 @@
+{
+  "dependencies": ["langgraph"],
+  "graphs": {
+    "echo": "./infra/agent-protocol/graph.py:build"
+  }
+}

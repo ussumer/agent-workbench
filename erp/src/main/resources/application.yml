@@ -5,19 +5,42 @@ spring:
   application:
     name: procurement-erp
   datasource:
-    # File-backed H2 so restart persistence is real. Memory URLs are forbidden by the plan.
-    url: jdbc:h2:file:./data/erp/rush_harness_demo;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    # File-backed H2 so restart persistence is real. A memory URL must never be
+    # used to claim persistence; tests point ERP_DB_PATH at their own file.
+    # AUTO_SERVER lets an operator inspect the file while the service runs; LOCK_TIMEOUT gives a
+    # concurrent duplicate-key writer time to be resolved by the winner's commit instead of
+    # surfacing a lock timeout.
+    url: jdbc:h2:file:${ERP_DB_PATH:./data/erp/rush_harness_demo};AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000
     driver-class-name: org.h2.Driver
     username: sa
     password: ""
+    hikari:
+      maximum-pool-size: 8
+      pool-name: erp-pool
   sql:
     init:
-      mode: never
+      mode: always
+      schema-locations: classpath:schema.sql
+      continue-on-error: false
   h2:
     console:
       enabled: false
   jackson:
     default-property-inclusion: always
+    property-naming-strategy: SNAKE_CASE # JSON 字段统一 snake_case
+    serialization:
+      write-dates-as-timestamps: false
+
+erp:
+  seed:
+    # 与 T01 固定的唯一种子源；解析失败时服务启动失败，不退回硬编码数据
+    path: ${ERP_SEED_PATH:../fixtures/seed-v1.json}
+    fallback-path: fixtures/seed-v1.json
+  security:
+    # 内部服务令牌：只给 MCP 网关使用，不下发浏览器或沙箱。
+    # 本机 Demo 允许一个可覆盖的本地默认值，生产部署必须通过 ERP_SERVICE_TOKEN 覆盖。
+    service-token: ${ERP_SERVICE_TOKEN:local-demo-service-token}
+    header-name: X-Service-Token
 
 logging:
   level:

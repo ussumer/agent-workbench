@@ -123,7 +123,14 @@ def render(report: dict) -> str:
     lines.append(f"  mvnw       {'present' if toolchain['maven_wrapper'] else 'missing'}")
     lines.append("capabilities (values are never printed):")
     for name, info in report["capabilities"].items():
-        state = "configured" if info["configured"] else "MISSING " + "; ".join(info["missing"])
+        if info["configured"]:
+            state = "configured"
+        elif config.capability_is_credential(name):
+            state = "MISSING " + "; ".join(info["missing"])
+        else:
+            # A local service address has a documented localhost fallback, so this is not a
+            # blocker the way a missing credential is.
+            state = "not set (local default in use): " + "; ".join(info["missing"])
         lines.append(f"  {name:<8} {state}")
     lines.append(f".env present: {report['env_file_present']}")
     if report["secret_names_in_env_file"]:

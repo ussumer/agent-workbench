@@ -5,7 +5,7 @@
     "T00": {
       "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T00/20260916T003019Z/receipt.json",
+      "receipt": "artifacts/tasks/T00/20260916T051725Z/receipt.json",
       "notes": "uv.lock/package-lock.json/mvnw locked; gate.py implemented; 23 acceptance tests, java-build and frontend-build passed. Versions resolved, not yet verified against live services (T06)."
     },
     "T01": {
@@ -15,52 +15,52 @@
       "notes": "seed-v1.json + expected-v1.json + 6 schemas + 24 JSON 契约样例 + json-cases.json 登记表；30 个验收用例通过。建议数量仅对预警行给出（P002/P005 有缺口但不在预警集）。"
     },
     "T02": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T02/20260916T012144Z/receipt.json",
+      "notes": "Java 21 + Spring Boot 3.5.6 + H2 文件库；五类查询端点、统一错误与分页、服务令牌校验、基础健康与数据库就绪分离。21 个跨语言验收用例 + 17 个 JUnit 用例通过；重启持久化与数据驱动预警已实测。"
     },
     "T03": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T03/20260916T012747Z/receipt.json",
+      "notes": "订单创建/整单修改/查询；BigDecimal 金额、乐观锁版本、payload 字节 hash 幂等账本、唯一键竞争后读回已提交结果。22 个跨语言用例 + 36 个 JUnit（含 4 个双线程竞争）通过。停用物料原用 INACTIVE_PART，已按用户决定并入 UNSUPPORTED_PART（对外单码、消息区分原因）；改动见 OrdersService/OrderApiTest/test_t01/test_t03/json-cases.json。"
     },
     "T04": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T04/20260916T013441Z/receipt.json",
+      "notes": "FastMCP Streamable HTTP 网关，八个工具，schema 快照固定；身份来自请求头、写工具需 HMAC 授权票据（owner/tool/target/operation_id/payload hash 全绑定）。26 个跨语言验收 + 23 个契约用例通过。"
     },
     "T05": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T05/20260916T014708Z/receipt.json",
+      "notes": "自建报价站（S001 表格 / S002 列表，价格与不支持物料均来自 seed）+ 确定性技能 ZIP 与 catalog。18 个验收用例通过；下载的 ZIP 已解压并真实运行脚本得到 1533.00。技能包跨平台可复现（宿主机与 Linux 容器哈希一致 f29c04da…），Dockerfile 已验证可构建并在容器内提供真实内容。"
     },
     "T06": {
-      "status": "pending",
+      "status": "blocked",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T06/20260916T015142Z/receipt.json",
+      "notes": "缺真实模型凭据（MODEL_API_KEY / MODEL_BASE_URL / MODEL_ID）。gate 返回 blocked（退出码 2），未执行任何 live 调用，也未标记通过。补齐本地 .env 后把状态改回 in_progress 重跑。"
     },
     "T07": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T07/20260916T015112Z/receipt.json",
+      "notes": "真实 MongoDB（mongo:7.0.43，compose 已启动）：官方 MongoDBSaver + MongoDB-backed MongoDBStore + 应用集合（threads/display_messages/runs/pending_actions）与显式索引清单；用户 namespace 与 skills key 前缀隔离。24 个验收 + 5 个插件集成用例通过，含独立进程读回 checkpoint。"
     },
     "T08": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T08/20260916T025704Z/receipt.json",
+      "notes": "真实 OpenSandbox：控制服务 127.0.0.1:18080，执行镜像 code-interpreter:v1.1.0；OpenSandboxBackend 显式适配 BaseSandbox 的同步原语与异步入口。24 个验收 + 12 个集成用例通过；含超时明确化、宿主哨兵不变、Docker socket 不可见、容器内抓报价站。依赖已从 opensandbox-sdk 纠正为 opensandbox 0.1.16。"
     },
     "T09": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T09/20260916T041041Z/receipt.json",
+      "notes": "沙箱池：状态机、用户锁、预热池锁、Mongo 登记与重连优先级；SandboxBackendProxy 显式委托全部 20 个协议方法（无 __getattr__），replace_backend 保持对象身份且 generation 可观察；恢复在登记成功后发布，失败则回收新容器并置 FAILED。28 个验收 + 8 个生命周期集成 + 12 个后端集成通过。验收后容器残留为 0；cleanup_orphans 支持按项目标记跨进程回收。"
     },
     "T10": {
       "status": "pending",

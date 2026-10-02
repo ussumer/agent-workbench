@@ -80,8 +80,8 @@
       "path": "orders/rejected/create-inactive-part.json",
       "schema": "order-create.schema.json",
       "kind": "business_rejected",
-      "rejection": "INACTIVE_PART",
-      "reason": "停用物料 P005 不可下单"
+      "rejection": "UNSUPPORTED_PART",
+      "reason": "停用物料 P005 不可下单（与「无供货关系」共用 UNSUPPORTED_PART）"
     },
     {
       "path": "orders/rejected/create-unsupported-pair.json",

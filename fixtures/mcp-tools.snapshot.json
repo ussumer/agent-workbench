@@ -1,0 +1,313 @@
+{
+  "note": "MCP 工具名称与输入 schema 快照。T04 验收会与真实 tools/list 结果比对，任何漂移都必须是有意为之。",
+  "tool_count": 8,
+  "tools": {
+    "inventory_warning": {
+      "properties": {
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "title": "inventory_warningArguments",
+      "type": "object"
+    },
+    "order_create": {
+      "$defs": {
+        "OrderLineInput": {
+          "description": "One requested order line, as the model may express it.",
+          "properties": {
+            "part_id": {
+              "description": "物料 ID，例如 P001",
+              "pattern": "^P\\d{3}$",
+              "title": "Part Id",
+              "type": "string"
+            },
+            "quantity": {
+              "description": "数量，1..10000",
+              "maximum": 10000,
+              "minimum": 1,
+              "title": "Quantity",
+              "type": "integer"
+            },
+            "unit_price": {
+              "description": "两位小数单价字符串，例如 \"25.50\"；不接受三位小数",
+              "pattern": "^(?:0\\.(?:0[1-9]|[1-9][0-9])|[1-9][0-9]{0,5}\\.[0-9]{2})$",
+              "title": "Unit Price",
+              "type": "string"
+            }
+          },
+          "required": [
+            "part_id",
+            "quantity",
+            "unit_price"
+          ],
+          "title": "OrderLineInput",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "supplier_id": {
+          "title": "Supplier Id",
+          "type": "string"
+        },
+        "currency": {
+          "title": "Currency",
+          "type": "string"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/OrderLineInput"
+          },
+          "title": "Lines",
+          "type": "array"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "supplier_id",
+        "currency",
+        "lines"
+      ],
+      "title": "order_createArguments",
+      "type": "object"
+    },
+    "order_search_details": {
+      "properties": {
+        "order_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Id"
+        },
+        "supplier_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supplier Id"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "title": "order_search_detailsArguments",
+      "type": "object"
+    },
+    "order_update": {
+      "$defs": {
+        "OrderLineInput": {
+          "description": "One requested order line, as the model may express it.",
+          "properties": {
+            "part_id": {
+              "description": "物料 ID，例如 P001",
+              "pattern": "^P\\d{3}$",
+              "title": "Part Id",
+              "type": "string"
+            },
+            "quantity": {
+              "description": "数量，1..10000",
+              "maximum": 10000,
+              "minimum": 1,
+              "title": "Quantity",
+              "type": "integer"
+            },
+            "unit_price": {
+              "description": "两位小数单价字符串，例如 \"25.50\"；不接受三位小数",
+              "pattern": "^(?:0\\.(?:0[1-9]|[1-9][0-9])|[1-9][0-9]{0,5}\\.[0-9]{2})$",
+              "title": "Unit Price",
+              "type": "string"
+            }
+          },
+          "required": [
+            "part_id",
+            "quantity",
+            "unit_price"
+          ],
+          "title": "OrderLineInput",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "order_id": {
+          "title": "Order Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "supplier_id": {
+          "title": "Supplier Id",
+          "type": "string"
+        },
+        "currency": {
+          "title": "Currency",
+          "type": "string"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/OrderLineInput"
+          },
+          "title": "Lines",
+          "type": "array"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "order_id",
+        "expected_version",
+        "supplier_id",
+        "currency",
+        "lines"
+      ],
+      "title": "order_updateArguments",
+      "type": "object"
+    },
+    "part_by_supplier": {
+      "properties": {
+        "supplier_id": {
+          "title": "Supplier Id",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "supplier_id"
+      ],
+      "title": "part_by_supplierArguments",
+      "type": "object"
+    },
+    "part_query": {
+      "properties": {
+        "part_id": {
+          "title": "Part Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "part_id"
+      ],
+      "title": "part_queryArguments",
+      "type": "object"
+    },
+    "part_search": {
+      "properties": {
+        "q": {
+          "title": "Q",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "q"
+      ],
+      "title": "part_searchArguments",
+      "type": "object"
+    },
+    "supplier_query": {
+      "properties": {
+        "q": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Q"
+        },
+        "active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "title": "supplier_queryArguments",
+      "type": "object"
+    }
+  }
+}

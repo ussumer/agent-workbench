@@ -50,15 +50,27 @@ CAPABILITIES: dict[str, tuple[tuple[str, ...], ...]] = {
 }
 
 # Human-readable capability descriptions used in blocked/doctor output.
+#
+# Capabilities are split by consequence. Credentials have no default and their
+# absence genuinely blocks a task; local service addresses do have a documented
+# localhost fallback, so "unset" there means "using the local default", which must
+# not be confused with "cannot run".
+CREDENTIAL_CAPABILITIES = frozenset({"model", "search", "chart", "sandbox"})
+
 CAPABILITY_LABELS = {
-    "model": "真实模型（MODEL_* 或 OPENAI_* 兼容配置）",
-    "search": "智谱搜索（ZHIPU_API_KEY）",
-    "chart": "ModelScope 图表 MCP（MODELSCOPE_MCP_URL / MODELSCOPE_API_TOKEN）",
-    "mongo": "MongoDB（MONGODB_URI）",
-    "erp": "Java ERP（ERP_BASE_URL）",
-    "mcp": "MCP 网关（MCP_BASE_URL）",
+    "model": "真实模型凭据（MODEL_* 或 OPENAI_*）",
+    "search": "智谱搜索凭据（ZHIPU_API_KEY）",
+    "chart": "ModelScope 图表凭据（MODELSCOPE_MCP_URL / MODELSCOPE_API_TOKEN）",
+    "mongo": "MongoDB（MONGODB_URI；未配置时用本机默认 localhost:27017）",
+    "erp": "Java ERP（ERP_BASE_URL；未配置时用本机默认 http://localhost:8080）",
+    "mcp": "MCP 网关（MCP_BASE_URL；未配置时用本机默认 http://localhost:8000）",
     "sandbox": "OpenSandbox（OPENSANDBOX_BASE_URL / OPENSANDBOX_API_KEY）",
 }
+
+
+def capability_is_credential(name: str) -> bool:
+    """Whether a capability depends on a secret the operator must supply."""
+    return name in CREDENTIAL_CAPABILITIES
 
 
 def load_dotenv(path: Path | None = None) -> dict[str, str]:

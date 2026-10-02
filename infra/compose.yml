@@ -32,6 +32,20 @@ services:
     networks:
       - harness
 
+  fixtures:
+    # Demo quote site + skill download resource. Built from the repository so the
+    # served prices and the skill archive come from fixtures/, not from a copy.
+    build:
+      context: ..
+      dockerfile: infra/fixtures.Dockerfile
+    image: rush-harness-fixtures:local
+    container_name: rush-harness-fixtures
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    networks:
+      - harness
+
 # OpenSandbox control service requirements (implemented in T08):
 #   * The manager process needs access to the host Docker daemon to create
 #     execution containers; business sandboxes must NOT receive that socket.
