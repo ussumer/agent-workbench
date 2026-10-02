@@ -1,0 +1,180 @@
+{
+  "symbols": {
+    "resolved": {
+      "deepagents.create_deep_agent": {
+        "signature": "(model: str | langchain_core.language_models.chat_models.BaseChatModel | None = None, tools: collections.abc.Sequence[langchain_core.tools.base.BaseTool | collections.abc.Callable | dict[str, typing.Any]] | None = None, *, system_prompt: str | langchain_core.messages.system.SystemMessage | None = None, middleware: collections.abc.Sequence[langchain.agents.middleware.types.AgentMiddleware[+StateT_co, ~ContextT, typing.Any]] = (), subagents: collections.abc.Sequence[deepagents.middleware.subagents.SubAgent | deepagents.middleware.subagents.CompiledSubAgent | deepagents.middleware.async_subagents.AsyncSubAgent] | None = None, skills: list[str] | None = None, memory: list[str] | None = None, permissions: list[deepagents.middleware.filesystem.FilesystemPermission] | None = None, backend: deepagents.backends.protocol.BackendProtocol | None = None, interrupt_on: dict[str, bool | langchain.agents.middleware.human_in_the_loop.InterruptOnConfig] | None = None, response_format: Union[langchain.agents.structured_output.ToolStrategy[~ResponseT], langchain.agents.structured_output.ProviderStrategy[~ResponseT], langchain.agents.structured_output.AutoStrategy[~ResponseT], type[~ResponseT], dict[str, Any], NoneType] = None, state_schema: type[deepagents.graph.DeepAgentState] | None = None, context_schema: type[~ContextT] | None = None, checkpointer: None | bool | langgraph.checkpoint.base.BaseCheckpointSaver = None, store: langgraph.store.base.BaseStore | None = None, debug: bool = False, name: str | None = None, cache: langgraph.cache.base.BaseCache | None = None) -> langgraph.graph.state.CompiledStateGraph[langchain.agents.middleware.types.AgentState[~ResponseT], ~ContextT, langchain.agents.middleware.types.InputAgentState, langchain.agents.middleware.types.OutputAgentState[~ResponseT]]",
+        "fields": [
+          "backend",
+          "cache",
+          "checkpointer",
+          "context_schema",
+          "debug",
+          "interrupt_on",
+          "memory",
+          "middleware",
+          "model",
+          "name",
+          "permissions",
+          "response_format",
+          "return",
+          "skills",
+          "state_schema",
+          "store",
+          "subagents",
+          "system_prompt",
+          "tools"
+        ]
+      },
+      "deepagents.SubAgent": {
+        "signature": null,
+        "fields": [
+          "description",
+          "interrupt_on",
+          "middleware",
+          "mode",
+          "model",
+          "name",
+          "permissions",
+          "response_format",
+          "skills",
+          "system_prompt",
+          "tools"
+        ],
+        "abstract_methods": []
+      },
+      "deepagents.AsyncSubAgent": {
+        "signature": null,
+        "fields": [
+          "description",
+          "graph_id",
+          "headers",
+          "name",
+          "url"
+        ],
+        "abstract_methods": []
+      },
+      "deepagents.backends.CompositeBackend": {
+        "signature": "(default: deepagents.backends.protocol.BackendProtocol | deepagents.backends.state.StateBackend, routes: dict[str, deepagents.backends.protocol.BackendProtocol], *, artifacts_root: str = '/') -> None",
+        "abstract_methods": []
+      },
+      "deepagents.backends.StoreBackend": {
+        "signature": "(*, namespace: collections.abc.Callable[['Runtime[Any]'], tuple[str, ...]], store: langgraph.store.base.BaseStore | None = None) -> None",
+        "abstract_methods": []
+      },
+      "deepagents.backends.FilesystemBackend": {
+        "signature": "(root_dir: str | pathlib.Path | None = None, virtual_mode: bool = True, max_file_size_mb: int = 10) -> None",
+        "abstract_methods": []
+      },
+      "deepagents.backends.StateBackend": {
+        "signature": "() -> None",
+        "abstract_methods": []
+      },
+      "deepagents.backends.protocol.BackendProtocol": {
+        "signature": "()",
+        "abstract_methods": []
+      },
+      "deepagents.backends.protocol.SandboxBackendProtocol": {
+        "signature": "()",
+        "abstract_methods": []
+      },
+      "langgraph.checkpoint.mongodb.MongoDBSaver": {
+        "signature": "(client: pymongo.synchronous.mongo_client.MongoClient, db_name: str = 'checkpointing_db', checkpoint_collection_name: str = 'checkpoints', writes_collection_name: str = 'checkpoint_writes', ttl: Optional[int] = None, serde: langgraph.checkpoint.serde.base.SerializerProtocol | None = None, **kwargs: Any) -> None",
+        "fields": [
+          "client",
+          "db"
+        ],
+        "abstract_methods": []
+      },
+      "langgraph.store.mongodb.MongoDBStore": {
+        "signature": "(collection: pymongo.synchronous.collection.Collection, ttl_config: Optional[langgraph.store.base.TTLConfig] = None, index_config: Optional[langgraph.store.mongodb.base.VectorIndexConfig] = None, auto_index_timeout: int = 15, query_model: str | None = None, rerank_config: Optional[langgraph.store.mongodb.base.RerankConfig] = None, **kwargs: Any)",
+        "fields": [
+          "supports_ttl"
+        ],
+        "abstract_methods": []
+      },
+      "langgraph.store.memory.InMemoryStore": {
+        "signature": "(*, index: 'IndexConfig | None' = None) -> 'None'",
+        "fields": [
+          "supports_ttl",
+          "ttl_config"
+        ],
+        "abstract_methods": []
+      },
+      "langgraph.types.Command": {
+        "signature": "(*, graph: 'str | None' = None, update: 'Any | None' = None, resume: 'dict[str, Any] | Any | None' = None, goto: 'Send | Sequence[Send | N] | N' = ()) -> None",
+        "fields": [
+          "PARENT",
+          "goto",
+          "graph",
+          "resume",
+          "update"
+        ],
+        "abstract_methods": []
+      },
+      "langgraph.types.interrupt": {
+        "signature": "(value: 'Any') -> 'Any'",
+        "fields": [
+          "return",
+          "value"
+        ]
+      },
+      "mcp.server.fastmcp.FastMCP": {
+        "signature": "(name: 'str | None' = None, instructions: 'str | None' = None, website_url: 'str | None' = None, icons: 'list[Icon] | None' = None, auth_server_provider: 'OAuthAuthorizationServerProvider[Any, Any, Any] | None' = None, token_verifier: 'TokenVerifier | None' = None, event_store: 'EventStore | None' = None, retry_interval: 'int | None' = None, *, tools: 'list[Tool] | None' = None, debug: 'bool' = False, log_level: \"Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']\" = 'INFO', host: 'str' = '127.0.0.1', port: 'int' = 8000, mount_path: 'str' = '/', sse_path: 'str' = '/sse', message_path: 'str' = '/messages/', streamable_http_path: 'str' = '/mcp', json_response: 'bool' = False, stateless_http: 'bool' = False, max_request_body_size: 'int' = 4194304, session_idle_timeout: 'float | None' = 1800, max_sessions: 'int | None' = 10000, warn_on_duplicate_resources: 'bool' = True, warn_on_duplicate_tools: 'bool' = True, warn_on_duplicate_prompts: 'bool' = True, dependencies: 'Collection[str]' = (), lifespan: 'Callable[[FastMCP[LifespanResultT]], AbstractAsyncContextManager[LifespanResultT]] | None' = None, auth: 'AuthSettings | None' = None, transport_security: 'TransportSecuritySettings | None' = None)",
+        "abstract_methods": []
+      },
+      "langchain_mcp_adapters.client.MultiServerMCPClient": {
+        "signature": "(connections: dict[str, langchain_mcp_adapters.sessions.StdioConnection | langchain_mcp_adapters.sessions.SSEConnection | langchain_mcp_adapters.sessions.StreamableHttpConnection | langchain_mcp_adapters.sessions.WebsocketConnection] | None = None, *, callbacks: langchain_mcp_adapters.callbacks.Callbacks | None = None, tool_interceptors: list[langchain_mcp_adapters.interceptors.ToolCallInterceptor] | None = None, tool_name_prefix: bool = False, handle_tool_errors: bool = True) -> None",
+        "abstract_methods": []
+      },
+      "langchain.agents.middleware.AgentMiddleware": {
+        "signature": "()",
+        "fields": [
+          "state_schema",
+          "tools",
+          "trace_policy",
+          "transformers"
+        ],
+        "abstract_methods": []
+      },
+      "langchain_openai.ChatOpenAI": {
+        "signature": "(*args: Any, name: str | None = None, cache: langchain_core.caches.BaseCache | bool | None = None, verbose: bool = <factory>, callbacks: list[langchain_core.callbacks.base.BaseCallbackHandler] | langchain_core.callbacks.base.BaseCallbackManager | None = None, tags: list[str] | None = None, metadata: dict[str, typing.Any] | None = None, custom_get_token_ids: collections.abc.Callable[[str], list[int]] | None = None, rate_limiter: langchain_core.rate_limiters.BaseRateLimiter | None = None, disable_streaming: Union[bool, Literal['tool_calling']] = False, output_version: str | None = <factory>, profile: langchain_core.language_models.model_profile.ModelProfile | None = None, client: Any = None, async_client: Any = None, root_client: Any = None, root_async_client: Any = None, model: str = 'gpt-3.5-turbo', temperature: float | None = None, model_kwargs: dict[str, typing.Any] = <factory>, api_key: pydantic.types.SecretStr | None | collections.abc.Callable[[], str] | collections.abc.Callable[[], collections.abc.Awaitable[str]] = None, base_url: str | None = None, organization: str | None = None, openai_proxy: str | None = <factory>, timeout: float | tuple[float, float] | typing.Any | None = None, stream_usage: bool | None = None, max_retries: int | None = None, presence_penalty: float | None = None, frequency_penalty: float | None = None, seed: int | None = None, logprobs: bool | None = None, top_logprobs: int | None = None, logit_bias: dict[int, int] | None = None, streaming: bool = False, n: int | None = None, top_p: float | None = None, max_completion_tokens: int | None = None, reasoning_effort: str | None = None, reasoning: dict[str, typing.Any] | None = None, verbosity: str | None = None, tiktoken_model_name: str | None = None, default_headers: collections.abc.Mapping[str, str] | None = None, default_query: collections.abc.Mapping[str, object] | None = None, http_client: typing.Any | None = None, http_async_client: typing.Any | None = None, http_socket_options: collections.abc.Sequence[tuple[int, int, int]] | None = None, stream_chunk_timeout: float | None = <factory>, stop_sequences: list[str] | str | None = None, extra_body: collections.abc.Mapping[str, typing.Any] | None = None, include_response_headers: bool = False, disabled_params: dict[str, typing.Any] | None = None, context_management: list[dict[str, typing.Any]] | None = None, include: list[str] | None = None, prompt_cache_options: dict[str, typing.Any] | None = None, service_tier: str | None = None, store: bool | None = None, truncation: str | None = None, use_previous_response_id: bool = False, use_responses_api: bool | None = None) -> None",
+        "fields": [
+          "max_tokens"
+        ],
+        "abstract_methods": []
+      },
+      "opensandbox.Sandbox": {
+        "signature": "(sandbox_id: str, sandbox_service: opensandbox.services.sandbox.Sandboxes, filesystem_service: opensandbox.services.filesystem.Filesystem, command_service: opensandbox.services.command.Commands, health_service: opensandbox.services.health.Health, metrics_service: opensandbox.services.metrics.Metrics, egress_service: opensandbox.services.egress.Egress, connection_config: opensandbox.config.connection.ConnectionConfig, diagnostics_service: opensandbox.services.diagnostics.Diagnostics | None = None, isolated_service: opensandbox.services.isolated.IsolationService | None = None, custom_health_check: collections.abc.Callable[['Sandbox'], collections.abc.Awaitable[bool]] | None = None) -> None",
+        "abstract_methods": []
+      },
+      "opensandbox.sync.SandboxSync": {
+        "signature": "(sandbox_id: str, sandbox_service: opensandbox.sync.services.sandbox.SandboxesSync, filesystem_service: opensandbox.sync.services.filesystem.FilesystemSync, command_service: opensandbox.sync.services.command.CommandsSync, health_service: opensandbox.sync.services.health.HealthSync, metrics_service: opensandbox.sync.services.metrics.MetricsSync, egress_service: opensandbox.sync.services.egress.EgressSync, connection_config: opensandbox.config.connection_sync.ConnectionConfigSync, diagnostics_service: opensandbox.sync.services.diagnostics.DiagnosticsSync | None = None, isolated_service: opensandbox.sync.services.isolated.IsolationServiceSync | None = None, custom_health_check: collections.abc.Callable[['SandboxSync'], bool] | None = None) -> None",
+        "abstract_methods": []
+      }
+    },
+    "failures": {}
+  },
+  "streaming": {
+    "stream_mode_literals": [
+      "checkpoints",
+      "custom",
+      "debug",
+      "messages",
+      "tasks",
+      "updates",
+      "values"
+    ],
+    "version_literals": [
+      "v1",
+      "v2"
+    ],
+    "part_keys": [
+      "type",
+      "ns",
+      "data",
+      "interrupts"
+    ],
+    "root_namespace": [],
+    "note": "type identifies what arrived; ns identifies where from. An empty ns is the root graph, a non-empty ns is a subgraph or sub-agent."
+  }
+}

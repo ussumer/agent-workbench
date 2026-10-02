@@ -126,8 +126,90 @@ def test_application_indexes_match_the_declared_manifest(resources):
     assert "uk_threads_thread_id" in unique_names
     assert "uk_runs_owner_request" in unique_names
     assert "uk_display_messages_thread_message" in unique_names
-    assert "uk_pending_actions_interrupt_call" in unique_names
-    assert len(APPLICATION_COLLECTIONS) == 4
+    # T12 corrected this key: the original `(interrupt_id, tool_call_id)` could not hold,
+    # because the framework's HITL interrupt carries no tool_call_id and an interrupt id is
+    # unique only within a thread. The thread is part of the key now.
+    assert "uk_pending_actions_interrupt" in unique_names
+    assert "uk_pending_actions_operation" in unique_names
+
+    pending_keys = {
+        spec.name: [key for key, _direction in spec.keys]
+        for spec in INDEX_SPECS
+        if spec.collection == "pending_actions" and spec.unique
+    }
+    assert pending_keys["uk_pending_actions_interrupt"] == [
+        "owner_user_id",
+        "thread_id",
+        "interrupt_id",
+    ]
+
+    # T16 added artifacts + artifact_blobs, kept as two collections on purpose: a registry
+    # row whose bytes are gone has to be a state the download route can report (410) rather
+    # than one it conceals behind a zero-byte "success".
+    artifact_keys = {
+        spec.name: [key for key, _direction in spec.keys]
+        for spec in INDEX_SPECS
+        if spec.collection == "artifacts"
+    }
+    assert artifact_keys["uk_artifacts_owner_artifact"] == ["owner_user_id", "artifact_id"]
+    blob_keys = {
+        spec.name: [key for key, _direction in spec.keys]
+        for spec in INDEX_SPECS
+        if spec.collection == "artifact_blobs"
+    }
+    assert blob_keys["uk_artifact_blobs_owner_artifact"] == ["owner_user_id", "artifact_id"]
+
+    # T17 added the publish metadata the contract names in storage-sandbox.md. The files of a
+    # published skill stay in the Store; these collections hold the version rows and the
+    # pointers, because moving a pointer is a conditional update and the Store has no
+    # compare-and-swap.
+    version_keys = {
+        spec.name: [key for key, _direction in spec.keys]
+        for spec in INDEX_SPECS
+        if spec.collection == "skill_versions"
+    }
+    assert version_keys["uk_skill_versions_identity"] == [
+        "owner_user_id",
+        "scope",
+        "slug",
+        "version",
+    ]
+    assignment_keys = {
+        spec.name: [key for key, _direction in spec.keys]
+        for spec in INDEX_SPECS
+        if spec.collection == "skill_assignments"
+    }
+    assert assignment_keys["uk_skill_assignments_target"] == [
+        "owner_user_id",
+        "scope",
+        "slug",
+    ]
+
+    # T20 added the background-task mapping: which Agent Protocol thread/run is doing the
+    # work, and which owner asked for it. The run itself lives in the separate service; this
+    # is the local half, and the unique key on the request id is what makes a double-submitted
+    # launch idempotent.
+    async_keys = {
+        spec.name: [key for key, _direction in spec.keys]
+        for spec in INDEX_SPECS
+        if spec.collection == "async_tasks" and spec.unique
+    }
+    assert async_keys["uk_async_tasks_owner_request"] == ["owner_user_id", "request_id"]
+
+    # threads, display_messages, runs, pending_actions, sandbox_registry (T09),
+    # artifacts, artifact_blobs (T16), skill_versions, skill_assignments (T17),
+    # async_tasks (T20), skill_smoke_attempts (T23).
+    smoke_keys = {
+        spec.name: [key for key, _direction in spec.keys]
+        for spec in INDEX_SPECS
+        if spec.collection == "skill_smoke_attempts"
+    }
+    assert smoke_keys["uk_skill_smoke_attempts_conversation"] == [
+        "owner_user_id",
+        "thread_id",
+        "slug",
+    ]
+    assert len(APPLICATION_COLLECTIONS) == 11
 
 
 def test_acceptance_runs_against_its_own_private_database(resources):

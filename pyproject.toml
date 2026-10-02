@@ -56,6 +56,11 @@ dev = [
     # Docker daemon to create execution containers), so it belongs to the dev group
     # rather than the application's runtime dependencies.
     "opensandbox-server>=0.2.3,<0.3",
+    # T23: browser screenshots for the live demo. Python rather than the Node toolchain so
+    # the evidence tooling sits beside the rest of the test tooling and is installed by the
+    # same lock — the browser binary itself is fetched by `playwright install chromium`,
+    # which is a documented setup step rather than a package.
+    "playwright>=1.63,<2.0",
 ]
 
 # The official Agent Protocol server (langgraph-cli / langgraph-api /
@@ -86,6 +91,7 @@ dev = [
     "respx>=0.22,<1.0",
     "jsonschema>=4.23,<5.0",
     "opensandbox-server>=0.2.3,<0.3",
+    "playwright>=1.63,<2.0",
 ]
 
 [tool.pytest.ini_options]

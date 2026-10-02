@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from pymongo import DESCENDING, ReturnDocument
@@ -76,7 +76,7 @@ class RunReservation:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _digest(payload: str) -> str:
@@ -165,6 +165,19 @@ class ApplicationRepository:
         }
 
     # -------------------------------------------------------- display messages
+
+    def try_consume_budget_call(self, *, owner_user_id: str, thread_id: str,
+                                kind: str, limit: int) -> bool:
+        """Atomically reserve one call within this owner's cumulative thread quota."""
+        if kind not in {"model", "tool"} or type(limit) is not int or limit < 1:
+            raise ValueError("invalid budget kind or limit")
+        field = f"budget_usage.{kind}"
+        result = self._database[COLLECTION_THREADS].find_one_and_update(
+            {"owner_user_id": owner_user_id, "thread_id": thread_id,
+             "$or": [{field: {"$exists": False}}, {field: {"$lt": limit}}]},
+            {"$inc": {field: 1}}, return_document=ReturnDocument.AFTER,
+        )
+        return result is not None
 
     def upsert_display_message(
         self,

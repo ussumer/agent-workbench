@@ -31,13 +31,18 @@ from typing import Any, Protocol
 from pymongo.database import Database
 
 from agent.backends.custom_opensandbox import OpenSandboxBackend, create_backend
-from agent.backends.sandbox_proxy import SandboxBackendProxy, SandboxReplacedError
+from agent.backends.sandbox_proxy import (
+    SandboxBackendProxy,
+    SandboxCircuitOpenError,
+    SandboxReplacedError,
+)
 from agent.backends.sandbox_setup import (
     SCRATCH_ROOT,
     SandboxRuntimeConfig,
     WorkspaceReport,
     resolve_image_digest,
 )
+from agent.middlewares.sandbox_breaker import BreakerRegistry
 from agent.persistence.indexes import COLLECTION_SANDBOX_REGISTRY
 
 LOGGER = logging.getLogger("rush_harness.sandbox.manager")
@@ -313,8 +318,10 @@ class SandboxManager:
         registry: SandboxRegistry,
         warm_pool_size: int = 1,
         replenish_in_background: bool = True,
+        breaker_registry: BreakerRegistry | None = None,
     ) -> None:
         self._factory = factory
+        self.breakers = breaker_registry or BreakerRegistry()
         self._registry = registry
         self._warm_pool_size = max(0, warm_pool_size)
         self._replenish_in_background = replenish_in_background
@@ -455,7 +462,8 @@ class SandboxManager:
         # `_track` is deliberately not called here: a claimed warm sandbox was already
         # counted when it was created, and counting it twice made the created/destroyed
         # bookkeeping unusable for leak checks.
-        proxy = SandboxBackendProxy(handle.backend, owner_user_id=user_id, generation=generation)
+        proxy = SandboxBackendProxy(handle.backend, owner_user_id=user_id, generation=generation,
+                                    breaker=self.breakers.for_user(user_id))
         with self._locks_guard:
             self._proxies[user_id] = proxy
         self._register(user_id, handle, generation=generation, status=SandboxStatus.CLAIMED)
@@ -521,6 +529,8 @@ class SandboxManager:
     def _is_alive(self, proxy: SandboxBackendProxy) -> bool:
         try:
             response = proxy.execute("true", timeout=30)
+        except SandboxCircuitOpenError:
+            raise
         except SandboxReplacedError:
             return False
         except Exception:  # noqa: BLE001 - an unreachable sandbox is simply not alive
@@ -534,12 +544,13 @@ class SandboxManager:
         return self._is_alive(proxy)
 
     def ensure_healthy(self, user_id: str) -> SandboxBackendProxy:
-        """Return a healthy proxy, recovering the sandbox when necessary."""
+        """Coalesce health and recovery, so one outage does not consume multiple probes."""
         proxy = self.get_or_create(user_id)
-        if self._is_alive(proxy):
-            return proxy
-        self._registry.mark(user_id, SandboxStatus.UNHEALTHY)
-        return self.recover(user_id)
+        with self._recovery_lock(user_id):
+            if self._is_alive(proxy):
+                return proxy
+            self._registry.mark(user_id, SandboxStatus.UNHEALTHY)
+            return self._recover_locked(user_id, proxy)
 
     # ------------------------------------------------------------ recovery
 
@@ -558,57 +569,61 @@ class SandboxManager:
                 LOGGER.info("user=%s sandbox already healthy; recovery skipped", user_id)
                 return proxy
 
-            proxy.begin_replacement()
-            self._registry.mark(user_id, SandboxStatus.RECOVERING)
-            handle: SandboxHandle | None = None
-            try:
-                # Creating the container is itself a failure point, so it belongs inside
-                # the guard: otherwise a failed creation would leave the registry stuck
-                # in `recovering` and the proxy permanently marked as being replaced.
-                handle = self._factory.create()
-                self._track(handle)
-                if handle.report is None:
-                    from agent.backends.sandbox_setup import prepare_workspace
+            return self._recover_locked(user_id, proxy)
 
-                    handle.report = prepare_workspace(
-                        handle.backend.sandbox, handle.backend.config
-                    )
-                self._restore_managed_files(user_id, handle)
-                next_generation = proxy.generation + 1
-                self._register(
-                    user_id,
-                    handle,
-                    generation=next_generation,
-                    status=SandboxStatus.CLAIMED,
-                )
-            except Exception:
-                LOGGER.exception("recovery for user=%s failed; reclaiming the new container", user_id)
-                if handle is not None:
-                    try:
-                        handle.close()
-                    finally:
-                        self._destroyed += 1
-                # Release the replacement flag: the proxy keeps pointing at the old
-                # generation, so callers get a real transport error rather than a
-                # permanent "being replaced" verdict, and the next health probe can
-                # try again.
-                proxy.abort_replacement()
-                self._registry.mark(user_id, SandboxStatus.FAILED)
-                raise
+    def _recover_locked(self, user_id: str, proxy: SandboxBackendProxy) -> SandboxBackendProxy:
+        """Publish one replacement while the caller holds this owner's recovery lock."""
+        proxy.begin_replacement()
+        self._registry.mark(user_id, SandboxStatus.RECOVERING)
+        handle: SandboxHandle | None = None
+        try:
+            # Creating the container is itself a failure point, so it belongs inside
+            # the guard: otherwise a failed creation would leave the registry stuck
+            # in `recovering` and the proxy permanently marked as being replaced.
+            handle = self._factory.create()
+            self._track(handle)
+            if handle.report is None:
+                from agent.backends.sandbox_setup import prepare_workspace
 
-            generation = proxy.replace_backend(handle.backend)
-            if generation != next_generation:  # pragma: no cover - defensive
-                raise IllegalTransition(
-                    f"generation drift: registered {next_generation}, published {generation}"
+                handle.report = prepare_workspace(
+                    handle.backend.sandbox, handle.backend.config
                 )
-            self._recoveries += 1
-            LOGGER.info(
-                "user=%s recovered onto sandbox %s generation=%s",
+            self._restore_managed_files(user_id, handle)
+            next_generation = proxy.generation + 1
+            self._register(
                 user_id,
-                handle.sandbox_id,
-                generation,
+                handle,
+                generation=next_generation,
+                status=SandboxStatus.CLAIMED,
             )
-            return proxy
+        except Exception:
+            LOGGER.exception("recovery for user=%s failed; reclaiming the new container", user_id)
+            if handle is not None:
+                try:
+                    handle.close()
+                finally:
+                    self._destroyed += 1
+            # Release the replacement flag: the proxy keeps pointing at the old
+            # generation, so callers get a real transport error rather than a
+            # permanent "being replaced" verdict, and the next health probe can
+            # try again.
+            proxy.abort_replacement()
+            self._registry.mark(user_id, SandboxStatus.FAILED)
+            raise
+
+        generation = proxy.replace_backend(handle.backend)
+        if generation != next_generation:  # pragma: no cover - defensive
+            raise IllegalTransition(
+                f"generation drift: registered {next_generation}, published {generation}"
+            )
+        self._recoveries += 1
+        LOGGER.info(
+            "user=%s recovered onto sandbox %s generation=%s",
+            user_id,
+            handle.sandbox_id,
+            generation,
+        )
+        return proxy
 
     def _restore_managed_files(self, user_id: str, handle: SandboxHandle) -> None:
         """Re-upload anything that must survive a container replacement.

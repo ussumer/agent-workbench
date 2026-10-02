@@ -5,13 +5,13 @@
     "T00": {
       "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T00/20260916T051725Z/receipt.json",
+      "receipt": "artifacts/tasks/T00/20260918T021254Z/receipt.json",
       "notes": "uv.lock/package-lock.json/mvnw locked; gate.py implemented; 23 acceptance tests, java-build and frontend-build passed. Versions resolved, not yet verified against live services (T06)."
     },
     "T01": {
       "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T01/20260916T011614Z/receipt.json",
+      "receipt": "artifacts/tasks/T01/20260916T051327Z/receipt.json",
       "notes": "seed-v1.json + expected-v1.json + 6 schemas + 24 JSON 契约样例 + json-cases.json 登记表；30 个验收用例通过。建议数量仅对预警行给出（P002/P005 有缺口但不在预警集）。"
     },
     "T02": {
@@ -23,7 +23,7 @@
     "T03": {
       "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T03/20260916T012747Z/receipt.json",
+      "receipt": "artifacts/tasks/T03/20260916T051329Z/receipt.json",
       "notes": "订单创建/整单修改/查询；BigDecimal 金额、乐观锁版本、payload 字节 hash 幂等账本、唯一键竞争后读回已提交结果。22 个跨语言用例 + 36 个 JUnit（含 4 个双线程竞争）通过。停用物料原用 INACTIVE_PART，已按用户决定并入 UNSUPPORTED_PART（对外单码、消息区分原因）；改动见 OrdersService/OrderApiTest/test_t01/test_t03/json-cases.json。"
     },
     "T04": {
@@ -35,19 +35,19 @@
     "T05": {
       "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T05/20260916T014708Z/receipt.json",
+      "receipt": "artifacts/tasks/T05/20260918T021423Z/receipt.json",
       "notes": "自建报价站（S001 表格 / S002 列表，价格与不支持物料均来自 seed）+ 确定性技能 ZIP 与 catalog。18 个验收用例通过；下载的 ZIP 已解压并真实运行脚本得到 1533.00。技能包跨平台可复现（宿主机与 Linux 容器哈希一致 f29c04da…），Dockerfile 已验证可构建并在容器内提供真实内容。"
     },
     "T06": {
-      "status": "blocked",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T06/20260916T015142Z/receipt.json",
-      "notes": "缺真实模型凭据（MODEL_API_KEY / MODEL_BASE_URL / MODEL_ID）。gate 返回 blocked（退出码 2），未执行任何 live 调用，也未标记通过。补齐本地 .env 后把状态改回 in_progress 重跑。"
+      "receipt": "artifacts/tasks/T06/20260918T021014Z/receipt.json",
+      "notes": "live 模式，18 个用例通过，无 fake。CAP-01..08 全部有实际结果：模型中文与两轮上下文、add 工具调用与 ToolMessage、13 片工具参数拼接、只读子代理委派、子代理中断在同一 thread 上 approve 与 reject、Mongo 跨进程读回、真实沙箱执行与 sha256 往返、Agent Protocol 同步与异步任务结果。新增 src/agent/{config,env_utils}.py 与 langchain-openai；依赖族自此标记 verified。实测修正两处假设：ns 归因依赖 stream(subgraphs=True)，AsyncSubAgent 为 TypedDict。"
     },
     "T07": {
       "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T07/20260916T015112Z/receipt.json",
+      "receipt": "artifacts/tasks/T07/20260918T021110Z/receipt.json",
       "notes": "真实 MongoDB（mongo:7.0.43，compose 已启动）：官方 MongoDBSaver + MongoDB-backed MongoDBStore + 应用集合（threads/display_messages/runs/pending_actions）与显式索引清单；用户 namespace 与 skills key 前缀隔离。24 个验收 + 5 个插件集成用例通过，含独立进程读回 checkpoint。"
     },
     "T08": {
@@ -59,98 +59,170 @@
     "T09": {
       "status": "done",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T09/20260916T041041Z/receipt.json",
+      "receipt": "artifacts/tasks/T09/20260918T021432Z/receipt.json",
       "notes": "沙箱池：状态机、用户锁、预热池锁、Mongo 登记与重连优先级；SandboxBackendProxy 显式委托全部 20 个协议方法（无 __getattr__），replace_backend 保持对象身份且 generation 可观察；恢复在登记成功后发布，失败则回收新容器并置 FAILED。28 个验收 + 8 个生命周期集成 + 12 个后端集成通过。验收后容器残留为 0；cleanup_orphans 支持按项目标记跨进程回收。"
     },
     "T10": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T10/20260918T023549Z/receipt.json",
+      "notes": "三路虚拟文件系统真实可用。main_agent.py 用 CompositeBackend 接 /memories/（namespace 含 user_id）与 /persisted-skills/（共享 namespace + 所有者 key 前缀），后者由 OwnerScopedStoreBackend 显式强制作用域：挂载根重写到所有者前缀、越权引用返回 permission_denied、.. 先归一化再判定；Store 挂载对沙箱 shell 不可见。src/skills/ 五个预置技能（frontmatter 校验 + slug 规则）。skills_sync 按 manifest hash 增量同步，首轮/换 generation/容器副本被清空都会全量重传；user_skills_restore 从 Store 校验 sha256 后原子替换目录，空状态为正常、不完整 manifest 拒绝且不删除既有版本。24 个验收用例通过。"
     },
     "T11": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T11/20260918T021125Z/receipt.json",
+      "notes": "主子 Agent 与规划接通。子 Agent 由 YAML 声明（procurement-analyst 只读六工具 / procurement-order 含两写工具），tool_patterns 与 expected_tools 快照必须完全一致，空匹配、越权多匹配、目录外工具名、只读 scope 持写工具一律启动失败；模式按整名匹配而非子串。主 Agent 用 create_deep_agent 装配 TodoListMiddleware + 自定义中间件栈，write_todos 真实持久化到 state['todos']。分工改为结构性约束：子代理声明的工具自动从主 Agent 摘除——真实模型烟测曾证明只靠提示词时模型会自行查询、不委派、不写 todo。写工具经 guard 在无授权时返回 APPROVAL_REQUIRED（T12 接入真实审批）。28 个验收用例通过，另含真实 deepseek-chat 只读烟测（3~4 条 todo + task 委派 + 子代理内 6 次 MCP 调用）。"
     },
     "T12": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T12/20260918T023651Z/receipt.json",
+      "notes": "两层人工介入接通。第一层 request_order_info 用框架 interrupt 追问缺失字段，补充无效再次中断，字段校验拒绝把三位小数/停用 ID 当作已提供，非 JSON 回答不会被解析成字段。第二层写审批：interrupt_on 覆盖 order_create/order_update（allowed_decisions 只留 approve/reject，配置里出现 edit 直接启动失败），待审动作在中断时冻结 canonical 字节+hash+稳定 operation_id 并落 Mongo。执行闸门是 awrap_tool_call 中间件，同时挂到子代理上；授权按「用户回答的那次 interrupt」绑定而非 tool_call_id（框架的 HITL interrupt 根本不带 tool_call_id）。实测：approve 前零写、reject 后零写、批准后内容变更报 PARAMETERS_CHANGED、同批准重放只产生一单（ERP 操作 ID 对账）、伪造签名/跨用户票据被拒、过期窗口拒绝、双击只成功一次（条件更新 + 唯一索引）。内部校验端点用独立 service token，只回 operation_id 与状态。28 个验收用例通过。修正了 T07 遗留的错误索引 (interrupt_id, tool_call_id)。"
     },
     "T13": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T13/20260918T020442Z/receipt.json",
+      "notes": "对外接口接通。StreamAdapter 集中做 v2 messages/values 归一化：工具参数按 tool_call_id 拼接后再解析（用 T06 捕获的单字符分片做回归）、结构化 content 不当字符串处理、推理块不当作回答、source 由 namespace 解析到子 Agent 名字（来自 task 调用的 JSON 参数而非文本）、未知 part 类型计数留证、每 run 恰好一个 done、出错/被取消/无终止信号的 run 一律不报 completed。HTTP：session/stream/resume/state/history/delete/cancel/artifacts 全部实现，run 由 RunRegistry 持有（非悬空 task），同 thread 第二个 run 409，同 request_id 重发不启动新 run（不同正文 409），跨用户一律 404。删除只删会话与 checkpoint，保留技能/偏好/订单。32 个验收用例通过，其中含真实 create_deep_agent + 真实 Mongo 的 interrupt 端到端。"
     },
     "T14": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T14/20260918T020655Z/receipt.json",
+      "notes": "Vue 工作台接通。frontend/src/api/sse.ts 实现 POST+fetch ReadableStream 的 SSE 分帧（跨 chunk 缓冲、流式 TextDecoder 处理多字节字符被切断、多行 data、CRLF、心跳注释、未终止的尾帧）；state/chat.ts 是状态机，只有 done 能终止 run，interrupted/failed 绝不显示成 completed，迟到 token 不覆盖终态，连接断开而无 done 记 STREAM_FAILED 且不自动重发；markdown.ts 先转义再格式化，raw HTML 无法执行，非 http(s) 链接不生成 href。App.vue + 三个组件实现历史抽屉/身份切换/对话/todos/工具轨迹/补充表单/审批按钮，审批与补充按钮在提交中禁用。前端 46 个 Vitest 用例通过（需 Node>=20.19，见 versions.md）。tests/acceptance/test_t14.py 19 个用例对真实后端逐帧校验（含真实 create_deep_agent 的中断与双标签页 409），并断言 npm run build 的产物是真实界面。"
     },
     "T15": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T15/20260918T020716Z/receipt.json",
+      "notes": "凭据补齐后完成。web_search.py 连真实智谱搜索：401/1113/403 分别映射为 SEARCH_UNAUTHORIZED / SEARCH_QUOTA_EXCEEDED / SEARCH_PERMISSION_DENIED 并**抛错而非返回空列表**；只对传输类错误重试（鉴权失败不重试）；实测 API 忽略 count（请求 2 返回 50），所以上限由我方 clamp；200 但缺 search_result 字段视为接口变更（SEARCH_BAD_RESPONSE）而不是「没搜到」。chart_generator.py 用**单一** chart_generator 工具罩住远端 18 个工具，按图表族构造 data——实测发现远端 schema 骗人：generate_line_chart 声明的 required 只有 [data]，但每行必须带 time，传柱状图那套 {category,value} 会运行时失败，所以朴素转发式包装器会通过柱状/饼图、在折线图上挂。资产按 base64 解码后校验 PNG magic，不是找 URL（远端返回 base64 图片）。无本地绘图兜底（有测试断言源码里不含 matplotlib/plotly/PIL）。chart_params.md 由占位替换为真实目录，并**如实标注**：讲义那份 26 项清单不在仓库内，无法逐项对齐，只记录真实 18 项，未编造缺失类型。24 个 live 用例通过，含真实搜索与三张图的真实渲染与落盘。"
     },
     "T16": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T16/20260918T020455Z/receipt.json",
+      "notes": "预置抓取分析技能与报告下载接通。三处判定全部落在脚本里而不是模型里：web-content-fetcher/scripts/fetch_page.py（HTML→Markdown，来源行由发起请求的进程写）、web-scraper/scripts/fetch_quotes.py（两种 DOM，退出码 3/4/5 区分连不上、结构变了、没价格）、procurement-analysis/scripts/build_report.py（Decimal 取最低单价，同价按 supplier_id 升序，缺报价只进 warnings 并从合计排除，绝不填目录价）。实测三种 DOM 抓取合计 2553.00，三行逐项匹配 expected-v1.json。产件走两条路：沙箱文件经 download_sandbox_file 转存，图表经 chart_generator 的 on_asset 挂钩登记（图片字节只在 agent 进程存在，沙箱里没有副本）。元数据与字节分两个集合，因此「登记在但文件没了」是可表达状态：元数据 download_ready=false，下载路由 410 而不是 200+空文件。38 个验收用例通过，其中报告在真容器里抓取并产出，来源地址是 host.docker.internal（只有容器内可达），构成从 HTTP 抓取的证据。"
     },
     "T17": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T17/20260918T011551Z/receipt.json",
+      "notes": "技能进化闭环接通。新增 src/agent/skills/：pipeline.py 是「读来源→校验→沙箱冒烟→持久化→分配」的唯一实现，store.py 把文件放 Store、把版本行与发布指针放 Mongo。指针必须放 Mongo 是因为「条件更新」需要 compare-and-swap，而 langgraph Store 没有；契约 storage-sandbox.md 本来就点名了 skill_versions/skill_assignments 两个集合。实测：package 与 generated 两条来源都通过；下载技能包后沙箱内真实执行 summarise.py 得 1533.00；冒烟双向验证（示例 exit 0、坏输入 exit 2）；内容相同返回原版本（不新建版本）；内容变化新建版本且保留旧的；写入后读回逐文件核对 sha256，对不上就不分配；冒烟失败最多反馈修复两次，仍失败则零版本零分配，且不进入可执行目录；staging 在 /skills/.staging 而不是 /skills/users/{scope}/；未知 scope 拒绝、缺 scope 返回询问（SCOPE_REQUIRED），绝不默认全员发布；恢复按 assignment revision + 容器 marker 短路，容器重建（marker 消失）后全量恢复。45 个验收用例通过。"
     },
     "T18": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T18/20260918T021226Z/receipt.json",
+      "notes": "长期偏好与自动记忆接通。src/agent/memory/preferences.py 定义封闭 schema：四个显式偏好（language/currency/output_format/chart_type）与两个自动历史字段（recent_supplier_ids 5 条去重、recent_queries 10 条截断），不支持的值被拒并说明支持哪些，未知 key 直接拒。自动历史与显式偏好存在两个独立字典里，memory_update 中间件**无法触及**显式偏好——不是靠规则而是没有代码路径。context_injection 每次模型调用重建偏好块（图可缓存，偏好属于单个 owner），子 Agent 的模型调用同样被覆盖。网页文本（source_is_user=False）不能改偏好；「为什么默认用柱状图？」这类提问也不改。只有 completed 且至少一次成功的 ERP 调用才更新历史；failed/interrupted/仅被拒绝的写都不记录。26 个验收用例通过，跨会话与跨用户隔离用真实 Mongo Store 验证。"
     },
     "T19": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T19/20260918T021238Z/receipt.json",
+      "notes": "上下文压缩、熔断与共享预算接通，中间件矩阵 8 个槽位全部实现。tools_summarization.py：超过 8192 字节的工具结果写进 /workspace/offload 并返回**成功**引用（不是失败也不是截断），写文件失败时保留原文而不是给一个读不到的路径，文件名对工具名做净化防路径穿越；archive_thread_history 在摘要之前把完整历史写入 owner namespace，compaction_preserves 显式检查 todos 与 __interrupt__ 是否幸存（丢了就点名）。sandbox_breaker.py 先分类再计数：SANDBOX_* 才喂熔断器，UNSUPPORTED_PART / VERSION_CONFLICT / APPROVAL_REJECTED 等业务码只另行计数——连续 10 次 422 熔断器保持关闭；closed→open→half_open（冷却后**只放一次**探测，避免并发一起打过去）→成功关闭/失败重开并重置冷却；每用户一个熔断器。预算用框架自己的 ModelCallLimit/ToolCallLimit，exit_behavior='end' 而非抛错，主子 Agent 靠传**同一组实例**共享。未新增第二套工具错误处理（框架 ToolNode 已可见）。28 个验收用例通过。"
     },
     "T20": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T20/20260918T020329Z/receipt.json",
+      "notes": "后台分析与 Agent Protocol 接通。新增 src/agent/async_tasks/（models 在 store 里、service 做 SDK 适配）、src/api_view/api/async_tasks.py（合同固定的四个端点）、src/api_view/internal/{sandbox,analysis}.py（跨进程沙箱与只读数据面）、infra/agent-protocol/analyst_graph.py（只读采购分析图，已注册进 langgraph.json）、src/agent/subagents/async_analyst.py（AsyncSubAgent 声明）、frontend/src/{state/async_tasks.ts,components/AsyncTasks.vue} 与 10 个前端用例。实测：真独立服务（8123，独立 venv）上的任务拿到真实 Protocol thread/run id 并能用 SDK 读回；状态 queued→completed 跟随 Protocol；同 request_id 重放不新建 thread；跨用户一律 404；取消后状态保持 cancelled 不会被后续轮询复活；update 走同一 async thread 的后续 run 并如实记录「SDK 不支持改写已运行输入」；服务不可达启动返回 503 且不留下任务；服务不认识的 run 报 lost 而不是 completed；后台分析图声明的工具面写权限为空，主进程的 /internal/analysis/read 独立拒绝 order_create；内部端点无 token/错 token 一律 403；/internal/sandbox/operations 是白名单（write/execute/download）且越界路径一律 400。32 个验收用例通过。"
     },
     "T21": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T21/20260918T023358Z/receipt.json",
+      "notes": "故障联调完成，**没有发现需要修的缺陷**——这是本次审计的结论，不是省略。新增 tests/acceptance/test_t21.py（23 例）、tests/integration/test_recovery.py（10 例）、tests/integration/test_isolation.py（12 例）。覆盖 V09/V10/V04/V13/V15/V16 的跨模块组合：响应丢失后同 operation_id 重试取回同一订单且跨 owner 不串、4 线程并发重试三轮都只出一单、未批准写零写、两标签页抢同一个中断只成一单、票据绑定被批准的字节（改数量即失效）、容器副本删除后从 Store 恢复且恢复后真的能跑出 1533.00、半写版本不可分配、恶意 ZIP 不产生任何版本、独立进程读回技能版本与字节。隔离侧：Store 键命名空间、虚拟文件系统 owner 作用域、grep 不跨 owner、两个 owner 并发写同一键不串、MCP 身份是 ContextVar 而非全局（并发四路互不干扰、异常路径也会 reset、未绑定时报错而不是默认成某人）。第 3 步的审计结论：src/ 下**没有**模块级可变容器，MCP 侧用 caller_scope + reset 的正确纪律，已用测试钉住而不是口头声称。故障场景按要求各跑三次，结果全一致。"
     },
     "T22": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T22/20260918T064721Z/receipt.json",
+      "notes": "全覆盖审计完成。新增 scripts/coverage_report.py（生成 docs/runtime/coverage-report.md，85 行）、tests/acceptance/test_t22.py（33 例）、gate.py 的 --all 守卫。报告逐项链接真实文件、测试与 receipt，并把状态分成三列且互不替代：自动（确定性 check 通过）、真实（live check 通过，自动通过不代表真实通过）、人工（state.json 的 review；自动通过不代表人工已接受）。R27/R28 由 T23/T24 负责，报告里明确标为**待验收**而不是通过。生成器拒绝打印任何不存在的路径，并已用篡改过的映射验证它会拒绝；待验收需求的交付物按设计不校验存在性。gate 的 --all 增加了 assert_no_self_invocation()：任何 check 若 shell 调用 gate.py 会被直接拒绝（否则 --all 会变成死循环而非嵌套调用），且该守卫本身有「喂一个篡改清单看它是否真的拒绝」的测试。--all 仍然完全不读 state.json，已有测试对着源码断言这一点。审计侧：skip/xfail 用 AST 精确检测（字符串字面量不算），live 模式不许出现模型替身，src/ 下无 TODO/NotImplemented，前端与 Java 产物真实存在。"
     },
     "T23": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": ""
+      "receipt": "artifacts/tasks/T23/20260919T154444Z/receipt.json",
+      "notes": "24 次真实轮次完成：artifacts/live/r1/ 有 24 次试验、23 次成功（要求 22），八个场景每个都 ≥2，passed_overall 为真且 ignored_from_other_runs 为空。资产：柱/折/饼三类图表各出真 PNG 且摘要与字节可核，真实搜索在证据里写明服务它的引擎（search_std，按用户要求从 search_pro_sogou 降本 80%，contracts/external.md 与 dependencies.md 同步更新，因为后者禁止暗换引擎）。截图：1440×900 与 390×844 两视口，overflow_x 为 0、区域无重叠。tests/acceptance/test_t23.py 41 例，gate 以 live 模式跑出 41/0/0。T23 的价值主要在于它把前 22 个任务没碰到的真缺陷挖了出来，且都不是靠猜：① UserScopedStore 只有同步面，框架走 aget 就整轮崩；② 记忆键拒绝前导斜杠，而框架剥掉挂载前缀后传的正是带斜杠的键，模型按文档写 /memories/preferences.md 会让整轮以 NAMESPACEVIOLATION 结束；③ 判定『通过』时看不见失败的运行——假通过，D06 两次七秒崩溃被判成功；④ 轮次目录会把别的轮次的试验混着算，两个进程也能同写一个目录（已加 round_run_id 与 run.lock 互斥）；⑤ 试验之间不清沙箱，D07 读到 D05 留下的『报价抓取全部失败』报告，整轮去诊断这个不存在的故障；⑥ D05/D07 的对账没查自己声明的期望——D05 三次『通过』时产出的报告正文是『报价抓取全部失败，无金额』；⑦ 夹具站点起在随机端口而所有技能文档都写 8088，实测 8088 上没有任何服务在听，这是 D05 抓不到报价的根因；⑧ D07 声明了『重启 API 并重建沙箱』，runner 从没执行过，于是第 4 轮的前提是假的。按用户决定把 model_calls_per_run 40→80、tool_calls_per_run 60→120，依据与可回退性写在 BudgetConfig 注释与 HANDOFF 第 7 条。D07 最终 2/3——补上真正的重建之后仍有一次失败（没读自己技能的 SKILL.md），说明这条用例仍在区分，不是橡皮图章。"
     },
     "T24": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T24/20260921T143918Z/receipt.json",
+      "notes": "清洁启动交付完成：gate 三项全过（acceptance 14 例 / java-build / frontend-build），收据在 artifacts/tasks/T24/20260921T143918Z/。新增 scripts/dev.py（doctor/up/status/logs/smoke/seed/down/reset）、scripts/seed_demo.py、docs/runtime/runbook.md、walkthrough.md、tests/acceptance/test_t24.py，并把 README 改写成安装→启动→烟测。dev.py 复用验收轮次用的同一套装配 tests.live.stack.running_stack（没有第二套启动逻辑），只把运行目录换成 artifacts/dev/、数据库换成按名字的 rush_harness_test_dev，因此『数据默认保留、重启接上同一个库』是默认行为而不是一句承诺；为此给 running_stack 加两个可选参数，不传即保持既有测试的隔离性。实测：up 自行拉起沙箱控制服务 → status 四个服务全 ok → smoke 948 帧 done=completed 且走委派路径 → down 干净停止、残留进程 0 → 再 up 仍接同一个库。seed_demo.py 不写数据，而是把 ERP 数据读回来与 D01 的预期逐项核对（数字源自 fixtures/expected-v1.json）。reset 只动演示库（复用测试库前缀护栏）、artifacts/dev/ 与停止标记，明确不动沙箱容器。test_t24.py 两层断言：文档里每条 `python scripts/x.py sub` 与每个仓库路径都必须真实存在（文档指错地方正是这块交付物最容易烂掉的方式），外加一条不可跳过的真实启停循环（up→status→smoke→down→up）。写作时改正了自己一处写窄的断言：原先要求子命令以 add_parser 字面量声明，而 plan_guard.py 用列表声明，把一个能用的命令判成了缺失。用户审阅仍为 not_reviewed——自动与真实检查全绿不等于人工已接受。"
+    },
+    "T25": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T25/20261001T022622Z/receipt.json",
+      "notes": "显式保留模式已接入 dev；真实 Mongo 记录在异常退出及重启后原样保留，ERP 订单内容和幂等重放保持，默认验收库在正常/异常退出均清理。gate acceptance 6/0/0，plan-contract 43/0/0；初轮服务未启动导致的失败收据 20261001T022427Z 保留。补充 T24 文档/启动器回归 13 passed、1 deselected（默认开发会话启停由独立库 T25 覆盖），Ruff 本次文件通过。"
+    },
+    "T26": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T26/20261001T023408Z/receipt.json",
+      "notes": "根目录 /artifacts/ 继续忽略，所有 src/**/*.py 均不被忽略；gate 2/0/0。两个失败 attempt 保留：首轮测试自身 Windows 文本换行问题已改用 Git NUL 协议，第二轮准确复现 4 个产物源码被忽略；未自动暂存或提交。"
+    },
+    "T27": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T27/20261001T024032Z/receipt.json",
+      "notes": "内部校验异常返回 dict；StructuredTool 保持 JSON envelope。新增协议 6/0/0、原 T17 真实发布/分配/恢复回归 45/0/0。修复前失败收据 20261001T023620Z 保留。"
+    },
+    "T28": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T28/20261001T065359Z/receipt.json",
+      "notes": "主/子官方 skills 发现已接入；preset slug 解析父目录并过滤 YAML 未声明技能，按 scope 扫描用户技能；同步/恢复后强制刷新 checkpoint metadata。通过 config-only 调用，在移除执行副本及 marker 后从真实 MongoDB 恢复再发现。chart_params 参考文件真实同步且计入 revision。gate discovery+原 T11 35/0/0，原 T10 24/0/0。多次失败及中间通过 attempt 均保留；相关文件 Ruff 最终通过。新增 runtime_owner 支持实际 LangGraph config 身份。"
+    },
+    "T29": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T29/20261001T072700Z/receipt.json",
+      "notes": "运行入口只解析用户原文的显式偏好；主子动态注入已通过真实 HTTP 验证。每 run 独立回调采集委派 MCP/Java ERP 的业务 envelope，完成后更新 owner 历史。显式偏好与自动历史分键保存，旧历史兼容读取，记忆保存失败对外 failed 并发出错误事件。gate runtime-memory 7/0/0、原 T18 26/0/0、原 T13 32/0/0，相关 Ruff 通过；失败 attempt 071602、071936 保留。共享预算/熔断/归档和并发历史合并尚待后续包。"
+    },
+    "T30": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T30/20261001T075907Z/receipt.json",
+      "notes": "新增真实沙箱验证 9/0/0、原 T17 完整发布回归 45/0/0。脚本示例合法性与非空输出必需；好坏输入输出分离，按相对路径保留产物；核心采购技能用服务端独立 5 个案例校验 schema/Decimal/来源/报告和业务拒绝。纯指导技能标 structural/behavior_verified=false，保留发布能力，不宣称泛化提升。相关 Ruff 通过，受影响两源码 mypy 通过（仅补充字典注解）。初轮 9 个缺陷复现失败及两轮控制服务/清理失败均保留。"
+    },
+    "T31": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T31/20261001T082559Z/receipt.json",
+      "notes": "Mongo 版本预占与 publication_status 两阶段完成，reserved/failed/缺失版本不可查询分配；失败和遗留半写编号跳过且保留旧字节。complete 固定起始 revision，仅一次 CAS，不自动重基；重复同内容保留当前版本。UUID staging/download；读回完整 manifest 字节校验；Store 扫描不截断作完整结论。gate 新9/0/0、原 T17 45/0/0、T21+recovery+isolation 45/0/0。Ruff 与两源码 mypy 通过。基线8 fail和081643失败收据保留；原测试3处更新合法夹具/目录接口，原业务断言保留。最低恢复数33未降低，按当前实际20+10补入15项隔离检查。"
+    },
+    "T32": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T32/20261001T090628Z/receipt.json",
+      "notes": "API invocation 独立共享 callback 汇总主子模型/工具调用；Mongo owner/thread 原子累计；等待模型受总 timeout 保护。任何耗尽后阻止后续调用并 failed，不写成功采购历史；runs 保存 counts/limits/elapsed/failure_code。官方局部 guards error、子代理继承预算/offload。最终 gate 新6/0/0、T19 28/0/0、T13+T29 39/0/0；相关 Ruff 与四源码 mypy 通过。修复前5 fail/1 pass和中间通过收据保留，最终补充跨类型停止断言后完整复跑。熔断/归档另包。"
+    },
+    "T33": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T33/20261001T101948Z/receipt.json",
+      "notes": "最终完整 gate 9+28+36+24 共97 passed/0 failed/0 skipped；真实调用熔断、epoch并发探测、锁内单次健康恢复、按数据库warm池清理隔离。相关Ruff九文件/mypy六源码通过；补充预算依赖6 passed。所有失败尝试保留，SDK callback never-awaited warnings待兼容性修复。"
+    },
+    "T34": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T34/20261001T105230Z/receipt.json",
+      "notes": "同一完整gate初始化7+原T13 32+预算记忆13，共52 passed/0 failed/0 skipped；baseline七项真实失败保留。run_started先发送，初始化/恢复原问题/偏好/终态检查纳入deadline，取消不阻塞，迟到结果丢弃；失败收尾/重放不重新初始化。Ruff两文件/mypy聊天源码通过。SDK callback警告仍保留；线程中已开始的SDK操作按自身超时收尾。"
+    },
+    "T35": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T35/20261001T111034Z/receipt.json",
+      "notes": "完整 gate 归档8+T19 28+装配35+聊天预算记忆45，共116 passed/0 failed/0 skipped；补充T34 7 passed。官方SDK子类自动/主动同步异步摘要前完整Mongo归档并读回；UUID追加、完整消息字段、待办与中断、owner/thread/namespace/scope/application_run_id，失败不提交压缩。主子实际模型接线。baseline两项真实覆盖/丢字段失败及SDK夹具中间失败XML均保留。Ruff六文件通过，归档/工具摘要/聊天三源码mypy通过；更广类型检查的旧backend名义类型、YAML存根与TypedDict问题未作为通过。尚非完整RSI。"
+    },
+    "T36": {
       "status": "pending",
       "review": "not_reviewed",
       "receipt": null,
-      "notes": ""
+      "notes": "用户要求改为分part文档学习与逐章确认，不继续逐问面试；仅文档，不改变应用验收。"
     }
   }
 }

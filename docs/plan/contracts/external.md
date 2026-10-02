@@ -16,9 +16,11 @@ HTML 报价包含 part_id、sku、currency、unit_price、quoted_at 和供应商
 
 报价计算规则：只比较同物料同币种，取最低单价；相同价格以 supplier_id 升序确定推荐。P001/P003/P004 按建议数量最低价合计 `2553.00`。报告保留每个来源 URL 和时间，不能把搜索摘要当已抓取报价。
 
-## 智谱搜狗
+## 智谱搜索
 
-Agent 工具 `web_search(query,count=5)`，调用智谱 web_search API，引擎 search_pro_sogou，返回 title/url/snippet/published_at/provider。query<=70 字符，count<=10。超时、鉴权失败和空结果分开处理。单次读搜索最多 2 次重试；鉴权失败不重试。
+Agent 工具 `web_search(query,count=5)`，调用智谱 web_search API，引擎 **search_std**，返回 title/url/snippet/published_at/provider。query<=70 字符，count<=10。超时、鉴权失败和空结果分开处理。单次读搜索最多 2 次重试；鉴权失败不重试。
+
+引擎原为 `search_pro_sogou`。改成标准档是因为单次成本高出数倍，而演示轮次每一轮都会检索——那一档在这里买的是成本不是质量。**两处文档与代码在同一次改动里一起更新**：`dependencies.md` 禁止暗换引擎，而一个与文档不符的引擎正是"暗换"。无 `search_std` 权限时按阻塞处理，不退回旧引擎。
 
 真实搜索用于采购背景资料，不用于验证本地演示站是否被公网收录。验收断言返回结构和可用引用，不固定搜索排名或具体文本。请求 ID、脱敏状态和结果保存，密钥不入模型上下文。
 

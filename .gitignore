@@ -24,7 +24,7 @@ frontend/node_modules/
 frontend/dist/
 
 # Evidence and runtime output
-artifacts/
+/artifacts/
 download/
 *.log
 
@@ -33,3 +33,7 @@ download/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Agent Protocol service runtime artifacts
+infra/agent-protocol/server.pid
+infra/agent-protocol/server.*.log

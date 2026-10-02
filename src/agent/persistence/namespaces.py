@@ -42,14 +42,26 @@ def skills_namespace() -> tuple[str, ...]:
 
 
 def memory_key(relative: str) -> str:
-    """Normalise a preference file key inside the user's memories namespace."""
-    if not relative or relative.startswith("/"):
-        raise NamespaceViolation(f"memory key must be relative, got {relative!r}")
+    """Normalise a preference file key inside the user's memories namespace.
+
+    A leading slash is *accepted and stripped*. It used to be refused, on the reading that
+    "relative" is an invariant worth enforcing; it is not written down anywhere — not in the
+    contract, not in a test — and the refusal was reachable by the framework itself. The
+    memories mount is at ``/memories/``, and ``CompositeBackend`` strips the mount and hands
+    the backend ``/preferences.md``, leading slash included. So a model writing to the mount's
+    own documented path killed the run with ``NamespaceViolation`` (found by T23, D06 #1/#2).
+
+    A key cannot leave its namespace by starting with a slash — the namespace is fixed by the
+    mount, not derived from the key — so the checks that carry weight are the ones below:
+    no traversal and not empty.
+    """
+    if not relative or not relative.strip():
+        raise NamespaceViolation("memory key must not be empty")
     parts = [part for part in relative.split("/") if part]
     if any(part in {".", ".."} for part in parts):
         raise NamespaceViolation(f"memory key must not traverse, got {relative!r}")
     if not parts:
-        raise NamespaceViolation("memory key must not be empty")
+        raise NamespaceViolation(f"memory key must not be empty, got {relative!r}")
     return "/".join(parts)
 
 

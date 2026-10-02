@@ -1019,6 +1019,766 @@
           "cwd": "frontend"
         }
       ]
+    },
+    {
+      "id": "T25",
+      "title": "修复开发会话的数据保留和重启验收",
+      "file": "docs/plan/tasks/T25.md",
+      "depends_on": [
+        "T24"
+      ],
+      "requirements": [
+        "R28"
+      ],
+      "reads": [
+        "docs/runtime/harness-review-2026-10-01.md",
+        "docs/plan/contracts/erp.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "acceptance",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 3,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t25.py",
+            "-q",
+            "--junitxml={evidence_dir}/acceptance.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/acceptance.xml"
+        },
+        {
+          "id": "plan-contract",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 43,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/plan",
+            "tests/contract",
+            "-q",
+            "--junitxml={evidence_dir}/plan-contract.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/plan-contract.xml"
+        }
+      ]
+    },
+    {
+      "id": "T26",
+      "title": "修复产物模块源码被 Git 忽略",
+      "file": "docs/plan/tasks/T26.md",
+      "depends_on": [
+        "T25"
+      ],
+      "requirements": [
+        "R28"
+      ],
+      "reads": [
+        "docs/runtime/harness-review-2026-10-01.md"
+      ],
+      "checks": [
+        {
+          "id": "source-retention",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 2,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t26.py",
+            "-q",
+            "--junitxml={evidence_dir}/source-retention.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/source-retention.xml"
+        }
+      ]
+    },
+    {
+      "id": "T27",
+      "title": "修复技能校验失败的工具返回协议",
+      "file": "docs/plan/tasks/T27.md",
+      "depends_on": [
+        "T26"
+      ],
+      "requirements": [
+        "R20"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/implementation-notes.md"
+      ],
+      "checks": [
+        {
+          "id": "error-protocol",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t27.py",
+            "-q",
+            "--junitxml={evidence_dir}/error-protocol.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/error-protocol.xml"
+        },
+        {
+          "id": "skill-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 30,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t17.py",
+            "-q",
+            "--junitxml={evidence_dir}/skill-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/skill-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T28",
+      "title": "接入主子 Agent 技能发现与刷新",
+      "file": "docs/plan/tasks/T28.md",
+      "depends_on": [
+        "T27"
+      ],
+      "requirements": [
+        "R19",
+        "R20"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/implementation-notes.md"
+      ],
+      "checks": [
+        {
+          "id": "discovery-and-assembly",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 35,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t28.py",
+            "tests/acceptance/test_t11.py",
+            "-q",
+            "--junitxml={evidence_dir}/discovery-and-assembly.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/discovery-and-assembly.xml"
+        },
+        {
+          "id": "sync-restore-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t10.py",
+            "-q",
+            "--junitxml={evidence_dir}/sync-restore-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/sync-restore-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T29",
+      "title": "接通运行入口的偏好与采购记忆",
+      "file": "docs/plan/tasks/T29.md",
+      "depends_on": [
+        "T28"
+      ],
+      "requirements": [
+        "R21"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/contracts/chat.md"
+      ],
+      "checks": [
+        {
+          "id": "runtime-memory",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 5,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t29.py",
+            "-q",
+            "--junitxml={evidence_dir}/runtime-memory.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/runtime-memory.xml"
+        },
+        {
+          "id": "memory-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t18.py",
+            "-q",
+            "--junitxml={evidence_dir}/memory-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/memory-regression.xml"
+        },
+        {
+          "id": "chat-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 18,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t13.py",
+            "-q",
+            "--junitxml={evidence_dir}/chat-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/chat-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T30",
+      "title": "技能安装冒烟与独立业务验证",
+      "file": "docs/plan/tasks/T30.md",
+      "depends_on": [
+        "T29"
+      ],
+      "requirements": [
+        "R20"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md"
+      ],
+      "checks": [
+        {
+          "id": "skill-validation",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 7,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t30.py",
+            "-q",
+            "--junitxml={evidence_dir}/skill-validation.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/skill-validation.xml"
+        },
+        {
+          "id": "publish-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 45,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t17.py",
+            "-q",
+            "--junitxml={evidence_dir}/publish-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/publish-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T31",
+      "title": "技能版本预占与冻结发布指针",
+      "file": "docs/plan/tasks/T31.md",
+      "depends_on": [
+        "T30"
+      ],
+      "requirements": [
+        "R20"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/contracts/storage-sandbox.md",
+        "docs/plan/implementation-notes.md"
+      ],
+      "checks": [
+        {
+          "id": "version-races",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t31.py",
+            "-q",
+            "--junitxml={evidence_dir}/version-races.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/version-races.xml"
+        },
+        {
+          "id": "publish-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 45,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t17.py",
+            "-q",
+            "--junitxml={evidence_dir}/publish-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/publish-regression.xml"
+        },
+        {
+          "id": "recovery-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 33,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t21.py",
+            "tests/integration/test_recovery.py",
+            "tests/integration/test_isolation.py",
+            "-q",
+            "--junitxml={evidence_dir}/recovery-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/recovery-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T32",
+      "title": "主子代理共享预算与超时失败终态",
+      "file": "docs/plan/tasks/T32.md",
+      "depends_on": [
+        "T31"
+      ],
+      "requirements": [
+        "R22",
+        "R23"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "shared-budget",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t32.py",
+            "-q",
+            "--junitxml={evidence_dir}/shared-budget.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/shared-budget.xml"
+        },
+        {
+          "id": "limits-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 28,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t19.py",
+            "-q",
+            "--junitxml={evidence_dir}/limits-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/limits-regression.xml"
+        },
+        {
+          "id": "chat-memory-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 39,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t13.py",
+            "tests/acceptance/test_t29.py",
+            "-q",
+            "--junitxml={evidence_dir}/chat-memory-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/chat-memory-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T33",
+      "title": "沙箱真实调用熔断与并发探测",
+      "file": "docs/plan/tasks/T33.md",
+      "depends_on": [
+        "T32"
+      ],
+      "requirements": [
+        "R08",
+        "R09",
+        "R23",
+        "R25"
+      ],
+      "reads": [
+        "docs/plan/contracts/storage-sandbox.md",
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "sandbox-breaker",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t33.py",
+            "-q",
+            "--junitxml={evidence_dir}/sandbox-breaker.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/sandbox-breaker.xml"
+        },
+        {
+          "id": "limits-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 28,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t19.py",
+            "-q",
+            "--junitxml={evidence_dir}/limits-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/limits-regression.xml"
+        },
+        {
+          "id": "pool-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 36,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t09.py",
+            "tests/integration/test_sandbox_lifecycle.py",
+            "-q",
+            "--junitxml={evidence_dir}/pool-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/pool-regression.xml"
+        },
+        {
+          "id": "sandbox-protocol",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t08.py",
+            "-q",
+            "--junitxml={evidence_dir}/sandbox-protocol.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/sandbox-protocol.xml"
+        }
+      ]
+    },
+    {
+      "id": "T34",
+      "title": "初始化失败与总时长的聊天终态边界",
+      "file": "docs/plan/tasks/T34.md",
+      "depends_on": [
+        "T33"
+      ],
+      "requirements": [
+        "R14",
+        "R22",
+        "R23"
+      ],
+      "reads": [
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "initialization",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t34.py",
+            "-q",
+            "--junitxml={evidence_dir}/initialization.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/initialization.xml"
+        },
+        {
+          "id": "chat-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 32,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t13.py",
+            "-q",
+            "--junitxml={evidence_dir}/chat-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/chat-regression.xml"
+        },
+        {
+          "id": "budget-memory-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 13,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t32.py",
+            "tests/acceptance/test_t29.py",
+            "-q",
+            "--junitxml={evidence_dir}/budget-memory-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/budget-memory-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T35",
+      "title": "SDK自动和主动摘要前持久归档",
+      "file": "docs/plan/tasks/T35.md",
+      "depends_on": [
+        "T34"
+      ],
+      "requirements": [
+        "R22",
+        "R23"
+      ],
+      "reads": [
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "archive",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t35.py",
+            "-q",
+            "--junitxml={evidence_dir}/archive.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/archive.xml"
+        },
+        {
+          "id": "limits-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 28,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t19.py",
+            "-q",
+            "--junitxml={evidence_dir}/limits-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/limits-regression.xml"
+        },
+        {
+          "id": "assembly-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 35,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t11.py",
+            "tests/acceptance/test_t28.py",
+            "-q",
+            "--junitxml={evidence_dir}/assembly-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/assembly-regression.xml"
+        },
+        {
+          "id": "chat-budget-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 45,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t13.py",
+            "tests/acceptance/test_t32.py",
+            "tests/acceptance/test_t29.py",
+            "-q",
+            "--junitxml={evidence_dir}/chat-budget-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/chat-budget-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T36",
+      "title": "面试项目分章学习文档与确认记录",
+      "file": "docs/plan/tasks/T36.md",
+      "depends_on": [
+        "T35"
+      ],
+      "requirements": [
+        "R28"
+      ],
+      "reads": [
+        "docs/plan/architecture.md",
+        "docs/plan/review.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "learning-docs",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "python",
+            "scripts/check_learning_docs.py"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }

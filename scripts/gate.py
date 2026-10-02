@@ -547,6 +547,32 @@ def run_task(
     return receipt, evidence_dir / "receipt.json"
 
 
+def assert_no_self_invocation(manifest: dict) -> None:
+    """Refuse an ``--all`` run whose checks would call this script again.
+
+    ``--all`` executes each task's checks itself. A check that shelled out to ``gate.py`` would
+    re-enter the runner — and because ``--all`` covers every task, that is a loop, not a
+    nested call. The acceptance names this failure mode explicitly, and a guard is worth more
+    than a comment here: the symptom is a hang with no output, which is expensive to diagnose.
+
+    The same reasoning is why ``--all`` never consults ``state.json``: a task's recorded status
+    is a *claim*, and this function's job is to produce evidence, not to repeat one.
+    """
+    for task in manifest["tasks"]:
+        for spec in task["checks"]:
+            joined = " ".join(spec["argv"])
+            if "gate.py" in joined:
+                raise GateError(
+                    f"{task['id']}/{spec['id']} invokes gate.py ({joined!r}); "
+                    "--all runs checks directly and must not re-enter this script"
+                )
+
+
+def all_mode_targets(manifest: dict) -> list[str]:
+    """Every task, in manifest order. Deliberately independent of ``state.json``."""
+    return [task["id"] for task in manifest["tasks"]]
+
+
 def _aggregate_status(task: dict, outcomes: list[CheckOutcome]) -> str:
     """All required checks must pass; otherwise blocked outranks failed."""
     required = {spec["id"] for spec in task["checks"] if spec.get("required")}
@@ -635,7 +661,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"gate error: {exc}", file=sys.stderr)
         return EXIT_FAILED
 
-    targets = [task["id"] for task in manifest["tasks"]] if args.all else [args.task]
+    if args.all:
+        try:
+            assert_no_self_invocation(manifest)
+        except GateError as exc:
+            print(f"gate error: {exc}", file=sys.stderr)
+            return EXIT_FAILED
+        print(
+            "gate --all: running every task's checks directly; "
+            "task status is read from the results, never from state.json"
+        )
+
+    targets = all_mode_targets(manifest) if args.all else [args.task]
     if any(target is None for target in targets):
         parser.error("provide a task id, for example: python scripts/gate.py T00")
 

@@ -35,6 +35,25 @@ DEFAULT_TEST_DATABASE = "rush_harness_test"
 
 SERVER_SELECTION_TIMEOUT_MS = 5000
 
+#: Environment variable holding the token the gateway presents to the internal approval
+#: verification endpoint. A separate secret from the user session and from the grant key:
+#: the gateway must be able to call that endpoint, and a token that could also mint grants
+#: would make the check pointless.
+DEFAULT_INTERNAL_SERVICE_TOKEN_ENV = "INTERNAL_SERVICE_TOKEN"
+
+
+def internal_service_token(env: Mapping[str, str] | None = None) -> str:
+    """The internal service token, without ever inventing one.
+
+    Returns an empty string when unset, which makes the endpoint refuse every caller rather
+    than accept an unauthenticated one. Failing closed here is the difference between "the
+    gateway cannot verify" and "anyone can".
+    """
+    from agent.env_utils import load_env
+
+    resolved = dict(load_env() if env is None else env)
+    return resolved.get(DEFAULT_INTERNAL_SERVICE_TOKEN_ENV, "").strip()
+
 
 class PersistenceUnavailable(RuntimeError):
     """MongoDB could not be reached; callers report blocked rather than degrading."""

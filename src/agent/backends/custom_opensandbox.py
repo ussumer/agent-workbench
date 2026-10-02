@@ -23,7 +23,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Iterator, Sequence
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import timedelta
 
 from deepagents.backends.protocol import (
@@ -40,9 +42,38 @@ from opensandbox.models.execd import RunCommandOpts
 from opensandbox.models.filesystem import WriteEntry
 from opensandbox.sync import SandboxSync
 
-from agent.backends.sandbox_setup import SandboxRuntimeConfig
+from agent.backends.sandbox_setup import SandboxRuntimeConfig, WorkspaceReport
 
 LOGGER = logging.getLogger("rush_harness.sandbox")
+
+_CALL_FAILURES: ContextVar[list[str] | None] = ContextVar("sandbox_call_failures", default=None)
+
+
+@contextmanager
+def collect_sandbox_failures() -> Iterator[list[str]]:
+    """Invocation-local transport evidence, including composed filesystem operations."""
+    failures: list[str] = []
+    token = _CALL_FAILURES.set(failures)
+    try:
+        yield failures
+    finally:
+        _CALL_FAILURES.reset(token)
+
+
+def _report_failure(code: str) -> None:
+    failures = _CALL_FAILURES.get()
+    if failures is not None:
+        failures.append(code)
+
+
+def _report_file_failure(failure: BaseException) -> None:
+    status = _status_code(failure)
+    business_error = status in (400, 401, 403, 404, 409, 422)
+    if status is None:
+        business_error = _error_code(failure) in (FILE_NOT_FOUND, PERMISSION_DENIED, INVALID_PATH, IS_DIRECTORY)
+    if not business_error:
+        # Evidence comes from a failed SDK operation, before mapping into file errors.
+        _report_failure("TRANSPORT_ERROR")
 
 #: Exit code for a command that the backend aborted because it exceeded its budget.
 TIMEOUT_EXIT_CODE = 124
@@ -169,6 +200,7 @@ class OpenSandboxBackend(BaseSandbox):
                 opts=RunCommandOpts(timeout=timedelta(seconds=effective)),
             )
         except TimeoutError as failure:
+            _report_failure("EXEC_TIMEOUT")
             LOGGER.warning("sandbox=%s execute timed out after %ss", self.id, effective)
             return ExecuteResponse(
                 output=f"command timed out after {effective}s: {failure}",
@@ -178,12 +210,14 @@ class OpenSandboxBackend(BaseSandbox):
         except Exception as failure:  # noqa: BLE001 - classified, then either mapped or re-raised
             status = _status_code(failure)
             if status in (408, 504):
+                _report_failure("EXEC_TIMEOUT")
                 LOGGER.warning("sandbox=%s execute reported timeout status=%s", self.id, status)
                 return ExecuteResponse(
                     output=f"command timed out after {effective}s (upstream status {status})",
                     exit_code=TIMEOUT_EXIT_CODE,
                     truncated=False,
                 )
+            _report_failure("TRANSPORT_ERROR")
             raise SandboxExecutionError(
                 f"sandbox {self.id} could not run the command: {type(failure).__name__}: {failure}"
             ) from failure
@@ -200,6 +234,7 @@ class OpenSandboxBackend(BaseSandbox):
             # distinct code so the two are not conflated.
             timed_out = elapsed >= effective * _TIMEOUT_ATTRIBUTION_RATIO
             exit_code = TIMEOUT_EXIT_CODE if timed_out else ABORTED_EXIT_CODE
+            _report_failure("EXEC_TIMEOUT" if timed_out else "CONTAINER_GONE")
             verdict = "timed out" if timed_out else "terminated"
             detail = f"command {verdict} after {elapsed:.1f}s (budget {effective}s)"
             output = f"{output}\n{detail}".strip() if output else detail
@@ -230,6 +265,7 @@ class OpenSandboxBackend(BaseSandbox):
             try:
                 self._sandbox.files.write_files([WriteEntry(path=path, data=content)])
             except Exception as failure:  # noqa: BLE001 - mapped to a per-path error
+                _report_file_failure(failure)
                 responses.append(FileUploadResponse(path=path, error=_error_code(failure)))
                 LOGGER.warning("sandbox=%s upload failed path=%s err=%s", self.id, path, failure)
                 continue
@@ -250,6 +286,7 @@ class OpenSandboxBackend(BaseSandbox):
             try:
                 content = self._sandbox.files.read_bytes(path)
             except Exception as failure:  # noqa: BLE001 - mapped to a per-path error
+                _report_file_failure(failure)
                 code = _error_code(failure)
                 responses.append(FileDownloadResponse(path=path, content=None, error=code))
                 LOGGER.warning(
@@ -271,7 +308,11 @@ class OpenSandboxBackend(BaseSandbox):
         invalid = _validate_path(file_path)
         if invalid is not None:
             return DeleteResult(path=file_path, error=invalid)
-        info = self._sandbox.files.get_file_info([file_path]).get(file_path)
+        try:
+            info = self._sandbox.files.get_file_info([file_path]).get(file_path)
+        except Exception as failure:  # noqa: BLE001 - retain SDK exception and fault evidence
+            _report_file_failure(failure)
+            raise
         if info is None:
             return DeleteResult(path=file_path, error=FILE_NOT_FOUND)
         if getattr(info, "entry_type", None) == "directory":
@@ -279,6 +320,7 @@ class OpenSandboxBackend(BaseSandbox):
         try:
             self._sandbox.files.delete_files([file_path])
         except Exception as failure:  # noqa: BLE001
+            _report_file_failure(failure)
             return DeleteResult(path=file_path, error=_error_code(failure))
         return DeleteResult(path=file_path, error=None)
 
@@ -289,7 +331,11 @@ class OpenSandboxBackend(BaseSandbox):
 
     def stat(self, paths: Iterable[str]) -> dict[str, object]:
         """Batch metadata lookup, used by tests and workspace checks."""
-        return self._sandbox.files.get_file_info(list(paths))
+        try:
+            return {path: entry for path, entry in self._sandbox.files.get_file_info(list(paths)).items()}
+        except Exception as failure:  # noqa: BLE001 - retain SDK exception and fault evidence
+            _report_file_failure(failure)
+            raise
 
     def search(self, path: str, pattern: str) -> list[object]:
         """Glob-style search delegated to the sandbox's own filesystem service."""
@@ -363,7 +409,7 @@ def create_backend(
     env: dict[str, str] | None = None,
     metadata: dict[str, str] | None = None,
     prepare: bool = True,
-) -> tuple[OpenSandboxBackend, object]:
+) -> tuple[OpenSandboxBackend, WorkspaceReport | None]:
     """Create a sandbox and wrap it in the backend.
 
     Returns the backend plus the workspace report, so callers can log exactly what

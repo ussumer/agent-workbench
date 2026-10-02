@@ -54,7 +54,10 @@ class SandboxUnavailable(RuntimeError):
 def control_settings() -> SandboxRuntimeConfig:
     """Runtime configuration pointed at the local control service."""
     env = dict(os.environ)
-    env.setdefault("OPENSANDBOX_DOMAIN", f"{CONTROL_HOST}:{CONTROL_PORT}")
+    # The integration profile owns a fixed local control endpoint. Development .env
+    # may use an alias or a hosted domain; neither changes the test service contract.
+    env["OPENSANDBOX_DOMAIN"] = f"{CONTROL_HOST}:{CONTROL_PORT}"
+    env["OPENSANDBOX_BASE_URL"] = f"http://{CONTROL_HOST}:{CONTROL_PORT}"
     config = SandboxRuntimeConfig.from_env(env)
     # Tests never use a hosted endpoint or an api_key: see infra/sandbox/README.md.
     return SandboxRuntimeConfig(
@@ -254,7 +257,12 @@ def running_pool(
     require_image(config)
 
     counting = CountingFactory(
-        factory or OpenSandboxFactory(config, metadata={"purpose": "t09-acceptance"})
+        factory or OpenSandboxFactory(
+            config,
+            metadata={"purpose": "t09-acceptance"},
+            # Stable across restarts of this database, separate from other test/dev pools.
+            marker="rush-harness-" + hashlib.sha256(settings.database.encode()).hexdigest()[:16],
+        )
     )
     with MongoClient(settings.mongo_uri, serverSelectionTimeoutMS=5000, tz_aware=True) as client:
         database = client[settings.database]

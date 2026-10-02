@@ -16,7 +16,7 @@
 | 限制 | [官方中间件](https://docs.langchain.com/oss/python/langchain/middleware/built-in) | 避免和框架内置摘要、限制重复安装 |
 | 异步 | [async subagents](https://docs.langchain.com/oss/python/deepagents/async-subagents)：Agent Protocol，预览功能 | 固定可运行版，独立服务启动/查/更新/取消 |
 | 沙箱 | [OpenSandbox 快速开始](https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/getting-started/index.md) | 区分管理服务、execd、SDK，实际创建执行传文件销毁 |
-| 搜索 | [智谱 API](https://docs.bigmodel.cn/api-reference/工具-api/网络搜索)：web_search、search_pro_sogou | 无引擎权限时报阻塞，不暗换引擎 |
+| 搜索 | [智谱 API](https://docs.bigmodel.cn/api-reference/工具-api/网络搜索)：web_search、search_std | 无引擎权限时报阻塞，不暗换引擎。原用 search_pro_sogou，因单次成本高出数倍改用标准档；换引擎必须同时改这里、contracts/external.md 与代码，三处不一致即为暗换 |
 | 图表 | [AntV 原始项目](https://github.com/antvis/mcp-server-chart) | 从 ModelScope 真实端点发现工具，保存目录快照 |
 | Java | [Boot 3.5 要求](https://docs.spring.io/spring-boot/3.5/system-requirements.html) | 本项目 Java 21，不需要升级 Boot 4 |
 

@@ -1,6 +1,7 @@
 {
   "dependencies": ["langgraph"],
   "graphs": {
-    "echo": "./infra/agent-protocol/graph.py:build"
+    "echo": "./infra/agent-protocol/graph.py:build",
+    "procurement-analyst": "./infra/agent-protocol/analyst_graph.py:build"
   }
 }

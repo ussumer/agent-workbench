@@ -1,0 +1,81 @@
+{
+  "part_count": 34,
+  "subgraphs_requested": true,
+  "types_seen": [
+    "messages",
+    "tasks",
+    "updates"
+  ],
+  "namespaces_seen": [
+    []
+  ],
+  "subgraph_parts": 0,
+  "tool_call_chunks": 14,
+  "tool_arg_fragments": [
+    "{",
+    "\"",
+    "a",
+    "\"",
+    ": ",
+    "17",
+    ", ",
+    "\"",
+    "b",
+    "\"",
+    ": ",
+    "25",
+    "}"
+  ],
+  "concatenated_tool_args": "{\"a\": 17, \"b\": 25}",
+  "text_fragment_count": 2,
+  "sample_parts": [
+    {
+      "type": "tasks",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "dict(keys=['id', 'input', 'metadata', 'name', 'triggers'])"
+    },
+    {
+      "type": "updates",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "dict(keys=['PatchToolCallsMiddleware.before_agent'])"
+    },
+    {
+      "type": "tasks",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "dict(keys=['error', 'id', 'interrupts', 'name', 'result'])"
+    },
+    {
+      "type": "tasks",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "dict(keys=['id', 'input', 'metadata', 'name', 'triggers'])"
+    },
+    {
+      "type": "messages",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "tuple(len=2)"
+    },
+    {
+      "type": "messages",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "tuple(len=2)"
+    },
+    {
+      "type": "messages",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "tuple(len=2)"
+    },
+    {
+      "type": "messages",
+      "ns": [],
+      "is_subgraph": false,
+      "summary": "tuple(len=2)"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ import threading
 from collections.abc import Sequence
 from typing import Any
 
+import httpx
 from deepagents.backends.protocol import (
     DeleteResult,
     EditResult,
@@ -43,7 +44,18 @@ from deepagents.backends.protocol import (
     WriteResult,
 )
 
+from agent.backends.custom_opensandbox import SandboxExecutionError, collect_sandbox_failures
+from agent.middlewares.sandbox_breaker import SandboxBreaker
+
 LOGGER = logging.getLogger("rush_harness.sandbox.proxy")
+
+
+class SandboxCircuitOpenError(RuntimeError):
+    """Cooldown/probe refusal; never evidence that a container needs rebuilding."""
+
+    def __init__(self, owner: str) -> None:
+        super().__init__(f"SANDBOX_CIRCUIT_OPEN: 用户 {owner} 的沙箱调用已暂停，请等待冷却后探测。")
+        self.code = "SANDBOX_CIRCUIT_OPEN"
 
 
 class SandboxReplacedError(RuntimeError):
@@ -68,8 +80,10 @@ class SandboxBackendProxy(SandboxBackendProtocol):
         owner_user_id: str,
         generation: int = 1,
         execution_lock: threading.Lock | None = None,
+        breaker: SandboxBreaker | None = None,
     ) -> None:
         self._backend = backend
+        self.breaker = breaker or SandboxBreaker()
         self._owner_user_id = owner_user_id
         self._generation = generation
         # Shared by every proxy of the same owner, so two threads cannot interleave
@@ -149,10 +163,36 @@ class SandboxBackendProxy(SandboxBackendProtocol):
 
     # ------------------------------------------------------------------ execute
 
+    def _invoke(self, operation: str, *args: Any, **kwargs: Any) -> Any:
+        epoch = self.breaker.admit()
+        if epoch is None:
+            raise SandboxCircuitOpenError(self._owner_user_id)
+        with collect_sandbox_failures() as failures:
+            try:
+                result = getattr(self._current(), operation)(*args, **kwargs)
+            except Exception as failure:
+                if failures:
+                    self.breaker.record_failure(failures[0], expected_opened_count=epoch)
+                elif isinstance(failure, (SandboxExecutionError, httpx.HTTPError, OSError)):
+                    self.breaker.record_failure("TRANSPORT_ERROR", expected_opened_count=epoch)
+                else:
+                    self.breaker.record_ignored(expected_opened_count=epoch)
+                raise
+            if failures:
+                self.breaker.record_failure(failures[0], expected_opened_count=epoch)
+            elif isinstance(result, ExecuteResponse) and result.exit_code in (124, 125):
+                self.breaker.record_failure("EXEC_TIMEOUT" if result.exit_code == 124 else "CONTAINER_GONE", expected_opened_count=epoch)
+            else:
+                values = result if isinstance(result, list) else [result]
+                if any(getattr(value, "error", None) for value in values):
+                    self.breaker.record_ignored(expected_opened_count=epoch)
+                else:
+                    self.breaker.record_success(expected_opened_count=epoch)
+            return result
+
     def execute(self, command: str, *, timeout: int | None = None) -> ExecuteResponse:
-        backend = self._current()
         with self._execution_lock:
-            return backend.execute(command, timeout=timeout)
+            return self._invoke("execute", command, timeout=timeout)
 
     async def aexecute(self, command: str, *, timeout: int | None = None) -> ExecuteResponse:
         # Delegated through the sync entry point so the per-owner execution lock is
@@ -162,7 +202,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
     # --------------------------------------------------------------------- ls
 
     def ls(self, path: str) -> LsResult:
-        return self._current().ls(path)
+        return self._invoke("ls", path)
 
     async def als(self, path: str) -> LsResult:
         return await asyncio.to_thread(self.ls, path)
@@ -170,7 +210,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
     # ------------------------------------------------------------------- read
 
     def read(self, file_path: str, offset: int = 0, limit: int = 2000) -> ReadResult:
-        return self._current().read(file_path, offset, limit)
+        return self._invoke("read", file_path, offset, limit)
 
     async def aread(self, file_path: str, offset: int = 0, limit: int = 2000) -> ReadResult:
         return await asyncio.to_thread(self.read, file_path, offset, limit)
@@ -178,7 +218,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
     # ------------------------------------------------------------------ write
 
     def write(self, file_path: str, content: str) -> WriteResult:
-        return self._current().write(file_path, content)
+        return self._invoke("write", file_path, content)
 
     async def awrite(self, file_path: str, content: str) -> WriteResult:
         return await asyncio.to_thread(self.write, file_path, content)
@@ -192,7 +232,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
         new_string: str,
         replace_all: bool = False,  # noqa: FBT001, FBT002 - protocol signature
     ) -> EditResult:
-        return self._current().edit(file_path, old_string, new_string, replace_all)
+        return self._invoke("edit", file_path, old_string, new_string, replace_all)
 
     async def aedit(
         self,
@@ -206,7 +246,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
     # ------------------------------------------------------------------- glob
 
     def glob(self, pattern: str, path: str | None = None) -> GlobResult:
-        return self._current().glob(pattern, path)
+        return self._invoke("glob", pattern, path)
 
     async def aglob(self, pattern: str, path: str | None = None) -> GlobResult:
         return await asyncio.to_thread(self.glob, pattern, path)
@@ -221,7 +261,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
         *,
         max_count: int | None = None,
     ) -> GrepResult:
-        return self._current().grep(pattern, path, glob, max_count=max_count)
+        return self._invoke("grep", pattern, path, glob, max_count=max_count)
 
     async def agrep(
         self,
@@ -236,7 +276,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
     # ----------------------------------------------------------------- delete
 
     def delete(self, file_path: str) -> DeleteResult:
-        return self._current().delete(file_path)
+        return self._invoke("delete", file_path)
 
     async def adelete(self, file_path: str) -> DeleteResult:
         return await asyncio.to_thread(self.delete, file_path)
@@ -244,13 +284,13 @@ class SandboxBackendProxy(SandboxBackendProtocol):
     # ---------------------------------------------------------------- transfer
 
     def upload_files(self, files: list[tuple[str, bytes]]) -> list[FileUploadResponse]:
-        return self._current().upload_files(files)
+        return self._invoke("upload_files", files)
 
     async def aupload_files(self, files: list[tuple[str, bytes]]) -> list[FileUploadResponse]:
         return await asyncio.to_thread(self.upload_files, files)
 
     def download_files(self, paths: list[str]) -> list[FileDownloadResponse]:
-        return self._current().download_files(paths)
+        return self._invoke("download_files", paths)
 
     async def adownload_files(self, paths: list[str]) -> list[FileDownloadResponse]:
         return await asyncio.to_thread(self.download_files, paths)
@@ -258,7 +298,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
     # ----------------------------------------------------- backend-specific extra
 
     def stat(self, paths: Sequence[str]) -> dict[str, Any]:
-        return self._current().stat(paths)
+        return self._invoke("stat", paths)
 
     def workspace_report(self) -> Any:
         backend = self._current()

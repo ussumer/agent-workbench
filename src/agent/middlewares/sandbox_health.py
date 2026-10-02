@@ -6,8 +6,8 @@ probe before the agent starts and, when the probe fails, asks
 allocation decisions stay in the manager, which is the single lease holder — a second
 pool here would let an async sub-agent run against a container nobody registered.
 
-Recovery is attempted at most once per run. If it fails, the run continues and the
-first real tool call surfaces the error, rather than the middleware retrying in a loop.
+Recovery is attempted at most once per run. A recovery failure or a circuit refusal
+is surfaced to the run, rather than retried in an unbounded loop.
 """
 
 from __future__ import annotations
@@ -70,18 +70,20 @@ class SandboxHealthMiddleware(AgentMiddleware):
     def probe(self, owner_user_id: str) -> dict[str, Any]:
         """Return the sandbox snapshot for one owner, recovering when needed."""
         proxy = self._manager.get_or_create(owner_user_id)
+        generation = proxy.generation
         recovered = False
-        try:
-            healthy = self._manager._is_alive(proxy)  # noqa: SLF001 - same package boundary
-        except SandboxReplacedError:
-            healthy = False
-
-        if not healthy and self._recover:
-            LOGGER.warning("user=%s sandbox unhealthy before run; requesting recovery", owner_user_id)
+        if self._recover:
+            # The manager coalesces probe and recovery under the same owner lock. Probing
+            # here first would count the very same outage twice and race other callers.
             proxy = self._manager.ensure_healthy(owner_user_id)
-            recovered = True
-        elif not healthy:
-            LOGGER.warning("user=%s sandbox unhealthy before run; recovery disabled", owner_user_id)
+            recovered = proxy.generation != generation
+        else:
+            try:
+                healthy = self._manager._is_alive(proxy)  # noqa: SLF001 - same package boundary
+            except SandboxReplacedError:
+                healthy = False
+            if not healthy:
+                LOGGER.warning("user=%s sandbox unhealthy before run; recovery disabled", owner_user_id)
 
         return {
             STATE_SANDBOX_ID: _safe_id(proxy),
