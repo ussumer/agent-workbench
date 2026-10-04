@@ -1,5 +1,13 @@
 # 当前交接
 
+## T60完成：Curator原题与完整诊断已恢复，整体修复目标仍active
+
+T59修复commit `03299e4`，旧真实失败保持blocked。T60 gate `artifacts/tasks/T60/20261004T184707Z/receipt.json`：25unit（新协议+受影响T57/T58）与一次历史材料prepare通过；四组包共20train/35attempt，保留公开task、原Actor system/environment、完整feedback，bytes45065/59168/61716/51282，零新增模型调用。输出在同attempt的curator-inputs目录。scoped默认v2；旧T58 evidence verifier显式version=1，历史输入可精确重建，不覆盖旧bank。
+
+初轮`20261004T184535Z`失败：原始train run在Curator失败前中止，实际没有总manifest；修复为以真实per-call wire SHA核对原始请求，并将response与BASE冻结记录比较、repair输入/反馈逐项比较。没有补造历史manifest。T60 done只证明材料修复，不代表技能学习或业务成功。报告`docs/runtime/gdpevo-curator-view-2026-10-05.md`。
+
+下一步需要登记T61，复用现有ComputationService/DeepAgents运行v3同题计算能力诊断，再进行操作级bank和train-only选择；勿继续调一体化总prompt、倒用旧test、重复旧T59或恢复T38/T51。真实订单的v3 adapter、学习重复/三次执行对照仍待完成；费用沿用累计50/单次2，当前轮0新增。源代码改动在训练隔离分支，用户原工作区不动。
+
 ## T59 runner 修复已 Git 保存；旧真实失败保留，转向独立训练视图修复
 
 原接线与论文复核 checkpoint commit `1c874b4`。已修复最终proposal为空时遮盖stream主因；失败结果记录primary_failure，旧429预算失败在只读重放中保留。actor-turn-allowance默认16，非空bank总请求32、空bank16，摘要与重试共享；费用仍50总/2每次，不代表等成本对照或保证完成16回合。gate `artifacts/tasks/T59/20261004T183910Z/receipt.json`：22unit通过，旧真实evidence blocked，无新增模型调用。首轮runner-repair.xml 20pass/1failed（测试未模拟usage结算）保留；没有改货币上限。T59改blocked、receipt null，不宣称完成或学习收益。

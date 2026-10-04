@@ -21,7 +21,8 @@ def verify():
     if records!=read(BASE/'training-records.json') or digest(BASE/'manifest.json')!=protocol['source_manifest_sha256']:raise ValueError('origin drift')
     if set(skills)!=set(GROUPS):raise ValueError('incomplete skill bank')
     for group in GROUPS:
-        material=scoped_curator_input(training,records,group)
+        # T58 actually used v1. Keep its missing-view result honest and replayable.
+        material=scoped_curator_input(training,records,group,version=1)
         if material!=read(SESSION/f'curator-input-{group}.json'):raise ValueError('learning input drift')
         req=read(SESSION/'curator'/group/'request.json')
         messages=[{'role':'system','content':_curator_prompt(group)},{'role':'user','content':json.dumps(material,ensure_ascii=False)}]

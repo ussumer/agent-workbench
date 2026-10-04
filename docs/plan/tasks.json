@@ -3228,6 +3228,60 @@
         }
       ],
       "file": "docs/plan/tasks/T59.md"
+    },
+    {
+      "id": "T60",
+      "title": "Curator原题视图与完整诊断修复",
+      "depends_on": [
+        "T58"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/paper-method-diagnosis-2026-10-05.md",
+        "docs/runtime/gdpevo-procurement-taskset-v3.md",
+        "docs/papers/rsi/trace/2608.22793v2.txt"
+      ],
+      "checks": [
+        {
+          "id": "curator-view-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t60.py",
+            "tests/acceptance/test_t57.py",
+            "tests/acceptance/test_t58.py",
+            "-q",
+            "--junitxml={evidence_dir}/curator-view-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/curator-view-unit.xml"
+        },
+        {
+          "id": "curator-view-preparation",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_curator_prepare.py",
+            "--output",
+            "{evidence_dir}/curator-inputs"
+          ],
+          "cwd": "."
+        }
+      ],
+      "file": "docs/plan/tasks/T60.md"
     }
   ]
 }

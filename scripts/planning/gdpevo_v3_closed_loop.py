@@ -24,14 +24,22 @@ def compact(task,row,value): return {'task_id':task['task_id'],'group_id':task['
 def build_curator_records(training, records):
     """Join train policy evidence with public attempts, never test answers."""
     result=[]
+    seen=set()
     for r in records:
         task=r['task']
         evidence=training['tasks'].get(task['task_id'],{}).get('policy_evidence',[])
         if task.get('split')!='train' or not evidence:
             raise ValueError(f"missing train policy evidence: {task.get('task_id')}")
+        if task['task_id'] in seen:
+            raise ValueError('duplicate train record: '+task['task_id'])
+        seen.add(task['task_id'])
+        if not isinstance(task.get('input'),dict) or not isinstance(task.get('request'),str):
+            raise ValueError('missing original Actor task input: '+task['task_id'])
         result.append({'task_id':task['task_id'],'group_id':task['group_id'],
-          'policy_evidence':evidence,
-          'attempts':[{'decision':a.get('model_output'),'grade':a['grade'],'feedback':a['feedback']} for a in r['attempts']]})
+          'actor_task':deepcopy({k:task[k] for k in ('task_id','group_id','split','request','input')}),
+          'policy_evidence':deepcopy(evidence),
+          'attempts':[{'decision':a.get('model_output'),'grade':deepcopy(a['grade']),
+                       'feedback':deepcopy(a['feedback'])} for a in r['attempts']]})
     return result
 
 

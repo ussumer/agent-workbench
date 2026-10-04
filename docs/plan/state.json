@@ -361,6 +361,12 @@
       "review": "not_reviewed",
       "receipt": null,
       "notes": "2026-10-05 runner修复已通过22项零模型回归；gate artifacts/tasks/T59/20261004T183910Z/receipt.json 为blocked：旧真实attempt仍failed，无新付费调用。先保留stream主因再读proposal；16计划Actor回合动态计入selector为32请求，摘要重试共享上限，单次2元/累计50元不变。旧runner-repair.xml 20pass/1failed为测试未模拟usage结算，后续真实Budget结算与未知usage测试均通过。真实业务未完成，不登记done、不重跑旧attempt；后续独立修复Curator视图，再设计同题计算实验。"
+    },
+    "T60": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T60/20261004T184707Z/receipt.json",
+      "notes": "Curator默认v2保留20道原始公开task、35真实尝试及完整反馈；四组prepare请求45065/59168/61716/51282bytes，真实Actor system/environment、初次响应及repair反馈逐项核对。历史T58 verifier显式v1精确重建。25unit及prepare command通过，首轮缺原始中止attempt总manifest失败保留，修复为实际per-call wire SHA校验，不补造旧manifest。零新增模型调用/无技能晋升；同题OpenSandbox能力对照、操作级进化和生产adapter尚未完成。"
     }
   }
 }

@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +31,11 @@ SESSION = EVAL / "procurement_eval/runs/planning-session-20261005/attempt-gdpevo
 GROUPS = ("quotes", "packages", "kits", "revisions")
 
 
-def scoped_curator_input(training: dict[str, Any], records: list[dict[str, Any]], group: str) -> dict[str, Any]:
+def scoped_curator_input(training: dict[str, Any], records: list[dict[str, Any]], group: str,
+                         *, version: int = 2) -> dict[str, Any]:
+    """v2 preserves original tasks/diagnostics; v1 replays frozen T58 evidence."""
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError('unsupported Curator input version')
     if group not in GROUPS:
         raise ValueError('unknown business group')
     joined = build_curator_records(training, records)
@@ -44,12 +49,20 @@ def scoped_curator_input(training: dict[str, Any], records: list[dict[str, Any]]
         for rule in row["policy_evidence"]:
             rule_ids.append(rule["rule_id"])
             rules[rule["rule_id"]] = {k: rule[k] for k in ("rule_id", "name", "condition", "policy", "fields", "stop")}
-        compact.append({"task_id": row["task_id"], "rule_ids": rule_ids, "attempts": [
+        entry = {"task_id": row["task_id"], "rule_ids": rule_ids, "attempts": [
             {"decision": a["decision"], "grade": a["grade"],
              "failed_outcomes": a["feedback"].get("failed_outcomes", [])}
             for a in row["attempts"]
-        ]})
-    return {"group_id": group, "policies": list(rules.values()), "train_records": compact}
+        ]}
+        if version == 2:
+            entry['actor_task'] = row['actor_task']
+            for original, attempt in zip(row['attempts'], entry['attempts'], strict=True):
+                attempt['feedback'] = deepcopy(original['feedback'])
+        compact.append(entry)
+    material = {"group_id": group, "policies": list(rules.values()), "train_records": compact}
+    if version == 2:
+        material['schema_version'] = 2
+    return material
 
 
 def _curator_prompt(group: str) -> str:
