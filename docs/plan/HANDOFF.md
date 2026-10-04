@@ -1,5 +1,14 @@
 # 当前交接
 
+## T56完成；准备T57扩展训练
+
+T56 gate `artifacts/tasks/T56/20261004T151202Z/receipt.json` 13 unit+只读真实verify通过。开发test fixed1/5(.48), raw4/5(.80), curated5/5(1.00)；train退化故未晋升，生产bank未改。第一次环境配置blocked保留；非mandatory Ruff import整理停止，不继续循环。扩题T54已从原工作区选择性引入（40新题、20train/20test、40反事实），私有裁判与公开训练材料分离。移植遗漏preserved-inputs导致一次143pass/1failed，补复制证据后144pass，validate通过；旧训练实现hash保持。预算沿用50/2。
+
+
+## 当前T56：改进进化机制
+
+用户明确授权改进进化机制。隔离分支上实现诊断反馈、训练失败修正、Curator候选train验证与拒绝退化、同协议fixed/raw/curated消融。保留T55旧实现/证据；不恢复T54或T51。新增付费调用沿用50/2授权。
+
 ## 2026-10-04 T55：GDPevo真实训练与固定消融
 
 训练前基线为 Git `9f2ea2e` / tag `pre-training-gdpevo-20261004`，训练隔离在 `/mnt/c/dev/rush-harness-training`，不改 T54 扩题文件或生产 Harness 活动技能。真实目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-gdpevo-training-20261004` 已保存五个 train（失败最多一次诊断重试）、一次 Curator、retrieval/raw 五题和 curated 五题的请求、响应、usage、私有评分、技能 hash、bank 与 manifest。模型为 `deepseek-flash`，no-tools、temperature 0、thinking disabled。

@@ -1,0 +1,7730 @@
+{
+  "schema_version": 2,
+  "task_group_id": "chengchuan-procurement-v3",
+  "groups": {
+    "quotes": {
+      "rules": [
+        {
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "rule_id": "V",
+          "name": "正式商务版本",
+          "condition": "同关系多版文件",
+          "policy": "draft不覆盖正式文件；当前可用的signed/pending/revoked按revision取最大，价格和包装由该文件控制。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "单一正式文件时无需版本争议；版本权威不扩展到ERP字段。"
+        },
+        {
+          "rule_id": "E",
+          "name": "商务生效窗口",
+          "condition": "存在未来或过期文件",
+          "policy": "effective_at<=as_of<=expires_at的正式文件参与，两个边界包含；窗口外版本不覆盖窗口内版本。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "有效窗口不改变历史成交金额或ERP交期。"
+        },
+        {
+          "rule_id": "X",
+          "name": "撤销关闭关系",
+          "condition": "最新可用正式文件revoked",
+          "policy": "关闭当前商务关系，不回退旧signed价格；其它供应商可继续比较。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "撤销不取消历史订单；过期或未来的撤销尚不控制本轮。"
+        },
+        {
+          "rule_id": "M",
+          "name": "证据相关性",
+          "condition": "最新正式文件pending且有价格区间",
+          "policy": "已知报价及pending最低/最高合法包价分别比较可行性和最优覆盖/成本；结论变化才needs_information，且零新购。被停用/超期/已完成需求或被已知价支配的pending不阻塞。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "无相关pending时不得无条件补证；资料未决不等同业务无解。"
+        }
+      ]
+    },
+    "packages": {
+      "rules": [
+        {
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "rule_id": "U",
+          "name": "包装到件换算",
+          "condition": "包装报价与按件需求",
+          "policy": "只买覆盖剩余量的最小整数包；费用按包价，不按件价；盈余不计可选覆盖。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "剩余量为零不再补购；不用多买包故意凑免邮。"
+        },
+        {
+          "rule_id": "S",
+          "name": "现场盈余",
+          "condition": "site=pit_stop",
+          "policy": "每物料本轮包装盈余最多1件；depot允许最小整数包的盈余。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "site不是pit_stop时停止现场限额。"
+        },
+        {
+          "rule_id": "C",
+          "name": "容量和交期",
+          "condition": "新购包转换为件",
+          "policy": "ERP capacity_units以件计，整包件数不得超容量；lead_days不能超过需求期限。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "不以报价承诺覆盖ERP；历史交期按成交快照对账。"
+        },
+        {
+          "rule_id": "O",
+          "name": "非贪心分配",
+          "condition": "存在多个可选需求与有限预算",
+          "policy": "按priority逐层最大化覆盖需求件数，再最小累计成本；供应商购物车运费与整数包一起比较，不能按最低单价逐行贪心。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "必需为硬约束；包装盈余不加分，低优先级不能挤掉高优先级覆盖。"
+        }
+      ]
+    },
+    "kits": {
+      "rules": [
+        {
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "rule_id": "K",
+          "name": "配套闭包",
+          "condition": "同非空kit_id目标",
+          "policy": "所有同kit成员全部完成或全部不买；历史已完成成员不重复购买。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "空kit_id不绑定；kit不变成required。"
+        },
+        {
+          "rule_id": "P",
+          "name": "优先级",
+          "condition": "多个可选优先级",
+          "policy": "先逐层最大覆盖件数，再最小累计成本；kit是硬闭包约束而非购买偏好。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "低层覆盖不能压过高层覆盖。"
+        },
+        {
+          "rule_id": "I",
+          "name": "配套例外",
+          "condition": "kit_id为空或独立成员",
+          "policy": "空kit_id独立，不因同供应商绑定；某kit不可行不阻止独立物料。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "非空kit_id仍需闭包；历史完成只补其余成员。"
+        },
+        {
+          "rule_id": "S",
+          "name": "现场包装",
+          "condition": "site=pit_stop且整包有盈余",
+          "policy": "每物料本轮盈余最多1件；depot允许最小整数包盈余。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "不把pit_stop限额套到depot。"
+        }
+      ]
+    },
+    "revisions": {
+      "rules": [
+        {
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "rule_id": "H",
+          "name": "成交事实来源",
+          "condition": "存在commitments及新报价",
+          "policy": "历史量/实付/计划交期按commitments原快照，不随当前报价、供应商停用或撤销变更；历史订单始终保留。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "commitment_ledger"
+          ],
+          "stop": "当前报价只影响新追加，不授予退货/取消能力。"
+        },
+        {
+          "rule_id": "D",
+          "name": "修订目标差量",
+          "condition": "当前revision需求变化",
+          "policy": "本轮只补目标量减历史量；历史超目标或历史交期不满足新期限时为真实冲突、infeasible，不自动回滚。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "目标已全量承诺时不再买；旧审批不能覆盖追加（公开权限边界）。"
+        },
+        {
+          "rule_id": "M",
+          "name": "相关补证",
+          "condition": "修订后存在pending",
+          "policy": "只在pending能改变剩余目标的可行性或最优覆盖/成本时needs_information；已满足物料、停用/超期来源和被支配区间不阻塞。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "证据未决不得写infeasible；完整已知无解才能拒绝。"
+        },
+        {
+          "rule_id": "C",
+          "name": "累计预算",
+          "condition": "预算修订或新追加",
+          "policy": "累计预算含已成交实付和新购物车费用；历史金额不参与新购物车免邮；历史已花超新预算为真实冲突。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "保留历史事实，不把新预算当本轮剩余额度。"
+        }
+      ]
+    }
+  },
+  "matrix": {
+    "quotes-train-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "V",
+        "M"
+      ]
+    },
+    "quotes-train-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "E"
+      ]
+    },
+    "quotes-train-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "V",
+        "X"
+      ]
+    },
+    "quotes-train-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "M"
+      ]
+    },
+    "quotes-train-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "V",
+        "E",
+        "M"
+      ]
+    },
+    "quotes-test-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "V",
+        "E",
+        "X"
+      ]
+    },
+    "quotes-test-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "V",
+        "E",
+        "M"
+      ]
+    },
+    "quotes-test-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "E",
+        "X",
+        "M"
+      ]
+    },
+    "quotes-test-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "V",
+        "X",
+        "M"
+      ]
+    },
+    "quotes-test-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "V",
+        "E",
+        "X",
+        "M"
+      ]
+    },
+    "packages-train-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U"
+      ]
+    },
+    "packages-train-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "S"
+      ]
+    },
+    "packages-train-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "C"
+      ]
+    },
+    "packages-train-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "O"
+      ]
+    },
+    "packages-train-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "C"
+      ]
+    },
+    "packages-test-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "C",
+        "O"
+      ]
+    },
+    "packages-test-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "S",
+        "C",
+        "O"
+      ]
+    },
+    "packages-test-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "S",
+        "C"
+      ]
+    },
+    "packages-test-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "O"
+      ]
+    },
+    "packages-test-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "U",
+        "S",
+        "C",
+        "O"
+      ]
+    },
+    "kits-train-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K"
+      ]
+    },
+    "kits-train-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "P"
+      ]
+    },
+    "kits-train-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K",
+        "I"
+      ]
+    },
+    "kits-train-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "S"
+      ]
+    },
+    "kits-train-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K",
+        "P"
+      ]
+    },
+    "kits-test-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K",
+        "P",
+        "I"
+      ]
+    },
+    "kits-test-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K",
+        "S",
+        "I"
+      ]
+    },
+    "kits-test-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K",
+        "P",
+        "S"
+      ]
+    },
+    "kits-test-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K",
+        "P",
+        "I"
+      ]
+    },
+    "kits-test-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "K",
+        "P",
+        "I",
+        "S"
+      ]
+    },
+    "revisions-train-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "H"
+      ]
+    },
+    "revisions-train-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "D"
+      ]
+    },
+    "revisions-train-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "M"
+      ]
+    },
+    "revisions-train-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "C"
+      ]
+    },
+    "revisions-train-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "H",
+        "D"
+      ]
+    },
+    "revisions-test-01": {
+      "rule_ids": [
+        "B",
+        "F",
+        "H",
+        "D",
+        "C"
+      ]
+    },
+    "revisions-test-02": {
+      "rule_ids": [
+        "B",
+        "F",
+        "H",
+        "D",
+        "M"
+      ]
+    },
+    "revisions-test-03": {
+      "rule_ids": [
+        "B",
+        "F",
+        "D",
+        "M",
+        "C"
+      ]
+    },
+    "revisions-test-04": {
+      "rule_ids": [
+        "B",
+        "F",
+        "H",
+        "M",
+        "C"
+      ]
+    },
+    "revisions-test-05": {
+      "rule_ids": [
+        "B",
+        "F",
+        "H",
+        "D",
+        "M",
+        "C"
+      ]
+    }
+  },
+  "rubrics": {
+    "quotes-train-01": [
+      {
+        "point_id": "quotes-train-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "V",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "V": [
+            "quotes-train-01",
+            "quotes-train-03",
+            "quotes-train-05"
+          ],
+          "M": [
+            "quotes-train-01",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-train-02": [
+      {
+        "point_id": "quotes-train-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "E"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "E": [
+            "quotes-train-02",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-train-03": [
+      {
+        "point_id": "quotes-train-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "V",
+          "X"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "V": [
+            "quotes-train-01",
+            "quotes-train-03",
+            "quotes-train-05"
+          ],
+          "X": [
+            "quotes-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-train-04": [
+      {
+        "point_id": "quotes-train-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "M": [
+            "quotes-train-01",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-train-05": [
+      {
+        "point_id": "quotes-train-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "V",
+          "E",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "V": [
+            "quotes-train-01",
+            "quotes-train-03",
+            "quotes-train-05"
+          ],
+          "E": [
+            "quotes-train-02",
+            "quotes-train-05"
+          ],
+          "M": [
+            "quotes-train-01",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-train-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-test-01": [
+      {
+        "point_id": "quotes-test-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "V",
+          "E",
+          "X"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "V": [
+            "quotes-train-01",
+            "quotes-train-03",
+            "quotes-train-05"
+          ],
+          "E": [
+            "quotes-train-02",
+            "quotes-train-05"
+          ],
+          "X": [
+            "quotes-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-test-02": [
+      {
+        "point_id": "quotes-test-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "V",
+          "E",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "V": [
+            "quotes-train-01",
+            "quotes-train-03",
+            "quotes-train-05"
+          ],
+          "E": [
+            "quotes-train-02",
+            "quotes-train-05"
+          ],
+          "M": [
+            "quotes-train-01",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-test-03": [
+      {
+        "point_id": "quotes-test-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "E",
+          "X",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "E": [
+            "quotes-train-02",
+            "quotes-train-05"
+          ],
+          "X": [
+            "quotes-train-03"
+          ],
+          "M": [
+            "quotes-train-01",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-test-04": [
+      {
+        "point_id": "quotes-test-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "V",
+          "X",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "V": [
+            "quotes-train-01",
+            "quotes-train-03",
+            "quotes-train-05"
+          ],
+          "X": [
+            "quotes-train-03"
+          ],
+          "M": [
+            "quotes-train-01",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "quotes-test-05": [
+      {
+        "point_id": "quotes-test-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "V",
+          "E",
+          "X",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ],
+          "V": [
+            "quotes-train-01",
+            "quotes-train-03",
+            "quotes-train-05"
+          ],
+          "E": [
+            "quotes-train-02",
+            "quotes-train-05"
+          ],
+          "X": [
+            "quotes-train-03"
+          ],
+          "M": [
+            "quotes-train-01",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "quotes-test-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "quotes-train-01",
+            "quotes-train-02",
+            "quotes-train-03",
+            "quotes-train-04",
+            "quotes-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-train-01": [
+      {
+        "point_id": "packages-train-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-train-02": [
+      {
+        "point_id": "packages-train-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "S"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "S": [
+            "packages-train-02"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-train-03": [
+      {
+        "point_id": "packages-train-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "C": [
+            "packages-train-03",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-train-04": [
+      {
+        "point_id": "packages-train-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "O"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "O": [
+            "packages-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-train-05": [
+      {
+        "point_id": "packages-train-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "C": [
+            "packages-train-03",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-train-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-test-01": [
+      {
+        "point_id": "packages-test-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "C",
+          "O"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "C": [
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "O": [
+            "packages-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-test-02": [
+      {
+        "point_id": "packages-test-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "S",
+          "C",
+          "O"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "S": [
+            "packages-train-02"
+          ],
+          "C": [
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "O": [
+            "packages-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-test-03": [
+      {
+        "point_id": "packages-test-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "S",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "S": [
+            "packages-train-02"
+          ],
+          "C": [
+            "packages-train-03",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-test-04": [
+      {
+        "point_id": "packages-test-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "O"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "O": [
+            "packages-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "packages-test-05": [
+      {
+        "point_id": "packages-test-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "U",
+          "S",
+          "C",
+          "O"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ],
+          "U": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "S": [
+            "packages-train-02"
+          ],
+          "C": [
+            "packages-train-03",
+            "packages-train-05"
+          ],
+          "O": [
+            "packages-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "packages-test-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "packages-train-01",
+            "packages-train-02",
+            "packages-train-03",
+            "packages-train-04",
+            "packages-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-train-01": [
+      {
+        "point_id": "kits-train-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-train-02": [
+      {
+        "point_id": "kits-train-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "P"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "P": [
+            "kits-train-02",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-train-03": [
+      {
+        "point_id": "kits-train-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K",
+          "I"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ],
+          "I": [
+            "kits-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-train-04": [
+      {
+        "point_id": "kits-train-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "S"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "S": [
+            "kits-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-train-05": [
+      {
+        "point_id": "kits-train-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K",
+          "P"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ],
+          "P": [
+            "kits-train-02",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-train-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-test-01": [
+      {
+        "point_id": "kits-test-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K",
+          "P",
+          "I"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ],
+          "P": [
+            "kits-train-02",
+            "kits-train-05"
+          ],
+          "I": [
+            "kits-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-test-02": [
+      {
+        "point_id": "kits-test-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K",
+          "S",
+          "I"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ],
+          "S": [
+            "kits-train-04"
+          ],
+          "I": [
+            "kits-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-test-03": [
+      {
+        "point_id": "kits-test-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K",
+          "P",
+          "S"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ],
+          "P": [
+            "kits-train-02",
+            "kits-train-05"
+          ],
+          "S": [
+            "kits-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-test-04": [
+      {
+        "point_id": "kits-test-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K",
+          "P",
+          "I"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ],
+          "P": [
+            "kits-train-02",
+            "kits-train-05"
+          ],
+          "I": [
+            "kits-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "kits-test-05": [
+      {
+        "point_id": "kits-test-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "K",
+          "P",
+          "I",
+          "S"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ],
+          "K": [
+            "kits-train-01",
+            "kits-train-03",
+            "kits-train-05"
+          ],
+          "P": [
+            "kits-train-02",
+            "kits-train-05"
+          ],
+          "I": [
+            "kits-train-03"
+          ],
+          "S": [
+            "kits-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "kits-test-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "kits-train-01",
+            "kits-train-02",
+            "kits-train-03",
+            "kits-train-04",
+            "kits-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-train-01": [
+      {
+        "point_id": "revisions-train-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "H"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "H": [
+            "revisions-train-01",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-train-02": [
+      {
+        "point_id": "revisions-train-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "D"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "D": [
+            "revisions-train-02",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-train-03": [
+      {
+        "point_id": "revisions-train-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "M": [
+            "revisions-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-train-04": [
+      {
+        "point_id": "revisions-train-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "C": [
+            "revisions-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-train-05": [
+      {
+        "point_id": "revisions-train-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "H",
+          "D"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "H": [
+            "revisions-train-01",
+            "revisions-train-05"
+          ],
+          "D": [
+            "revisions-train-02",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-train-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-test-01": [
+      {
+        "point_id": "revisions-test-01:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "H",
+          "D",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "H": [
+            "revisions-train-01",
+            "revisions-train-05"
+          ],
+          "D": [
+            "revisions-train-02",
+            "revisions-train-05"
+          ],
+          "C": [
+            "revisions-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-01:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-01:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-01:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-01:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-01:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-test-02": [
+      {
+        "point_id": "revisions-test-02:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "H",
+          "D",
+          "M"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "H": [
+            "revisions-train-01",
+            "revisions-train-05"
+          ],
+          "D": [
+            "revisions-train-02",
+            "revisions-train-05"
+          ],
+          "M": [
+            "revisions-train-03"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-02:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-02:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-02:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-02:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-02:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-test-03": [
+      {
+        "point_id": "revisions-test-03:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "D",
+          "M",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "D": [
+            "revisions-train-02",
+            "revisions-train-05"
+          ],
+          "M": [
+            "revisions-train-03"
+          ],
+          "C": [
+            "revisions-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-03:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-03:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-03:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-03:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-03:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-test-04": [
+      {
+        "point_id": "revisions-test-04:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "H",
+          "M",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "H": [
+            "revisions-train-01",
+            "revisions-train-05"
+          ],
+          "M": [
+            "revisions-train-03"
+          ],
+          "C": [
+            "revisions-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-04:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-04:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-04:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-04:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-04:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ],
+    "revisions-test-05": [
+      {
+        "point_id": "revisions-test-05:procurement",
+        "outcome_key": "procurement",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B",
+          "F",
+          "H",
+          "D",
+          "M",
+          "C"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ],
+          "H": [
+            "revisions-train-01",
+            "revisions-train-05"
+          ],
+          "D": [
+            "revisions-train-02",
+            "revisions-train-05"
+          ],
+          "M": [
+            "revisions-train-03"
+          ],
+          "C": [
+            "revisions-train-04"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-05:source_selection",
+        "outcome_key": "source_selection",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-05:freight_audit",
+        "outcome_key": "freight_audit",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "F"
+        ],
+        "rule_anchors": {
+          "F": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-05:commitment_ledger",
+        "outcome_key": "commitment_ledger",
+        "weight": 2,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-05:approval_boundary",
+        "outcome_key": "approval_boundary",
+        "weight": 3,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      },
+      {
+        "point_id": "revisions-test-05:erp_claim_conflicts",
+        "outcome_key": "erp_claim_conflicts",
+        "weight": 1,
+        "binary": true,
+        "rule_ids": [
+          "B"
+        ],
+        "rule_anchors": {
+          "B": [
+            "revisions-train-01",
+            "revisions-train-02",
+            "revisions-train-03",
+            "revisions-train-04",
+            "revisions-train-05"
+          ]
+        }
+      }
+    ]
+  },
+  "manual_checks": {
+    "quotes-train-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 520,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "final",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "4×130=520；draft不是正式版本，ERP交期仍2。"
+    },
+    "quotes-train-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 360,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "live",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "时点恰好双边界，live 3×120=360，未来/过期不参与。"
+    },
+    "quotes-train-03": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 360,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "backup",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "撤销关闭S1，2×180=360，不能回退100。"
+    },
+    "quotes-train-04": {
+      "expected": {
+        "disposition": "needs_information",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "最低边界240可改变已知360；必须补证。"
+    },
+    "quotes-train-05": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 200,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "new",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "最新生效正式new 2×100=200。"
+    },
+    "quotes-test-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 550,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "f-alt",
+            "packs": 5
+          }
+        ]
+      },
+      "calculation": "as_of=12撤销已生效，未来rev4不覆盖；S2商品550恰好免邮。"
+    },
+    "quotes-test-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 520,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "g-new",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "已知520≤pending最低560，稳定执行；恰好免邮。"
+    },
+    "quotes-test-03": {
+      "expected": {
+        "disposition": "needs_information",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "已知无来源，但pending最低240+50=290可行；资料未决不是无解。"
+    },
+    "quotes-test-04": {
+      "expected": {
+        "disposition": "needs_information",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "必需200已可行，但pending低价可覆盖可选2件，高价超预算；不能仅凭必需可行执行。"
+    },
+    "quotes-test-05": {
+      "expected": {
+        "disposition": "infeasible",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "expired撤销不控制；当前560>500，停用pending不能解决，因此真无解。"
+    },
+    "packages-train-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "pa-pack",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "ceil(5/4)=2包=8件，depot盈余3允许，400<500。"
+    },
+    "packages-train-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "pb-unit",
+            "packs": 5
+          }
+        ]
+      },
+      "calculation": "pit_stop盈余3>1，必须5个单件500。"
+    },
+    "packages-train-03": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "pc-unit",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "两包6件超过容量5；便宜来源超期；唯一可行4×100=400。"
+    },
+    "packages-train-04": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 425,
+        "coverage": [
+          5
+        ],
+        "allocation": [
+          {
+            "quote_id": "pr",
+            "packs": 1
+          },
+          {
+            "quote_id": "pt",
+            "packs": 5
+          }
+        ]
+      },
+      "calculation": "剩余330：PL花240覆盖4，PT花325覆盖5，优先覆盖5件425。"
+    },
+    "packages-train-05": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 360,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "pd-pack",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "2包8件恰好容量8，商品360恰好免邮；单件420较贵。"
+    },
+    "packages-test-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 440,
+        "coverage": [
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "pe-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "pf-s1",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "S1整体340+100=440免邮；S2最低单价300+105+160=565，混购也更贵。"
+    },
+    "packages-test-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 540,
+        "coverage": [
+          2
+        ],
+        "allocation": [
+          {
+            "quote_id": "pg-small",
+            "packs": 4
+          },
+          {
+            "quote_id": "ph",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "5件大包需10件盈余3被禁止；4小包8件480+可选60=540免邮可行。"
+    },
+    "packages-test-03": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "pi-each",
+            "packs": 5
+          }
+        ]
+      },
+      "calculation": "两包6件超过容量5；S2 400恰好门槛免邮，也恰在budget内。"
+    },
+    "packages-test-04": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 650,
+        "coverage": [
+          11
+        ],
+        "allocation": [
+          {
+            "quote_id": "pj",
+            "packs": 1
+          },
+          {
+            "quote_id": "pk",
+            "packs": 2
+          },
+          {
+            "quote_id": "pm",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "全选800超预算；PK+PM覆盖11（成本100+400+150=650），高于PK+PL2覆盖10及PL2+PM覆盖9。"
+    },
+    "packages-test-05": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 640,
+        "coverage": [
+          4
+        ],
+        "allocation": [
+          {
+            "quote_id": "pn-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "po",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "S1便宜行270但运费180，另S2可选240+100使总790；S2整车400+240=640免邮覆盖4。"
+    },
+    "kits-train-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 600,
+        "coverage": [
+          2,
+          2
+        ],
+        "allocation": [
+          {
+            "quote_id": "ka",
+            "packs": 2
+          },
+          {
+            "quote_id": "kb",
+            "packs": 2
+          },
+          {
+            "quote_id": "kc",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "200+200+200=600，kit闭包覆盖两个优先级各2件。"
+    },
+    "kits-train-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [
+          2,
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "la",
+            "packs": 1
+          },
+          {
+            "quote_id": "lb",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "两可选各花300；高优先级2件优先于低优先级5件。"
+    },
+    "kits-train-03": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 370,
+        "coverage": [
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "ma",
+            "packs": 1
+          },
+          {
+            "quote_id": "mx",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "kit500+required100超450；同供应商独立MX 270+100=370覆盖3。"
+    },
+    "kits-train-04": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "na",
+            "packs": 2
+          },
+          {
+            "quote_id": "ny",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "NX需8件盈余3被禁，NY需4件盈余1可行，总500。"
+    },
+    "kits-train-05": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [
+          4,
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "oa",
+            "packs": 1
+          },
+          {
+            "quote_id": "ox",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "kit450覆盖高优先级3，独立500覆盖4，因此不强买kit。"
+    },
+    "kits-test-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 550,
+        "coverage": [
+          3,
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "qa",
+            "packs": 1
+          },
+          {
+            "quote_id": "qx",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "便宜kit540只覆盖高层2；独立550覆盖高层3，优先取后者。"
+    },
+    "kits-test-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "ra",
+            "packs": 2
+          },
+          {
+            "quote_id": "rx",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "RB盈余3现场禁止，kit全不买；独立RX仍可以买。"
+    },
+    "kits-test-03": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [
+          4,
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "sa",
+            "packs": 1
+          },
+          {
+            "quote_id": "sx",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "kit400高层3，独立400高层4优先；SB盈余1合法。"
+    },
+    "kits-test-04": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 550,
+        "coverage": [
+          2,
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "ta",
+            "packs": 1
+          },
+          {
+            "quote_id": "tc",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "历史TB已完成不可再买，闭包补TC；150+100+300=550，TX再250会超700。"
+    },
+    "kits-test-05": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [
+          3,
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "ua",
+            "packs": 1
+          },
+          {
+            "quote_id": "ux",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "kit500覆盖高层2/低层5，独立400高层3更优；UC盈余1现场允许。"
+    },
+    "revisions-train-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 180,
+        "coverage": [],
+        "allocation": []
+      },
+      "calculation": "全部历史承诺保留180；当前停用和新价不影响历史，无追加。"
+    },
+    "revisions-train-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "vb",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "目标5减已购2，只追加3，200+300=500。"
+    },
+    "revisions-train-03": {
+      "expected": {
+        "disposition": "needs_information",
+        "total_cents": 100,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "剩3：known460、pending最低340可改变成本，保留100历史且补证。"
+    },
+    "revisions-train-04": {
+      "expected": {
+        "disposition": "infeasible",
+        "total_cents": 350,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "历史已花350超过新预算349，无追加也真无解。"
+    },
+    "revisions-train-05": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 380,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "ve-alt",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "历史不按新60重算；只补2，100+2×140=380。"
+    },
+    "revisions-test-01": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 670,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "vf-pack",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "新商品150不能加历史400凑免邮；历史400+新150+运费120=670，S2共720超预算。"
+    },
+    "revisions-test-02": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 560,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "vj",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "VG已完成，新pending与追加无关；仅追加VJ两件，360+200=560。"
+    },
+    "revisions-test-03": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 690,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "vk",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "已知690优于pending最低720，预算700稳定执行，无条件补证错误。"
+    },
+    "revisions-test-04": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 770,
+        "coverage": [
+          2
+        ],
+        "allocation": [
+          {
+            "quote_id": "vl",
+            "packs": 1
+          },
+          {
+            "quote_id": "vm",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "pending超期不影响；新购物车120+200=320免邮，历史450累计770。"
+    },
+    "revisions-test-05": {
+      "expected": {
+        "disposition": "execute",
+        "total_cents": 840,
+        "coverage": [
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "vn-unit",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "差量4，大包需6件盈余2现场不允许；S3停用，单件600+历史240=840；再80超900。"
+    }
+  },
+  "counterfactuals": [
+    {
+      "id": "quotes-cf-01",
+      "group_id": "quotes",
+      "task_id": "quotes-test-01",
+      "condition_group": "as_of",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "as_of"
+          ],
+          "value": 11
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 450,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "f-signed",
+            "packs": 5
+          }
+        ]
+      },
+      "calculation": "撤销前一天签章rev2控制，5×90=450。"
+    },
+    {
+      "id": "quotes-cf-02",
+      "group_id": "quotes",
+      "task_id": "quotes-test-01",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 549
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "免邮后的550仍差1分。"
+    },
+    {
+      "id": "quotes-cf-03",
+      "group_id": "quotes",
+      "task_id": "quotes-test-02",
+      "condition_group": "quotes",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            2,
+            "price_bounds_cents"
+          ],
+          "value": [
+            90,
+            190
+          ]
+        }
+      ],
+      "manual_expected": {
+        "disposition": "needs_information",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "pending最低360改变已知520。"
+    },
+    {
+      "id": "quotes-cf-04",
+      "group_id": "quotes",
+      "task_id": "quotes-test-02",
+      "condition_group": "as_of",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "as_of"
+          ],
+          "value": 14
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 480,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "g-old",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "新文件未生效；4×100+80运费=480。"
+    },
+    {
+      "id": "quotes-cf-05",
+      "group_id": "quotes",
+      "task_id": "quotes-test-03",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 250
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "pending最低240+50=290也超预算。"
+    },
+    {
+      "id": "quotes-cf-06",
+      "group_id": "quotes",
+      "task_id": "quotes-test-03",
+      "condition_group": "erp_relationships",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "erp_relationships",
+            1,
+            "active"
+          ],
+          "value": false
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "唯一可能来源停用。"
+    },
+    {
+      "id": "quotes-cf-07",
+      "group_id": "quotes",
+      "task_id": "quotes-test-04",
+      "condition_group": "quotes",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            3,
+            "price_bounds_cents"
+          ],
+          "value": [
+            300,
+            400
+          ]
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 200,
+        "coverage": [
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "i-alt",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "pending最便宜2×300+200=800也超过700，选必需200。"
+    },
+    {
+      "id": "quotes-cf-08",
+      "group_id": "quotes",
+      "task_id": "quotes-test-04",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 400
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 200,
+        "coverage": [
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "i-alt",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "最低可选完整方案500被预算排除。"
+    },
+    {
+      "id": "quotes-cf-09",
+      "group_id": "quotes",
+      "task_id": "quotes-test-05",
+      "condition_group": "erp_relationships",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "erp_relationships",
+            1,
+            "active"
+          ],
+          "value": true
+        }
+      ],
+      "manual_expected": {
+        "disposition": "needs_information",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "低价来源恢复使可行性未决。"
+    },
+    {
+      "id": "quotes-cf-10",
+      "group_id": "quotes",
+      "task_id": "quotes-test-05",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 560
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 560,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "k-new",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "已知4×140=560恰好预算。"
+    },
+    {
+      "id": "packages-cf-01",
+      "group_id": "packages",
+      "task_id": "packages-test-01",
+      "condition_group": "carts",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "carts",
+            "S1",
+            "free_at_cents"
+          ],
+          "value": 441
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 520,
+        "coverage": [
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "pe-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "pf-s1",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "440低于新门槛441，正确加80运费=520。"
+    },
+    {
+      "id": "packages-cf-02",
+      "group_id": "packages",
+      "task_id": "packages-test-01",
+      "condition_group": "erp_relationships",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "erp_relationships",
+            0,
+            "capacity_units"
+          ],
+          "value": 5
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 565,
+        "coverage": [
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "pe-each",
+            "packs": 5
+          },
+          {
+            "quote_id": "pf-s2",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "S1 required包6件超过容量5，改S2整车405+160=565。"
+    },
+    {
+      "id": "packages-cf-03",
+      "group_id": "packages",
+      "task_id": "packages-test-02",
+      "condition_group": "site",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "site"
+          ],
+          "value": "depot"
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 540,
+        "coverage": [
+          2
+        ],
+        "allocation": [
+          {
+            "quote_id": "pg-large",
+            "packs": 2
+          },
+          {
+            "quote_id": "ph",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "大包380+S2可选60+S2运费100=540，与小包方案540并列；depot合法最优集合变化。"
+    },
+    {
+      "id": "packages-cf-04",
+      "group_id": "packages",
+      "task_id": "packages-test-02",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 539
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "加可选后540免邮才可行；不买可选required480+100=580，539下真无解。"
+    },
+    {
+      "id": "packages-cf-05",
+      "group_id": "packages",
+      "task_id": "packages-test-03",
+      "condition_group": "erp_relationships",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "erp_relationships",
+            0,
+            "capacity_units"
+          ],
+          "value": 6
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 360,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "pi-pack",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "容量允许6件，两包360优于400单件。"
+    },
+    {
+      "id": "packages-cf-06",
+      "group_id": "packages",
+      "task_id": "packages-test-03",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 399
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 0,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "唯一合法单件400超预算1分。"
+    },
+    {
+      "id": "packages-cf-07",
+      "group_id": "packages",
+      "task_id": "packages-test-04",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 800
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 800,
+        "coverage": [
+          15
+        ],
+        "allocation": [
+          {
+            "quote_id": "pj",
+            "packs": 1
+          },
+          {
+            "quote_id": "pk",
+            "packs": 2
+          },
+          {
+            "quote_id": "pl2",
+            "packs": 1
+          },
+          {
+            "quote_id": "pm",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "全部商品800免邮，覆盖6+4+5=15。"
+    },
+    {
+      "id": "packages-cf-08",
+      "group_id": "packages",
+      "task_id": "packages-test-04",
+      "condition_group": "carts",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "carts",
+            "S1",
+            "free_at_cents"
+          ],
+          "value": 651
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [
+          9
+        ],
+        "allocation": [
+          {
+            "quote_id": "pj",
+            "packs": 1
+          },
+          {
+            "quote_id": "pl2",
+            "packs": 1
+          },
+          {
+            "quote_id": "pm",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "原650方案新运费100超预算，改400+100覆盖9。"
+    },
+    {
+      "id": "packages-cf-09",
+      "group_id": "packages",
+      "task_id": "packages-test-05",
+      "condition_group": "carts",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "carts",
+            "S1",
+            "freight_cents"
+          ],
+          "value": 0
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 610,
+        "coverage": [
+          4
+        ],
+        "allocation": [
+          {
+            "quote_id": "pn-cheap",
+            "packs": 3
+          },
+          {
+            "quote_id": "po",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "S1运费免除：270+S2可选240+100=610，比S2整体640低。"
+    },
+    {
+      "id": "packages-cf-10",
+      "group_id": "packages",
+      "task_id": "packages-test-05",
+      "condition_group": "carts",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "carts",
+            "S2",
+            "free_at_cents"
+          ],
+          "value": 641
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 740,
+        "coverage": [
+          4
+        ],
+        "allocation": [
+          {
+            "quote_id": "pn-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "po",
+            "packs": 4
+          }
+        ]
+      },
+      "calculation": "640商品低于641，多100运费成740，但仍比S1混购790低。"
+    },
+    {
+      "id": "kits-cf-01",
+      "group_id": "kits",
+      "task_id": "kits-test-01",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 540
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 540,
+        "coverage": [
+          2,
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "qa",
+            "packs": 1
+          },
+          {
+            "quote_id": "qb",
+            "packs": 2
+          },
+          {
+            "quote_id": "qc",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "独立550不可行，kit恰好540可行。"
+    },
+    {
+      "id": "kits-cf-02",
+      "group_id": "kits",
+      "task_id": "kits-test-01",
+      "condition_group": "demands",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "demands",
+            3,
+            "priority"
+          ],
+          "value": 2
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 540,
+        "coverage": [
+          2,
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "qa",
+            "packs": 1
+          },
+          {
+            "quote_id": "qb",
+            "packs": 2
+          },
+          {
+            "quote_id": "qc",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "独立降为低优先级，高层kit覆盖2优先。"
+    },
+    {
+      "id": "kits-cf-03",
+      "group_id": "kits",
+      "task_id": "kits-test-02",
+      "condition_group": "site",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "site"
+          ],
+          "value": "depot"
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 760,
+        "coverage": [
+          7
+        ],
+        "allocation": [
+          {
+            "quote_id": "ra",
+            "packs": 2
+          },
+          {
+            "quote_id": "rb",
+            "packs": 2
+          },
+          {
+            "quote_id": "rc",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "depot允许RB盈余3，kit覆盖7，总200+360+200=760。"
+    },
+    {
+      "id": "kits-cf-04",
+      "group_id": "kits",
+      "task_id": "kits-test-02",
+      "condition_group": "quotes",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            1,
+            "pack_size"
+          ],
+          "value": 3
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 760,
+        "coverage": [
+          7
+        ],
+        "allocation": [
+          {
+            "quote_id": "ra",
+            "packs": 2
+          },
+          {
+            "quote_id": "rb",
+            "packs": 2
+          },
+          {
+            "quote_id": "rc",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "RB需6件盈余1，现场合法，kit成为最优。"
+    },
+    {
+      "id": "kits-cf-05",
+      "group_id": "kits",
+      "task_id": "kits-test-03",
+      "condition_group": "demands",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "demands",
+            3,
+            "priority"
+          ],
+          "value": 2
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [
+          3,
+          2
+        ],
+        "allocation": [
+          {
+            "quote_id": "sa",
+            "packs": 1
+          },
+          {
+            "quote_id": "sb",
+            "packs": 2
+          },
+          {
+            "quote_id": "sc",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "SX降优先级，kit高层3领先，总100+160+140=400。"
+    },
+    {
+      "id": "kits-cf-06",
+      "group_id": "kits",
+      "task_id": "kits-test-03",
+      "condition_group": "quotes",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            3,
+            "pack_size"
+          ],
+          "value": 3
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 400,
+        "coverage": [
+          3,
+          2
+        ],
+        "allocation": [
+          {
+            "quote_id": "sa",
+            "packs": 1
+          },
+          {
+            "quote_id": "sb",
+            "packs": 2
+          },
+          {
+            "quote_id": "sc",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "SX需6件盈余2被禁，合法kit400。"
+    },
+    {
+      "id": "kits-cf-07",
+      "group_id": "kits",
+      "task_id": "kits-test-04",
+      "condition_group": "demands",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "demands",
+            2,
+            "kit_id"
+          ],
+          "value": null
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [
+          4,
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "ta",
+            "packs": 1
+          },
+          {
+            "quote_id": "tx",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "TC不属于kit，历史TB不再强迫补TC；150+100+250=500。"
+    },
+    {
+      "id": "kits-cf-08",
+      "group_id": "kits",
+      "task_id": "kits-test-04",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 800
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 800,
+        "coverage": [
+          4,
+          3
+        ],
+        "allocation": [
+          {
+            "quote_id": "ta",
+            "packs": 1
+          },
+          {
+            "quote_id": "tc",
+            "packs": 3
+          },
+          {
+            "quote_id": "tx",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "历史150+100+300+250=800，高层含已购TB2+TX2=4。"
+    },
+    {
+      "id": "kits-cf-09",
+      "group_id": "kits",
+      "task_id": "kits-test-05",
+      "condition_group": "demands",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "demands",
+            3,
+            "quantity"
+          ],
+          "value": 2
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 500,
+        "coverage": [
+          2,
+          5
+        ],
+        "allocation": [
+          {
+            "quote_id": "ua",
+            "packs": 1
+          },
+          {
+            "quote_id": "ub",
+            "packs": 1
+          },
+          {
+            "quote_id": "uc",
+            "packs": 2
+          }
+        ]
+      },
+      "calculation": "两方案高层同2时，kit低层5优先于独立0。"
+    },
+    {
+      "id": "kits-cf-10",
+      "group_id": "kits",
+      "task_id": "kits-test-05",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 800
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 800,
+        "coverage": [
+          5,
+          5
+        ],
+        "allocation": [
+          {
+            "quote_id": "ua",
+            "packs": 1
+          },
+          {
+            "quote_id": "ub",
+            "packs": 1
+          },
+          {
+            "quote_id": "uc",
+            "packs": 2
+          },
+          {
+            "quote_id": "ux",
+            "packs": 3
+          }
+        ]
+      },
+      "calculation": "全部800，两个优先级覆盖5、5。"
+    },
+    {
+      "id": "revisions-cf-01",
+      "group_id": "revisions",
+      "task_id": "revisions-test-01",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 650
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 400,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "最优670也超过新预算，保留历史400。"
+    },
+    {
+      "id": "revisions-cf-02",
+      "group_id": "revisions",
+      "task_id": "revisions-test-01",
+      "condition_group": "carts",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "carts",
+            "S1",
+            "free_at_cents"
+          ],
+          "value": 150
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 550,
+        "coverage": [],
+        "allocation": [
+          {
+            "quote_id": "vf-pack",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "门槛等于新商品150，免邮后400+150=550。"
+    },
+    {
+      "id": "revisions-cf-03",
+      "group_id": "revisions",
+      "task_id": "revisions-test-02",
+      "condition_group": "demands",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "demands",
+            0,
+            "quantity"
+          ],
+          "value": 5
+        }
+      ],
+      "manual_expected": {
+        "disposition": "needs_information",
+        "total_cents": 360,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "VG新增1需pending补证，最低610可行、最高760超700。"
+    },
+    {
+      "id": "revisions-cf-04",
+      "group_id": "revisions",
+      "task_id": "revisions-test-02",
+      "condition_group": "erp_relationships",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "erp_relationships",
+            1,
+            "lead_days"
+          ],
+          "value": 8
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 360,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "VJ唯一来源超期，VG已完成pending仍无关，真无解。"
+    },
+    {
+      "id": "revisions-cf-05",
+      "group_id": "revisions",
+      "task_id": "revisions-test-03",
+      "condition_group": "quotes",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            1,
+            "price_bounds_cents"
+          ],
+          "value": [
+            100,
+            220
+          ]
+        }
+      ],
+      "manual_expected": {
+        "disposition": "needs_information",
+        "total_cents": 240,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "pending最低540改变已知690；停止追加但保留240。"
+    },
+    {
+      "id": "revisions-cf-06",
+      "group_id": "revisions",
+      "task_id": "revisions-test-03",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 689
+        }
+      ],
+      "manual_expected": {
+        "disposition": "infeasible",
+        "total_cents": 240,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "已知690差1分，pending最低720也不可行。"
+    },
+    {
+      "id": "revisions-cf-07",
+      "group_id": "revisions",
+      "task_id": "revisions-test-04",
+      "condition_group": "demands",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "demands",
+            0,
+            "max_lead_days"
+          ],
+          "value": 4
+        }
+      ],
+      "manual_expected": {
+        "disposition": "needs_information",
+        "total_cents": 450,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "pending从超期变合法，下界计划760低于known770，可改变最优成本。"
+    },
+    {
+      "id": "revisions-cf-08",
+      "group_id": "revisions",
+      "task_id": "revisions-test-04",
+      "condition_group": "budget_cents",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 769
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 670,
+        "coverage": [
+          0
+        ],
+        "allocation": [
+          {
+            "quote_id": "vl",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "可选完整方案770超1分，required历史450+新120+运费100=670。"
+    },
+    {
+      "id": "revisions-cf-09",
+      "group_id": "revisions",
+      "task_id": "revisions-test-05",
+      "condition_group": "site",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "site"
+          ],
+          "value": "depot"
+        }
+      ],
+      "manual_expected": {
+        "disposition": "execute",
+        "total_cents": 740,
+        "coverage": [
+          1
+        ],
+        "allocation": [
+          {
+            "quote_id": "vn-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "vo",
+            "packs": 1
+          }
+        ]
+      },
+      "calculation": "depot允许差量4买6，历史240+包装420+可选80=740。"
+    },
+    {
+      "id": "revisions-cf-10",
+      "group_id": "revisions",
+      "task_id": "revisions-test-05",
+      "condition_group": "erp_relationships",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "erp_relationships",
+            2,
+            "active"
+          ],
+          "value": true
+        }
+      ],
+      "manual_expected": {
+        "disposition": "needs_information",
+        "total_cents": 240,
+        "coverage": null,
+        "allocation": []
+      },
+      "calculation": "pending低边界能覆盖可选，改变known覆盖0，需补证。"
+    }
+  ],
+  "claims": {
+    "model_calls": 0,
+    "calibrated": false,
+    "learning_gain_proven": false,
+    "production_adapter_ready": false
+  }
+}

@@ -2961,6 +2961,116 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T56",
+      "title": "诊断驱动的文字技能进化闭环与真实消融",
+      "file": "docs/plan/tasks/T56.md",
+      "depends_on": [
+        "T55"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "scripts/planning/gdpevo_training.py",
+        "docs/runtime/gdpevo-training-2026-10-04.md"
+      ],
+      "checks": [
+        {
+          "id": "refinement-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t56.py",
+            "-q",
+            "--junitxml={evidence_dir}/refinement-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/refinement-unit.xml"
+        },
+        {
+          "id": "refinement-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_refinement.py",
+            "verify",
+            "--output",
+            "{evidence_dir}/refinement-report.json"
+          ],
+          "cwd": "."
+        }
+      ]
+    },
+    {
+      "id": "T54",
+      "title": "GDPevo四组采购任务扩展与确定性独立裁判",
+      "file": "docs/plan/tasks/T54.md",
+      "depends_on": [
+        "T52",
+        "T53"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v2.md",
+        "docs/runtime/gdpevo-calibration-2026-10-04.md",
+        "docs/plan/contracts/planning.md",
+        "scripts/planning/gdpevo_oracle.py",
+        "fixtures/planning/gdpevo-procurement-v3.json",
+        "scripts/planning/gdpevo_expansion_judge.py"
+      ],
+      "checks": [
+        {
+          "id": "expansion-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_gdpevo_expansion.py",
+            "-q",
+            "--junitxml={evidence_dir}/expansion-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/expansion-unit.xml"
+        },
+        {
+          "id": "expansion-report",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_expansion.py",
+            "validate",
+            "--output",
+            "{evidence_dir}/expansion-report.json"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,1009 @@
+{
+  "schema_version": 2,
+  "tasks": {
+    "quotes-train-01": {
+      "policy_evidence": [
+        {
+          "document_id": "quotes-train-01-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "quotes-train-01-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "quotes-train-01-V",
+          "rule_id": "V",
+          "name": "正式商务版本",
+          "condition": "同关系多版文件",
+          "policy": "draft不覆盖正式文件；当前可用的signed/pending/revoked按revision取最大，价格和包装由该文件控制。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "单一正式文件时无需版本争议；版本权威不扩展到ERP字段。"
+        },
+        {
+          "document_id": "quotes-train-01-M",
+          "rule_id": "M",
+          "name": "证据相关性",
+          "condition": "最新正式文件pending且有价格区间",
+          "policy": "已知报价及pending最低/最高合法包价分别比较可行性和最优覆盖/成本；结论变化才needs_information，且零新购。被停用/超期/已完成需求或被已知价支配的pending不阻塞。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "无相关pending时不得无条件补证；资料未决不等同业务无解。"
+        }
+      ]
+    },
+    "quotes-train-02": {
+      "policy_evidence": [
+        {
+          "document_id": "quotes-train-02-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "quotes-train-02-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "quotes-train-02-E",
+          "rule_id": "E",
+          "name": "商务生效窗口",
+          "condition": "存在未来或过期文件",
+          "policy": "effective_at<=as_of<=expires_at的正式文件参与，两个边界包含；窗口外版本不覆盖窗口内版本。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "有效窗口不改变历史成交金额或ERP交期。"
+        }
+      ]
+    },
+    "quotes-train-03": {
+      "policy_evidence": [
+        {
+          "document_id": "quotes-train-03-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "quotes-train-03-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "quotes-train-03-V",
+          "rule_id": "V",
+          "name": "正式商务版本",
+          "condition": "同关系多版文件",
+          "policy": "draft不覆盖正式文件；当前可用的signed/pending/revoked按revision取最大，价格和包装由该文件控制。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "单一正式文件时无需版本争议；版本权威不扩展到ERP字段。"
+        },
+        {
+          "document_id": "quotes-train-03-X",
+          "rule_id": "X",
+          "name": "撤销关闭关系",
+          "condition": "最新可用正式文件revoked",
+          "policy": "关闭当前商务关系，不回退旧signed价格；其它供应商可继续比较。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "撤销不取消历史订单；过期或未来的撤销尚不控制本轮。"
+        }
+      ]
+    },
+    "quotes-train-04": {
+      "policy_evidence": [
+        {
+          "document_id": "quotes-train-04-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "quotes-train-04-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "quotes-train-04-M",
+          "rule_id": "M",
+          "name": "证据相关性",
+          "condition": "最新正式文件pending且有价格区间",
+          "policy": "已知报价及pending最低/最高合法包价分别比较可行性和最优覆盖/成本；结论变化才needs_information，且零新购。被停用/超期/已完成需求或被已知价支配的pending不阻塞。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "无相关pending时不得无条件补证；资料未决不等同业务无解。"
+        }
+      ]
+    },
+    "quotes-train-05": {
+      "policy_evidence": [
+        {
+          "document_id": "quotes-train-05-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "quotes-train-05-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "quotes-train-05-V",
+          "rule_id": "V",
+          "name": "正式商务版本",
+          "condition": "同关系多版文件",
+          "policy": "draft不覆盖正式文件；当前可用的signed/pending/revoked按revision取最大，价格和包装由该文件控制。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "单一正式文件时无需版本争议；版本权威不扩展到ERP字段。"
+        },
+        {
+          "document_id": "quotes-train-05-E",
+          "rule_id": "E",
+          "name": "商务生效窗口",
+          "condition": "存在未来或过期文件",
+          "policy": "effective_at<=as_of<=expires_at的正式文件参与，两个边界包含；窗口外版本不覆盖窗口内版本。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "source_selection"
+          ],
+          "stop": "有效窗口不改变历史成交金额或ERP交期。"
+        },
+        {
+          "document_id": "quotes-train-05-M",
+          "rule_id": "M",
+          "name": "证据相关性",
+          "condition": "最新正式文件pending且有价格区间",
+          "policy": "已知报价及pending最低/最高合法包价分别比较可行性和最优覆盖/成本；结论变化才needs_information，且零新购。被停用/超期/已完成需求或被已知价支配的pending不阻塞。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "无相关pending时不得无条件补证；资料未决不等同业务无解。"
+        }
+      ]
+    },
+    "packages-train-01": {
+      "policy_evidence": [
+        {
+          "document_id": "packages-train-01-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "packages-train-01-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "packages-train-01-U",
+          "rule_id": "U",
+          "name": "包装到件换算",
+          "condition": "包装报价与按件需求",
+          "policy": "只买覆盖剩余量的最小整数包；费用按包价，不按件价；盈余不计可选覆盖。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "剩余量为零不再补购；不用多买包故意凑免邮。"
+        }
+      ]
+    },
+    "packages-train-02": {
+      "policy_evidence": [
+        {
+          "document_id": "packages-train-02-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "packages-train-02-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "packages-train-02-U",
+          "rule_id": "U",
+          "name": "包装到件换算",
+          "condition": "包装报价与按件需求",
+          "policy": "只买覆盖剩余量的最小整数包；费用按包价，不按件价；盈余不计可选覆盖。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "剩余量为零不再补购；不用多买包故意凑免邮。"
+        },
+        {
+          "document_id": "packages-train-02-S",
+          "rule_id": "S",
+          "name": "现场盈余",
+          "condition": "site=pit_stop",
+          "policy": "每物料本轮包装盈余最多1件；depot允许最小整数包的盈余。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "site不是pit_stop时停止现场限额。"
+        }
+      ]
+    },
+    "packages-train-03": {
+      "policy_evidence": [
+        {
+          "document_id": "packages-train-03-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "packages-train-03-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "packages-train-03-U",
+          "rule_id": "U",
+          "name": "包装到件换算",
+          "condition": "包装报价与按件需求",
+          "policy": "只买覆盖剩余量的最小整数包；费用按包价，不按件价；盈余不计可选覆盖。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "剩余量为零不再补购；不用多买包故意凑免邮。"
+        },
+        {
+          "document_id": "packages-train-03-C",
+          "rule_id": "C",
+          "name": "容量和交期",
+          "condition": "新购包转换为件",
+          "policy": "ERP capacity_units以件计，整包件数不得超容量；lead_days不能超过需求期限。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "不以报价承诺覆盖ERP；历史交期按成交快照对账。"
+        }
+      ]
+    },
+    "packages-train-04": {
+      "policy_evidence": [
+        {
+          "document_id": "packages-train-04-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "packages-train-04-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "packages-train-04-O",
+          "rule_id": "O",
+          "name": "非贪心分配",
+          "condition": "存在多个可选需求与有限预算",
+          "policy": "按priority逐层最大化覆盖需求件数，再最小累计成本；供应商购物车运费与整数包一起比较，不能按最低单价逐行贪心。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "必需为硬约束；包装盈余不加分，低优先级不能挤掉高优先级覆盖。"
+        }
+      ]
+    },
+    "packages-train-05": {
+      "policy_evidence": [
+        {
+          "document_id": "packages-train-05-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "packages-train-05-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "packages-train-05-U",
+          "rule_id": "U",
+          "name": "包装到件换算",
+          "condition": "包装报价与按件需求",
+          "policy": "只买覆盖剩余量的最小整数包；费用按包价，不按件价；盈余不计可选覆盖。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "剩余量为零不再补购；不用多买包故意凑免邮。"
+        },
+        {
+          "document_id": "packages-train-05-C",
+          "rule_id": "C",
+          "name": "容量和交期",
+          "condition": "新购包转换为件",
+          "policy": "ERP capacity_units以件计，整包件数不得超容量；lead_days不能超过需求期限。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "不以报价承诺覆盖ERP；历史交期按成交快照对账。"
+        }
+      ]
+    },
+    "kits-train-01": {
+      "policy_evidence": [
+        {
+          "document_id": "kits-train-01-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "kits-train-01-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "kits-train-01-K",
+          "rule_id": "K",
+          "name": "配套闭包",
+          "condition": "同非空kit_id目标",
+          "policy": "所有同kit成员全部完成或全部不买；历史已完成成员不重复购买。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "空kit_id不绑定；kit不变成required。"
+        }
+      ]
+    },
+    "kits-train-02": {
+      "policy_evidence": [
+        {
+          "document_id": "kits-train-02-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "kits-train-02-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "kits-train-02-P",
+          "rule_id": "P",
+          "name": "优先级",
+          "condition": "多个可选优先级",
+          "policy": "先逐层最大覆盖件数，再最小累计成本；kit是硬闭包约束而非购买偏好。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "低层覆盖不能压过高层覆盖。"
+        }
+      ]
+    },
+    "kits-train-03": {
+      "policy_evidence": [
+        {
+          "document_id": "kits-train-03-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "kits-train-03-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "kits-train-03-K",
+          "rule_id": "K",
+          "name": "配套闭包",
+          "condition": "同非空kit_id目标",
+          "policy": "所有同kit成员全部完成或全部不买；历史已完成成员不重复购买。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "空kit_id不绑定；kit不变成required。"
+        },
+        {
+          "document_id": "kits-train-03-I",
+          "rule_id": "I",
+          "name": "配套例外",
+          "condition": "kit_id为空或独立成员",
+          "policy": "空kit_id独立，不因同供应商绑定；某kit不可行不阻止独立物料。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "非空kit_id仍需闭包；历史完成只补其余成员。"
+        }
+      ]
+    },
+    "kits-train-04": {
+      "policy_evidence": [
+        {
+          "document_id": "kits-train-04-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "kits-train-04-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "kits-train-04-S",
+          "rule_id": "S",
+          "name": "现场包装",
+          "condition": "site=pit_stop且整包有盈余",
+          "policy": "每物料本轮盈余最多1件；depot允许最小整数包盈余。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "不把pit_stop限额套到depot。"
+        }
+      ]
+    },
+    "kits-train-05": {
+      "policy_evidence": [
+        {
+          "document_id": "kits-train-05-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "kits-train-05-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "kits-train-05-K",
+          "rule_id": "K",
+          "name": "配套闭包",
+          "condition": "同非空kit_id目标",
+          "policy": "所有同kit成员全部完成或全部不买；历史已完成成员不重复购买。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "空kit_id不绑定；kit不变成required。"
+        },
+        {
+          "document_id": "kits-train-05-P",
+          "rule_id": "P",
+          "name": "优先级",
+          "condition": "多个可选优先级",
+          "policy": "先逐层最大覆盖件数，再最小累计成本；kit是硬闭包约束而非购买偏好。",
+          "fields": [
+            "allocation"
+          ],
+          "stop": "低层覆盖不能压过高层覆盖。"
+        }
+      ]
+    },
+    "revisions-train-01": {
+      "policy_evidence": [
+        {
+          "document_id": "revisions-train-01-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "revisions-train-01-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "revisions-train-01-H",
+          "rule_id": "H",
+          "name": "成交事实来源",
+          "condition": "存在commitments及新报价",
+          "policy": "历史量/实付/计划交期按commitments原快照，不随当前报价、供应商停用或撤销变更；历史订单始终保留。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "commitment_ledger"
+          ],
+          "stop": "当前报价只影响新追加，不授予退货/取消能力。"
+        }
+      ]
+    },
+    "revisions-train-02": {
+      "policy_evidence": [
+        {
+          "document_id": "revisions-train-02-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "revisions-train-02-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "revisions-train-02-D",
+          "rule_id": "D",
+          "name": "修订目标差量",
+          "condition": "当前revision需求变化",
+          "policy": "本轮只补目标量减历史量；历史超目标或历史交期不满足新期限时为真实冲突、infeasible，不自动回滚。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "目标已全量承诺时不再买；旧审批不能覆盖追加（公开权限边界）。"
+        }
+      ]
+    },
+    "revisions-train-03": {
+      "policy_evidence": [
+        {
+          "document_id": "revisions-train-03-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "revisions-train-03-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "revisions-train-03-M",
+          "rule_id": "M",
+          "name": "相关补证",
+          "condition": "修订后存在pending",
+          "policy": "只在pending能改变剩余目标的可行性或最优覆盖/成本时needs_information；已满足物料、停用/超期来源和被支配区间不阻塞。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "证据未决不得写infeasible；完整已知无解才能拒绝。"
+        }
+      ]
+    },
+    "revisions-train-04": {
+      "policy_evidence": [
+        {
+          "document_id": "revisions-train-04-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "revisions-train-04-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "revisions-train-04-C",
+          "rule_id": "C",
+          "name": "累计预算",
+          "condition": "预算修订或新追加",
+          "policy": "累计预算含已成交实付和新购物车费用；历史金额不参与新购物车免邮；历史已花超新预算为真实冲突。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "保留历史事实，不把新预算当本轮剩余额度。"
+        }
+      ]
+    },
+    "revisions-train-05": {
+      "policy_evidence": [
+        {
+          "document_id": "revisions-train-05-B",
+          "rule_id": "B",
+          "name": "公开边界与独立审计",
+          "condition": "所有任务",
+          "policy": "required/optional/priority与单供应商最小整包遵循公共契约。已成交按原量原实付保留，不回滚；本revision追加不能复用旧批准，离线不能执行。ERP关系字段独立权威；每份商务文件的erp_claims与ERP不一致必须进入冲突清单，即使文件是draft或未被购买。 独立目录审计关系采用窗口内signed文件，draft不能覆盖；该关系不产生采购。",
+          "fields": [
+            "commitment_ledger",
+            "approval_request",
+            "erp_claim_conflicts"
+          ],
+          "stop": "本轮分配不能反写历史；冲突登记不把有完整权威字段的记录一律变成needs_information。",
+          "public": true
+        },
+        {
+          "document_id": "revisions-train-05-F",
+          "rule_id": "F",
+          "name": "本轮供应商购物车门槛",
+          "condition": "供应商本轮新购物车存在；audit_carts为另一组待审购物车",
+          "policy": "每供应商购物车收一次运费，仅new_goods_cents达到free_at_cents（含等号）才免邮；历史paid不凑门槛，不同供应商不合并。无新购商品不收运费；预算包含历史实付、新商品和本轮运费。",
+          "fields": [
+            "allocation",
+            "freight_cents",
+            "freight_audit"
+          ],
+          "stop": "已支付购物车不重新收费；audit_carts只审票，不并入候选计划。"
+        },
+        {
+          "document_id": "revisions-train-05-H",
+          "rule_id": "H",
+          "name": "成交事实来源",
+          "condition": "存在commitments及新报价",
+          "policy": "历史量/实付/计划交期按commitments原快照，不随当前报价、供应商停用或撤销变更；历史订单始终保留。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents",
+            "commitment_ledger"
+          ],
+          "stop": "当前报价只影响新追加，不授予退货/取消能力。"
+        },
+        {
+          "document_id": "revisions-train-05-D",
+          "rule_id": "D",
+          "name": "修订目标差量",
+          "condition": "当前revision需求变化",
+          "policy": "本轮只补目标量减历史量；历史超目标或历史交期不满足新期限时为真实冲突、infeasible，不自动回滚。",
+          "fields": [
+            "disposition",
+            "allocation",
+            "freight_cents"
+          ],
+          "stop": "目标已全量承诺时不再买；旧审批不能覆盖追加（公开权限边界）。"
+        }
+      ]
+    }
+  }
+}
