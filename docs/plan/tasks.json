@@ -2744,6 +2744,169 @@
       "status": "done",
       "receipt": "artifacts/tasks/T50/20261004T090438Z/receipt.json",
       "notes": "T50 已完成：gate artifacts/tasks/T50/20261004T090438Z/receipt.json，8项异步规划单元测试+5项真实Agent Protocol/OpenSandbox回归通过。官方Protocol输入携带可信owner/thread上下文；主进程token保护的planning_goal只读路由返回同一目标revision、来源状态、决策和已创建订单摘要；规划审查指令才触发该路径，库存分析保持原行为。不授予写单权限，未新增付费模型调用。"
+    },
+    {
+      "id": "T51",
+      "title": "高难度重复真实训练前后消融",
+      "file": "docs/plan/tasks/T51.md",
+      "depends_on": [
+        "T50"
+      ],
+      "requirements": [
+        "R32"
+      ],
+      "reads": [
+        "docs/runtime/evolution-pilot.md",
+        "docs/runtime/learning-space-baseline.md",
+        "docs/papers/rsi/trace/2608.22793v2.txt"
+      ],
+      "checks": [
+        {
+          "id": "challenge-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 4,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t51.py",
+            "-q",
+            "--junitxml={evidence_dir}/challenge-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/challenge-unit.xml"
+        },
+        {
+          "id": "challenge-live",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/challenge_pilot.py",
+            "verify",
+            "--session",
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-challenge-pilot-20261004"
+          ],
+          "cwd": "."
+        }
+      ],
+      "status": "blocked",
+      "receipt": null,
+      "notes": "fixed四个条件各重复2次，8/8业务成功。按用户基线仍高则停下的要求停止新增实验；Curator/curated尚未运行，未证明训练提升，等待小模型配置。"
+    },
+    {
+      "id": "T52",
+      "title": "GDPevo规则混合采购困难任务集设计",
+      "file": "docs/plan/tasks/T52.md",
+      "depends_on": [
+        "T44",
+        "T50"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/learning-space-baseline.md",
+        "docs/runtime/paper-fidelity-audit-2026-10-03.md",
+        "docs/papers/rsi/gdpevo/2608.03764v1.txt",
+        "docs/plan/contracts/planning.md"
+      ],
+      "checks": [
+        {
+          "id": "taskset-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 20,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t52.py",
+            "-q",
+            "--junitxml={evidence_dir}/taskset-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/taskset-unit.xml"
+        },
+        {
+          "id": "taskset-report",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_taskset.py",
+            "validate",
+            "--output",
+            "{evidence_dir}/gdpevo-taskset.json"
+          ],
+          "cwd": "."
+        }
+      ]
+    },
+    {
+      "id": "T53",
+      "title": "GDPevo新任务真实模型难度试跑",
+      "file": "docs/plan/tasks/T53.md",
+      "depends_on": [
+        "T52"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v2.md",
+        "scripts/planning/gdpevo_oracle.py"
+      ],
+      "checks": [
+        {
+          "id": "calibration-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t53.py",
+            "-q",
+            "--junitxml={evidence_dir}/calibration-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/calibration-unit.xml"
+        },
+        {
+          "id": "calibration-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_calibration.py",
+            "verify",
+            "--output",
+            "{evidence_dir}/calibration-report.json"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }

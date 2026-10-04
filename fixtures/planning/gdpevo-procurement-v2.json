@@ -1,0 +1,1447 @@
+{
+  "schema_version": 2,
+  "task_group_id": "chengchuan-procurement-v2",
+  "environment": {
+    "data_mode": "synthetic_offline_design",
+    "public_contract": "金额为整数分；priority较小者优先；必需需求硬约束，可选整批；已成交量/实付成本为不可回滚事实；新订单只走当前revision的MCP审批；输出为结构化决策，不能直接下单。",
+    "output_fields": [
+      "disposition",
+      "source_selection",
+      "allocation",
+      "freight_cents",
+      "commitment_ledger",
+      "approval_request"
+    ]
+  },
+  "tasks": [
+    {
+      "task_id": "train-01",
+      "split": "train",
+      "request": "根据澄川车队采购惯例，为目标 train-01 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "depot",
+        "revision": 1,
+        "budget_cents": 2000,
+        "demands": [
+          {
+            "part_id": "P001",
+            "quantity": 10,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P001",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P001",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "a-old",
+            "part_id": "P001",
+            "supplier_id": "S001",
+            "pack_price_cents": 100,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "a-final",
+            "part_id": "P001",
+            "supplier_id": "S001",
+            "pack_price_cents": 110,
+            "pack_size": 1,
+            "revision": 2,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "a-draft",
+            "part_id": "P001",
+            "supplier_id": "S001",
+            "pack_price_cents": 1,
+            "pack_size": 1,
+            "revision": 3,
+            "status": "draft",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "a-pending",
+            "part_id": "P001",
+            "supplier_id": "S002",
+            "pack_price_cents": null,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "pending",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": [
+              120,
+              180
+            ]
+          }
+        ],
+        "carts": {},
+        "commitments": [],
+        "evidence_refs": [
+          "erp:train-01",
+          "request:train-01",
+          "quote:a-old",
+          "quote:a-final",
+          "quote:a-draft",
+          "quote:a-pending"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      },
+      "training_materials": [
+        {
+          "document_id": "policy-train-01-Q",
+          "text": "仅生效且未过期的签章商务文件控制价格/包装；按revision选最新正式版本（signed/pending/revoked）；draft不覆盖正式文件。最新正式revoked关闭本关系，不回退旧价。ERP仍控制active/交期/供货容量，商务文件不能覆盖这些字段。"
+        },
+        {
+          "document_id": "policy-train-01-M",
+          "text": "在未知报价的最低/最高合法包价分别枚举完整计划。若两个边界的可行性及最优覆盖/成本均与仅用已知报价的最优相同，记录pending而不追问；否则needs_information且不提交新订单。不能把资料未决称infeasible，也不能发布假设包价。"
+        }
+      ]
+    },
+    {
+      "task_id": "train-02",
+      "split": "train",
+      "request": "根据澄川车队采购惯例，为目标 train-02 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "pit_stop",
+        "revision": 1,
+        "budget_cents": 1350,
+        "demands": [
+          {
+            "part_id": "P002",
+            "quantity": 7,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P004",
+            "quantity": 3,
+            "required": false,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "b-pack",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 400,
+            "pack_size": 4,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "b-each",
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "pack_price_cents": 120,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "b-opt",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 100,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          }
+        ],
+        "carts": {
+          "S001": {
+            "freight_cents": 250,
+            "free_at_cents": 1200
+          },
+          "S002": {
+            "freight_cents": 0,
+            "free_at_cents": 0
+          }
+        },
+        "commitments": [],
+        "evidence_refs": [
+          "erp:train-02",
+          "request:train-02",
+          "quote:b-pack",
+          "quote:b-each",
+          "quote:b-opt"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      },
+      "training_materials": [
+        {
+          "document_id": "policy-train-02-U",
+          "text": "只买整数包，件数=包数×pack_size，按最小包数覆盖剩余需求。depot允许整包盈余；pit_stop每个物料本轮盈余最多1件。可选覆盖只计需求件数，盈余不加分。"
+        },
+        {
+          "document_id": "policy-train-02-F",
+          "text": "运费按每个供应商本轮购物车收一次；仅本轮商品金额>=free_at_cents才免邮（等于也免）。已成交订单金额不计本轮门槛；不同供应商不能合并凑门槛。累计预算包含已成交实付+本轮商品+本轮运费。"
+        }
+      ]
+    },
+    {
+      "task_id": "train-03",
+      "split": "train",
+      "request": "根据澄川车队采购惯例，为目标 train-03 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "depot",
+        "revision": 2,
+        "budget_cents": 1550,
+        "demands": [
+          {
+            "part_id": "P001",
+            "quantity": 1,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P002",
+            "quantity": 3,
+            "required": false,
+            "priority": 1,
+            "kit_id": "brake-service",
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P004",
+            "quantity": 2,
+            "required": false,
+            "priority": 1,
+            "kit_id": "brake-service",
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P001",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "c-required",
+            "part_id": "P001",
+            "supplier_id": "S001",
+            "pack_price_cents": 100,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "c-left",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 200,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "c-right",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": 200,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          }
+        ],
+        "carts": {
+          "S001": {
+            "freight_cents": 250,
+            "free_at_cents": 1000
+          },
+          "S002": {
+            "freight_cents": 200,
+            "free_at_cents": 500
+          }
+        },
+        "commitments": [
+          {
+            "order_id": "O-C3",
+            "part_id": "P001",
+            "supplier_id": "S001",
+            "quantity": 1,
+            "paid_cents": 100,
+            "lead_days": 2
+          }
+        ],
+        "evidence_refs": [
+          "erp:train-03",
+          "request:train-03",
+          "quote:c-required",
+          "quote:c-left",
+          "quote:c-right",
+          "order:O-C3"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      },
+      "training_materials": [
+        {
+          "document_id": "policy-train-03-K",
+          "text": "同一kit的未完成目标必须全部补足或全部不买；已有成员完成不重新购买。不同kit互不绑定。目标仍按priority数字从小到大最大化可选需求件数，同级合计覆盖后再最小化累计成本。"
+        },
+        {
+          "document_id": "policy-train-03-F",
+          "text": "运费按每个供应商本轮购物车收一次；仅本轮商品金额>=free_at_cents才免邮（等于也免）。已成交订单金额不计本轮门槛；不同供应商不能合并凑门槛。累计预算包含已成交实付+本轮商品+本轮运费。"
+        },
+        {
+          "document_id": "policy-train-03-A",
+          "text": "历史已购承诺只作为累计事实和对账证据；不能用旧审批直接授权当前追加量。当前 revision 的每个新追加或变更行必须产生新的审批请求。不取消已成交订单；无变化的历史承诺不生成重复订单。"
+        }
+      ]
+    },
+    {
+      "task_id": "train-04",
+      "split": "train",
+      "request": "根据澄川车队采购惯例，为目标 train-04 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "pit_stop",
+        "revision": 2,
+        "budget_cents": 25000,
+        "demands": [
+          {
+            "part_id": "P003",
+            "quantity": 1,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P002",
+            "quantity": 3,
+            "required": false,
+            "priority": 1,
+            "kit_id": "service-A",
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P004",
+            "quantity": 5,
+            "required": false,
+            "priority": 1,
+            "kit_id": "service-A",
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "d-required",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "pack_price_cents": 6800,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "d-left",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 2400,
+            "pack_size": 2,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "d-right",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": 4000,
+            "pack_size": 4,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          }
+        ],
+        "carts": {},
+        "commitments": [
+          {
+            "order_id": "O-D4",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "quantity": 1,
+            "paid_cents": 6800,
+            "lead_days": 2
+          }
+        ],
+        "evidence_refs": [
+          "erp:train-04",
+          "request:train-04",
+          "quote:d-required",
+          "quote:d-left",
+          "quote:d-right",
+          "order:O-D4"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      },
+      "training_materials": [
+        {
+          "document_id": "policy-train-04-U",
+          "text": "只买整数包，件数=包数×pack_size，按最小包数覆盖剩余需求。depot允许整包盈余；pit_stop每个物料本轮盈余最多1件。可选覆盖只计需求件数，盈余不加分。"
+        },
+        {
+          "document_id": "policy-train-04-K",
+          "text": "同一kit的未完成目标必须全部补足或全部不买；已有成员完成不重新购买。不同kit互不绑定。目标仍按priority数字从小到大最大化可选需求件数，同级合计覆盖后再最小化累计成本。"
+        }
+      ]
+    },
+    {
+      "task_id": "train-05",
+      "split": "train",
+      "request": "根据澄川车队采购惯例，为目标 train-05 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "depot",
+        "revision": 1,
+        "budget_cents": 1500,
+        "demands": [
+          {
+            "part_id": "P004",
+            "quantity": 7,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "e-old",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 120,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "e-final",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 400,
+            "pack_size": 4,
+            "revision": 2,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "e-draft",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 1,
+            "pack_size": 1,
+            "revision": 3,
+            "status": "draft",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "e-other",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": 119,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          }
+        ],
+        "carts": {},
+        "commitments": [],
+        "evidence_refs": [
+          "erp:train-05",
+          "request:train-05",
+          "quote:e-old",
+          "quote:e-final",
+          "quote:e-draft",
+          "quote:e-other"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      },
+      "training_materials": [
+        {
+          "document_id": "policy-train-05-Q",
+          "text": "仅生效且未过期的签章商务文件控制价格/包装；按revision选最新正式版本（signed/pending/revoked）；draft不覆盖正式文件。最新正式revoked关闭本关系，不回退旧价。ERP仍控制active/交期/供货容量，商务文件不能覆盖这些字段。"
+        },
+        {
+          "document_id": "policy-train-05-U",
+          "text": "只买整数包，件数=包数×pack_size，按最小包数覆盖剩余需求。depot允许整包盈余；pit_stop每个物料本轮盈余最多1件。可选覆盖只计需求件数，盈余不加分。"
+        }
+      ]
+    },
+    {
+      "task_id": "test-01",
+      "split": "test",
+      "request": "根据澄川车队采购惯例，为目标 test-01 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "depot",
+        "revision": 1,
+        "budget_cents": 5000,
+        "demands": [
+          {
+            "part_id": "P004",
+            "quantity": 17,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 6
+          },
+          {
+            "part_id": "P002",
+            "quantity": 10,
+            "required": false,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 7,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "t1-old",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 600,
+            "pack_size": 4,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t1-final",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 700,
+            "pack_size": 4,
+            "revision": 2,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t1-draft",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 1,
+            "pack_size": 1,
+            "revision": 3,
+            "status": "draft",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t1-late",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": 100,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null,
+            "claimed_lead_days": 1
+          },
+          {
+            "quote_id": "t1-opt",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 120,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          }
+        ],
+        "carts": {
+          "S001": {
+            "freight_cents": 300,
+            "free_at_cents": 4700
+          }
+        },
+        "commitments": [],
+        "evidence_refs": [
+          "erp:test-01",
+          "request:test-01",
+          "quote:t1-old",
+          "quote:t1-final",
+          "quote:t1-draft",
+          "quote:t1-late",
+          "quote:t1-opt"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      }
+    },
+    {
+      "task_id": "test-02",
+      "split": "test",
+      "request": "根据澄川车队采购惯例，为目标 test-02 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "depot",
+        "revision": 3,
+        "budget_cents": 128200,
+        "demands": [
+          {
+            "part_id": "P003",
+            "quantity": 1,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P002",
+            "quantity": 50,
+            "required": false,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P004",
+            "quantity": 33,
+            "required": false,
+            "priority": 1,
+            "kit_id": "ignition-brake",
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P001",
+            "quantity": 23,
+            "required": false,
+            "priority": 1,
+            "kit_id": "ignition-brake",
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P001",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "t2-chain",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "pack_price_cents": 6800,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t2-filter",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 6000,
+            "pack_size": 5,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t2-plug",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": 7000,
+            "pack_size": 4,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t2-pad",
+            "part_id": "P001",
+            "supplier_id": "S002",
+            "pack_price_cents": 4800,
+            "pack_size": 2,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          }
+        ],
+        "carts": {
+          "S001": {
+            "freight_cents": 1500,
+            "free_at_cents": 62000
+          },
+          "S002": {
+            "freight_cents": 800,
+            "free_at_cents": 130000
+          }
+        },
+        "commitments": [
+          {
+            "order_id": "O-T2",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "quantity": 1,
+            "paid_cents": 6800,
+            "lead_days": 2
+          }
+        ],
+        "evidence_refs": [
+          "erp:test-02",
+          "request:test-02",
+          "quote:t2-chain",
+          "quote:t2-filter",
+          "quote:t2-plug",
+          "quote:t2-pad",
+          "order:O-T2"
+        ],
+        "prior_approval": {
+          "revision": 2,
+          "status": "pending",
+          "authorization": "none"
+        }
+      }
+    },
+    {
+      "task_id": "test-03",
+      "split": "test",
+      "request": "根据澄川车队采购惯例，为目标 test-03 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "depot",
+        "revision": 1,
+        "budget_cents": 16000,
+        "demands": [
+          {
+            "part_id": "P003",
+            "quantity": 1,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P002",
+            "quantity": 4,
+            "required": false,
+            "priority": 1,
+            "kit_id": "minor-service",
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P004",
+            "quantity": 2,
+            "required": false,
+            "priority": 1,
+            "kit_id": "minor-service",
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "t3-chain",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "pack_price_cents": 6800,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t3-old",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 500,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t3-revoked",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 500,
+            "pack_size": 1,
+            "revision": 2,
+            "status": "revoked",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t3-known",
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "pack_price_cents": 1200,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t3-pending",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": null,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "pending",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": [
+              1700,
+              5000
+            ]
+          }
+        ],
+        "carts": {},
+        "commitments": [],
+        "evidence_refs": [
+          "erp:test-03",
+          "request:test-03",
+          "quote:t3-chain",
+          "quote:t3-old",
+          "quote:t3-revoked",
+          "quote:t3-known",
+          "quote:t3-pending"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      }
+    },
+    {
+      "task_id": "test-04",
+      "split": "test",
+      "request": "根据澄川车队采购惯例，为目标 test-04 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "depot",
+        "revision": 1,
+        "budget_cents": 16000,
+        "demands": [
+          {
+            "part_id": "P003",
+            "quantity": 1,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P002",
+            "quantity": 4,
+            "required": false,
+            "priority": 1,
+            "kit_id": "kit-B",
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P004",
+            "quantity": 2,
+            "required": false,
+            "priority": 1,
+            "kit_id": "kit-B",
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "t4-chain",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "pack_price_cents": 6800,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t4-filter",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 1200,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t4-plug",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 1800,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t4-pending",
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "pack_price_cents": null,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "pending",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": [
+              1300,
+              1700
+            ]
+          }
+        ],
+        "carts": {
+          "S001": {
+            "freight_cents": 800,
+            "free_at_cents": 16000
+          },
+          "S002": {
+            "freight_cents": 1500,
+            "free_at_cents": 20000
+          }
+        },
+        "commitments": [],
+        "evidence_refs": [
+          "erp:test-04",
+          "request:test-04",
+          "quote:t4-chain",
+          "quote:t4-filter",
+          "quote:t4-plug",
+          "quote:t4-pending"
+        ],
+        "prior_approval": {
+          "revision": 1,
+          "status": "pending",
+          "authorization": "none"
+        }
+      }
+    },
+    {
+      "task_id": "test-05",
+      "split": "test",
+      "request": "根据澄川车队采购惯例，为目标 test-05 提交当前版本的决策记录。",
+      "input": {
+        "as_of": 10,
+        "site": "pit_stop",
+        "revision": 5,
+        "budget_cents": 78000,
+        "demands": [
+          {
+            "part_id": "P003",
+            "quantity": 1,
+            "required": true,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P004",
+            "quantity": 17,
+            "required": false,
+            "priority": 0,
+            "kit_id": "launch",
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P001",
+            "quantity": 7,
+            "required": false,
+            "priority": 0,
+            "kit_id": "launch",
+            "max_lead_days": 7
+          },
+          {
+            "part_id": "P002",
+            "quantity": 10,
+            "required": false,
+            "priority": 1,
+            "kit_id": null,
+            "max_lead_days": 7
+          }
+        ],
+        "erp_relationships": [
+          {
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P001",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          },
+          {
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "active": true,
+            "lead_days": 2,
+            "capacity_units": 100
+          }
+        ],
+        "quotes": [
+          {
+            "quote_id": "t5-chain",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "pack_price_cents": 6800,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t5-old",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": 6800,
+            "pack_size": 4,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t5-final",
+            "part_id": "P004",
+            "supplier_id": "S002",
+            "pack_price_cents": 7000,
+            "pack_size": 4,
+            "revision": 2,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t5-each",
+            "part_id": "P004",
+            "supplier_id": "S001",
+            "pack_price_cents": 1900,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t5-pad",
+            "part_id": "P001",
+            "supplier_id": "S002",
+            "pack_price_cents": 9600,
+            "pack_size": 5,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t5-filter",
+            "part_id": "P002",
+            "supplier_id": "S001",
+            "pack_price_cents": 1200,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "signed",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": null
+          },
+          {
+            "quote_id": "t5-pending",
+            "part_id": "P002",
+            "supplier_id": "S002",
+            "pack_price_cents": null,
+            "pack_size": 1,
+            "revision": 1,
+            "status": "pending",
+            "effective_at": 0,
+            "expires_at": 30,
+            "price_bounds_cents": [
+              1400,
+              1800
+            ]
+          }
+        ],
+        "carts": {
+          "S001": {
+            "freight_cents": 900,
+            "free_at_cents": 44000
+          },
+          "S002": {
+            "freight_cents": 800,
+            "free_at_cents": 25000
+          }
+        },
+        "commitments": [
+          {
+            "order_id": "O-T5",
+            "part_id": "P003",
+            "supplier_id": "S001",
+            "quantity": 1,
+            "paid_cents": 6800,
+            "lead_days": 2
+          }
+        ],
+        "evidence_refs": [
+          "erp:test-05",
+          "request:test-05",
+          "quote:t5-chain",
+          "quote:t5-old",
+          "quote:t5-final",
+          "quote:t5-each",
+          "quote:t5-pad",
+          "quote:t5-filter",
+          "quote:t5-pending",
+          "order:O-T5"
+        ],
+        "prior_approval": {
+          "revision": 4,
+          "status": "pending",
+          "authorization": "none"
+        }
+      }
+    }
+  ]
+}

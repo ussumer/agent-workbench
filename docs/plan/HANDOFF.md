@@ -1,10 +1,43 @@
 # 当前交接
 
+## 当前状态：T53新任务内容试跑完成；T51仍暂停
+
+用户授权“新任务跑一下”，T53已完成真实模型只读内容校准，不恢复T51旧题或启动训练。配置 `deepseek-flash`，no-tools/one-shot、thinking disabled；base和policy-visible各5题，均2/5整题全对、76%加权分，无网络/格式失败。给规则没有改善，不能宣称学习增益或正式校准；错误为超预算仍执行、重复采购历史件、违反现场包装盈余和免邮门槛。详细结果 `docs/runtime/gdpevo-calibration-2026-10-04.md`。
+
+T53 gate `artifacts/tasks/T53/20261004T123157Z/receipt.json`：6项单元检查和真实请求证据只读核验通过；这证明试跑证据完整，不代表模型业务成功。10次调用合计保守估算0.307314元，累计账本17.837046/50元，actual_cost未知。原始目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-gdpevo-calibration-20261004`。每题原始请求/响应/usage/冻结评分器均保存，未改T52题目/评分。后续适合用带OpenSandbox计算的同配置Actor验证；本次未接新规则生产adapter，未进行ERP下单。已停止新增调用，等待用户决定后续工作。
+
+2026-10-04 完成目标审计：计划检查显示 51/51 任务已完成，主线没有可继续的 pending task。以下证据证明场景裁判、持久计算、TRACE 式真实对照和持续重规划均已接通；目标已完成，但真实实验结果仍按限制如实表述，不把描述性对照写成学习增益。
+
+| 目标要求 | 当前证据 | 结论与边界 |
+| --- | --- | --- |
+| 多约束决策环境与独立裁判 | T37 `artifacts/tasks/T37/20261003T061537Z/receipt.json`（53 个环境测试、2 个真实 ERP 测试）；T48 `decisions.json` | 预算、交期、优先级、分批、来源缺失、不可行和合法替代解均有独立评分；评分器不向 Actor 暴露答案 |
+| 持久计算与 Prime 运行语义 | T38 `artifacts/tasks/T38/20261003T111735Z/receipt.json`（19+24 个计算测试及回归）；`src/agent/planning/computation.py`；真实 attempt-7 的 `load_state`/`read_names`/版本链 | 按用户修订采用 Mongo 版本化 JSON + OpenSandbox 每步独立 Python；失败不发布、CAS、取消/超时隔离和重启加载均有实现与证据；不保持 Python 对象身份 |
+| TRACE 式真实训练、技能选择与消融 | T47 `artifacts/tasks/T47/20261004T043016Z/receipt.json`；真实 pilot `attempt-evolution-pilot-040413`；T48 `attempt-decision-pilot-152921` | 真实 Actor、真实 Curator、逐回合选择、fixed/raw/curated 对照、成功/失败计算和澄清/拒绝反事实均留证；结果是描述性管线证据，不宣称学习提升或统计显著 |
+| 持续重规划与异步审查 | T49 `artifacts/tasks/T49/20261004T083808Z/receipt.json`；T50 `artifacts/tasks/T50/20261004T090438Z/receipt.json` | 预算/交期/需求变化会使旧审批失效并继续规划；异步审查读取同一目标的可信只读上下文，不获得下单权限 |
+
+明确后续研究边界：在线 refinement、可执行技能演化、完整持续目标时间流评测，以及冻结后的独立 2500 元双单冷跑/整体 deadline 取消专项，均未被本次简历版主线冒充完成。
+
+## 2026-10-04 T51：高难度训练前基线已饱和，按用户要求暂停
+
+外部实验目录：`/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-challenge-pilot-20261004`。在未注入任何技能的 `fixed-v1` 下，`deadline-budget`、`deadline-budget-missing`、`business-infeasible`、`no-partial` 四个高难度条件各独立重复 2 次，共 8/8 业务成功：可行方案独立 judge optimal、来源缺失正确 `needs_information` 且零订单、业务不可行正确 `infeasible` 且零订单、禁止分批正确完成必需订单。总模型请求 52 次，保守费用 4.163409 CNY，所有 attempt runtime freeze、Episode、ERP、独立 judge 和 evidence manifest 均保留，源码 hash 一致。
+
+这轮已按用户要求提高条件组合和重复通过要求，训练前仍为 100%（8/8），因此没有启动 Curator 或 curated 组，不能伪造训练提升。T51 状态置为 `blocked`，等待用户决定是否切换小模型；恢复后可复用本目录，不重跑这 8 次。
+
+## 2026-10-04 T52：GDPevo 规则混合采购困难任务集已完成
+
+T52 最终 gate `artifacts/tasks/T52/20261004T115212Z/receipt.json`：23 个零模型 fixture/私有穷举业务断言和 validator 报告通过，0 failed/0 skipped/0 paid model calls。任务集文件为 `fixtures/planning/gdpevo-procurement-v2.json`（Actor 公共视图）和 `fixtures/planning/gdpevo-procurement-v2-control.json`（私有评分控制面），设计说明见 `docs/runtime/gdpevo-procurement-taskset-v2.md`。
+
+任务组含 5 train + 5 held-out test，6 条带条件/策略/停止条件的企业特定规则：正式报价版本、整包单位与现场盈余、供应商购物车运费、维修配套组闭包、有界来源相关性、已购承诺与当前修订审批范围。5 个测试规则组合均未在训练组合中出现，所有测试规则和 30 个评分点有训练锚点；每个测试任务 6 个独立权重点，8 个单因素反事实均实际改变私有 oracle 结果，覆盖运费门槛、预算/边界、站点作用域、报价状态、ERP事实和配套组作用域。Actor staging 去掉 control fixture、rubric 和 expected。
+
+私有穷举还核对了正式报价版本、ERP交期、整包/运费、配套闭包、pending边界和历史承诺差量。这只是可审计的任务设计，不是模型校准结果：尚未证明 base 40–60%、训练提升 0.1–0.3 或最终低于 0.8，也没有启动 Curator/付费实验。T51 的 8/8 饱和基线仍保留并暂停；后续若恢复实验，应固定模型/环境/预算，先零模型校准 grader，再决定是否花费额度。
+
 ## 当前主线：T50
 
 同线程Vue目标修订与继续规划，复用T43后端；不重跑T47/T48付费实验。
 
-## **用户固定执行要求（强制）**
+## **用户固定执行要求（强制、不可弱化）**
+
+> **强调性声明：** 主线有效产出优先于边缘完美。遇到同一问题两次有依据修复仍失败，或连续约 20 分钟无实质进展，必须立即停下，报告卡点、尝试、影响和取舍，等待用户讨论；不得后台循环、重复失败命令或自行恢复暂停目标。组件通过不等于业务目标完成，失败必须保留并如实说明。
 
 主线有效产出优先：先交付能运行、能演示、能改变业务结果的工作；已通过的检查不重复跑，除非本次改动直接影响它。\
 同一问题两次有依据的修复尝试仍失败，或连续约 20 分钟没有实质进展，就停止该问题上的尝试，向用户说明卡点、尝试、影响和取舍，等待讨论。\

@@ -307,6 +307,24 @@
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T50/20261004T090438Z/receipt.json",
       "notes": "T50 已完成：gate artifacts/tasks/T50/20261004T090438Z/receipt.json，8项异步规划单元测试+5项真实Agent Protocol/OpenSandbox回归通过。官方Protocol输入携带可信owner/thread上下文；主进程token保护的planning_goal只读路由返回同一目标revision、来源状态、决策和已创建订单摘要；规划审查指令才触发该路径，库存分析保持原行为。不授予写单权限，未新增付费模型调用。"
+    },
+    "T51": {
+      "status": "blocked",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": "按用户要求在训练前先提高难度并重复验证；fixed 四个高难度条件各重复2次，8/8业务成功，全部证据保留。基线已饱和，尚未运行Curator/curated组；用户要求停下并考虑切换小模型，等待resume和模型决定。"
+    },
+    "T52": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T52/20261004T115212Z/receipt.json",
+      "notes": "T52最终gate通过：23个零模型fixture/私有穷举业务断言 + validator报告，0 failed/0 skipped/0 paid calls。5 train/5 test，6条企业规则，5个未见测试组合，30个测试rubric点，8个单因素反事实均实际改变私有oracle结果；Actor staging不含control rubric/expected。私有oracle核对正式报价版本、ERP交期、整包/运费、配套闭包、pending边界和历史承诺差量。仅完成任务集设计与确定性校验，未做模型校准或学习增益实验。"
+    },
+    "T53": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T53/20261004T123157Z/receipt.json",
+      "notes": "真实模型内容试跑完成：配置deepseek-flash，no-tools/one-shot/thinking-disabled，每组5题。base及policy-visible均2/5整题全对、mean_score=0.76；10次真实请求无环境/格式失败，保守新增费用0.307314CNY，实际账单未知。存在超预算执行、已购重复、现场盈余和免邮边界错误；没有规则可见增益，不声称训练收益、正式校准或生产Actor端到端能力。"
     }
   }
 }

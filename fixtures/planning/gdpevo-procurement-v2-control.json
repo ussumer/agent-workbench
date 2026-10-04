@@ -1,0 +1,1004 @@
+{
+  "schema_version": 2,
+  "task_group_id": "chengchuan-procurement-v2",
+  "rules": [
+    {
+      "rule_id": "Q",
+      "name": "报价修订与事实权威",
+      "condition": "同一供应关系存在多版商务文件",
+      "policy": "仅生效且未过期的签章商务文件控制价格/包装；按revision选最新正式版本（signed/pending/revoked）；draft不覆盖正式文件。最新正式revoked关闭本关系，不回退旧价。ERP仍控制active/交期/供货容量，商务文件不能覆盖这些字段。",
+      "stop": "未来/过期文件不参与；报价权威不扩展到ERP状态/交期。"
+    },
+    {
+      "rule_id": "U",
+      "name": "包装与现场盈余限制",
+      "condition": "报价按包装计价，需求按件",
+      "policy": "只买整数包，件数=包数×pack_size，按最小包数覆盖剩余需求。depot允许整包盈余；pit_stop每个物料本轮盈余最多1件。可选覆盖只计需求件数，盈余不加分。",
+      "stop": "没有剩余需求时不补购；现场限额不能套用到depot。"
+    },
+    {
+      "rule_id": "F",
+      "name": "新购物车运费与免邮",
+      "condition": "同一供应商本轮有新购行",
+      "policy": "运费按每个供应商本轮购物车收一次；仅本轮商品金额>=free_at_cents才免邮（等于也免）。已成交订单金额不计本轮门槛；不同供应商不能合并凑门槛。累计预算包含已成交实付+本轮商品+本轮运费。",
+      "stop": "无新购行不收运费；历史运费不再收取。"
+    },
+    {
+      "rule_id": "K",
+      "name": "维修配套组闭包",
+      "condition": "多个可选需求拥有相同非空kit_id",
+      "policy": "同一kit的未完成目标必须全部补足或全部不买；已有成员完成不重新购买。不同kit互不绑定。目标仍按priority数字从小到大最大化可选需求件数，同级合计覆盖后再最小化累计成本。",
+      "stop": "空kit_id的需求独立；不把供应商相同误认为配套组。"
+    },
+    {
+      "rule_id": "M",
+      "name": "有界证据缺失的决策相关性",
+      "condition": "最新正式报价pending，价格只能确定区间",
+      "policy": "在未知报价的最低/最高合法包价分别枚举完整计划。若两个边界的可行性及最优覆盖/成本均与仅用已知报价的最优相同，记录pending而不追问；否则needs_information且不提交新订单。不能把资料未决称infeasible，也不能发布假设包价。",
+      "stop": "超期/停用/无剩余需求的关系先排除；资料缺失不自动阻断无关已知方案。"
+    },
+    {
+      "rule_id": "A",
+      "name": "当前修订审批作用域",
+      "condition": "goal revision contains new or changed delta",
+      "policy": "历史已购承诺只作为累计事实和对账证据；不能用旧审批直接授权当前追加量。当前revision的每个新追加或变更行必须产生新的审批请求。",
+      "stop": "不取消已成交订单；无变化的历史承诺不生成重复订单。"
+    }
+  ],
+  "matrix": {
+    "train-01": {
+      "rule_ids": [
+        "Q",
+        "M"
+      ]
+    },
+    "train-02": {
+      "rule_ids": [
+        "U",
+        "F"
+      ]
+    },
+    "train-03": {
+      "rule_ids": [
+        "K",
+        "F",
+        "A"
+      ]
+    },
+    "train-04": {
+      "rule_ids": [
+        "U",
+        "K"
+      ]
+    },
+    "train-05": {
+      "rule_ids": [
+        "Q",
+        "U"
+      ]
+    },
+    "test-01": {
+      "rule_ids": [
+        "Q",
+        "U",
+        "F"
+      ]
+    },
+    "test-02": {
+      "rule_ids": [
+        "U",
+        "F",
+        "K",
+        "A"
+      ]
+    },
+    "test-03": {
+      "rule_ids": [
+        "Q",
+        "K",
+        "M"
+      ]
+    },
+    "test-04": {
+      "rule_ids": [
+        "F",
+        "K",
+        "M",
+        "A"
+      ]
+    },
+    "test-05": {
+      "rule_ids": [
+        "Q",
+        "U",
+        "F",
+        "K",
+        "M",
+        "A"
+      ]
+    }
+  },
+  "rubrics": {
+    "test-01": [
+      {
+        "point_id": "test-01-disposition",
+        "field": "disposition",
+        "outcome": "选择执行/补证/不可行",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-01-source_selection",
+        "field": "source_selection",
+        "outcome": "商务文件选择及ERP事实作用域",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-01-allocation",
+        "field": "allocation",
+        "outcome": "整数包与配套组合分配",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-01-freight_cents",
+        "field": "freight_cents",
+        "outcome": "按供应商本轮运费",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-01-commitment_ledger",
+        "field": "commitment_ledger",
+        "outcome": "已成交不可回滚事实对账",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-01-approval_request",
+        "field": "approval_request",
+        "outcome": "当前revision追加审批内容",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      }
+    ],
+    "test-02": [
+      {
+        "point_id": "test-02-disposition",
+        "field": "disposition",
+        "outcome": "选择执行/补证/不可行",
+        "weight": 3,
+        "rule_anchors": {
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-02-source_selection",
+        "field": "source_selection",
+        "outcome": "商务文件选择及ERP事实作用域",
+        "weight": 2,
+        "rule_anchors": {
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-02-allocation",
+        "field": "allocation",
+        "outcome": "整数包与配套组合分配",
+        "weight": 3,
+        "rule_anchors": {
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-02-freight_cents",
+        "field": "freight_cents",
+        "outcome": "按供应商本轮运费",
+        "weight": 2,
+        "rule_anchors": {
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-02-commitment_ledger",
+        "field": "commitment_ledger",
+        "outcome": "已成交不可回滚事实对账",
+        "weight": 2,
+        "rule_anchors": {
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-02-approval_request",
+        "field": "approval_request",
+        "outcome": "当前revision追加审批内容",
+        "weight": 3,
+        "rule_anchors": {
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      }
+    ],
+    "test-03": [
+      {
+        "point_id": "test-03-disposition",
+        "field": "disposition",
+        "outcome": "选择执行/补证/不可行",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-03-source_selection",
+        "field": "source_selection",
+        "outcome": "商务文件选择及ERP事实作用域",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-03-allocation",
+        "field": "allocation",
+        "outcome": "整数包与配套组合分配",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-03-freight_cents",
+        "field": "freight_cents",
+        "outcome": "按供应商本轮运费",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-03-commitment_ledger",
+        "field": "commitment_ledger",
+        "outcome": "已成交不可回滚事实对账",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-03-approval_request",
+        "field": "approval_request",
+        "outcome": "当前revision追加审批内容",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      }
+    ],
+    "test-04": [
+      {
+        "point_id": "test-04-disposition",
+        "field": "disposition",
+        "outcome": "选择执行/补证/不可行",
+        "weight": 3,
+        "rule_anchors": {
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-04-source_selection",
+        "field": "source_selection",
+        "outcome": "商务文件选择及ERP事实作用域",
+        "weight": 2,
+        "rule_anchors": {
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-04-allocation",
+        "field": "allocation",
+        "outcome": "整数包与配套组合分配",
+        "weight": 3,
+        "rule_anchors": {
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-04-freight_cents",
+        "field": "freight_cents",
+        "outcome": "按供应商本轮运费",
+        "weight": 2,
+        "rule_anchors": {
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-04-commitment_ledger",
+        "field": "commitment_ledger",
+        "outcome": "已成交不可回滚事实对账",
+        "weight": 2,
+        "rule_anchors": {
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-04-approval_request",
+        "field": "approval_request",
+        "outcome": "当前revision追加审批内容",
+        "weight": 3,
+        "rule_anchors": {
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      }
+    ],
+    "test-05": [
+      {
+        "point_id": "test-05-disposition",
+        "field": "disposition",
+        "outcome": "选择执行/补证/不可行",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-05-source_selection",
+        "field": "source_selection",
+        "outcome": "商务文件选择及ERP事实作用域",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-05-allocation",
+        "field": "allocation",
+        "outcome": "整数包与配套组合分配",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-05-freight_cents",
+        "field": "freight_cents",
+        "outcome": "按供应商本轮运费",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-05-commitment_ledger",
+        "field": "commitment_ledger",
+        "outcome": "已成交不可回滚事实对账",
+        "weight": 2,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      },
+      {
+        "point_id": "test-05-approval_request",
+        "field": "approval_request",
+        "outcome": "当前revision追加审批内容",
+        "weight": 3,
+        "rule_anchors": {
+          "Q": [
+            "train-01",
+            "train-05"
+          ],
+          "U": [
+            "train-02",
+            "train-04",
+            "train-05"
+          ],
+          "F": [
+            "train-02",
+            "train-03"
+          ],
+          "K": [
+            "train-03",
+            "train-04"
+          ],
+          "M": [
+            "train-01"
+          ],
+          "A": [
+            "train-03"
+          ]
+        },
+        "public_contract_anchor": "environment.public_contract"
+      }
+    ]
+  },
+  "counterfactuals": [
+    {
+      "id": "CF-fee-boundary",
+      "task_id": "test-01",
+      "group": "free_shipping_threshold",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "carts",
+            "S001",
+            "free_at_cents"
+          ],
+          "value": 4701
+        }
+      ]
+    },
+    {
+      "id": "CF-knapsack-budget",
+      "task_id": "test-02",
+      "group": "budget",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "budget_cents"
+          ],
+          "value": 127400
+        }
+      ]
+    },
+    {
+      "id": "CF-uncertainty-bounds",
+      "task_id": "test-03",
+      "group": "price_bounds",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            4,
+            "price_bounds_cents"
+          ],
+          "value": [
+            6000,
+            7000
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CF-decision-relevance",
+      "task_id": "test-04",
+      "group": "price_bounds",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            3,
+            "price_bounds_cents"
+          ],
+          "value": [
+            700,
+            900
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CF-site-scope",
+      "task_id": "test-05",
+      "group": "site",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "site"
+          ],
+          "value": "depot"
+        }
+      ]
+    },
+    {
+      "id": "CF-quote-revoked",
+      "task_id": "test-01",
+      "group": "quote_status",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "quotes",
+            1,
+            "status"
+          ],
+          "value": "revoked"
+        }
+      ]
+    },
+    {
+      "id": "CF-erp-active",
+      "task_id": "test-01",
+      "group": "relationship_active",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "erp_relationships",
+            0,
+            "active"
+          ],
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": "CF-no-kit",
+      "task_id": "test-02",
+      "group": "kit_membership",
+      "changes": [
+        {
+          "path": [
+            "input",
+            "demands",
+            3,
+            "kit_id"
+          ],
+          "value": null
+        }
+      ]
+    }
+  ],
+  "claims": {
+    "model_calls": 0,
+    "calibrated": false,
+    "learning_gain_proven": false,
+    "production_adapter_ready": false,
+    "independent_review_done": false
+  }
+}
