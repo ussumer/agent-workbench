@@ -171,7 +171,8 @@ def resolve_java_home(env: dict[str, str]) -> Path | None:
         candidates.extend(_windows_jdk_candidates())
     for candidate in candidates:
         try:
-            if _is_java_home(candidate) and (candidate / "bin" / "javac.exe").is_file():
+            compiler = "javac.exe" if os.name == "nt" else "javac"
+            if _is_java_home(candidate) and (candidate / "bin" / compiler).is_file():
                 return candidate.resolve()
         except OSError:
             continue

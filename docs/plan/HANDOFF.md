@@ -688,3 +688,6 @@ WSL/Linux 原先误用了 Windows `.venv-agent-protocol`，导致 Agent Protocol
 ```
 
 `ready=true`，模型身份 `deepseek-flash`、provider `/models`、Mongo、Java、OpenSandbox、Agent Protocol 全部为 true，`model_calls=0`。随后 `prepare` 通过：真实 ERP/MCP/报价站/OpenSandbox/Agent Protocol 均启动；两个沙箱无宿主挂载且宿主探针退出 0；ERP 前后订单均为空。该证据只证明环境和隔离边界，不证明真实 Actor 学习收益。下一步仍需用户明确新增模型费用额度后，才运行真实 Actor 基线。
+## 2026-10-04 T48 完成
+
+T48 gate `artifacts/tasks/T48/20261004T074542Z/receipt.json`：14 项组件测试与只读 live 核验通过，0 failed/0 skipped。真实实验目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-decision-pilot-152921`：复用已完成 fixed 不可行反例，真实 Curator 1 call（deepseek-flash；4543 输入/255 输出 token；保守估算 0.047772 CNY），没有重复 T47 六条消融。Curated 不可行案例正确记录 `infeasible` 且 ERP 零订单；来源遮蔽案例正确记录 `needs_information`、独立 judge `unresolved` 且零订单；完整来源控制通过独立 judge `feasible/optimal`，逐单审批后两单合计 2196。`contrastive-operations.json` 保留 attempt-7 真实 computation 成功/失败输入、stdout/stderr 摘要与 hash；Curator 输入为脱敏操作/状态摘要。报告只支持描述性条件行为和真实管线，不支持学习增益或统计显著。下一步按用户决定进入简历演示或后续动态重规划，不再重复本轮付费运行。

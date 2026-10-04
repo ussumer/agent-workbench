@@ -115,7 +115,8 @@ def drive_case(stack, client, thread: str, owner: str, attempt: dict) -> None:
                              for k, v in a.items()} for a in approvals]
     expected = {o["result"]["data"]["order_id"]: o for o in row.get("orders", [])}
     actual = {o["order_id"]: o for o in attempt["erp_after"]}
-    same_orders = set(expected) == set(actual) and bool(expected)
+    nonpurchase = assessment.get("environment_status") in {"infeasible", "unresolved"}
+    same_orders = (not expected and not actual) if nonpurchase else (set(expected) == set(actual) and bool(expected))
     if same_orders:
         for identifier, order in expected.items():
             payload = order["approved_payload"]
@@ -126,13 +127,19 @@ def drive_case(stack, client, thread: str, owner: str, attempt: dict) -> None:
                 == sorted((x["part_id"], x["quantity"], x["unit_price"]) for x in payload["lines"])
             )
     computations = any(x.get("status") == "completed" for x in attempt["kernel_executions"])
+    decision = row.get("decision") or {}
+    expected_decision = {"infeasible": "infeasible", "unresolved": "needs_information"}.get(assessment.get("environment_status"))
     attempt["business_success"] = bool(
-        assessment["accepted"] and same_orders and computations
+        ((assessment.get("accepted") and same_orders and computations and not decision)
+         if not nonpurchase else
+         (decision.get("status") == expected_decision and decision.get("revision") == problem.revision
+          and bool(decision.get("reason")) and same_orders and not proposal))
         and attempt["terminal_status"] == "completed"
         and not attempt.get("unexpected_clarification"))
-    attempt["business_checks"] = {"optimal_candidate": assessment["accepted"],
+    attempt["business_checks"] = {"optimal_candidate": assessment.get("accepted", False),
                                   "erp_matches_approved_orders": same_orders,
-                                  "real_computation": computations}
+                                  "real_computation": computations,
+                                  "decision_matches_environment": decision.get("status") == expected_decision if nonpurchase else not decision}
 
 
 def public_case(case_id: str) -> dict:

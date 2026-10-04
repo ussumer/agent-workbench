@@ -61,7 +61,7 @@ class PlanningOrders:
         row = self.goals.find_one_and_update(
             {**key, "revision": problem.revision - 1, "execution": None},
             {"$set": {"revision": problem.revision,
-                      "problem": problem.model_dump(mode="json"), "proposal": None}},
+                      "problem": problem.model_dump(mode="json"), "proposal": None}, "$unset": {"decision": ""}},
             return_document=ReturnDocument.AFTER,
         )
         if row is None:
@@ -89,6 +89,7 @@ class PlanningOrders:
             {"$set": {"revision": revision.problem.revision,
                       "problem": revision.problem.model_dump(mode="json"), "proposal": None,
                       "sources": sources, "revision_change": metadata},
+             "$unset": {"decision": ""},
              "$push": {"revision_history": {"problem": previous["problem"],
                  "sources": previous.get("sources", []), "revision_change": previous.get("revision_change"),
                  "proposal_id": (previous["proposal"] or {}).get("id")}}},

@@ -2503,18 +2503,115 @@
           "report": "{evidence_dir}/zero-generation-prepare.xml"
         }
       ]
+    },
+    {
+      "id": "T47",
+      "title": "真实 TRACE 小样本与三组消融",
+      "file": "docs/plan/tasks/T47.md",
+      "depends_on": [
+        "T46"
+      ],
+      "requirements": [
+        "R32"
+      ],
+      "reads": [
+        "docs/runtime/self-evolution-spec-2026-10-03.md",
+        "docs/runtime/learning-space-baseline.md",
+        "docs/plan/contracts/planning.md"
+      ],
+      "checks": [
+        {
+          "id": "evolution-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t47.py",
+            "-q",
+            "--junitxml={evidence_dir}/evolution-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/evolution-unit.xml"
+        },
+        {
+          "id": "evolution-live",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/evolution_pilot.py",
+            "--verify-existing",
+            "--output",
+            "{evidence_dir}/evolution-pilot"
+          ],
+          "cwd": "."
+        }
+      ]
+    },
+    {
+      "id": "T48",
+      "title": "操作失败对照与澄清/拒绝反事实",
+      "file": "docs/plan/tasks/T48.md",
+      "depends_on": [
+        "T47"
+      ],
+      "requirements": [
+        "R32"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/runtime/learning-space-baseline.md",
+        "docs/papers/rsi/trace/2608.22793v2.txt"
+      ],
+      "checks": [
+        {
+          "id": "decision-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t48.py",
+            "-q",
+            "--junitxml={evidence_dir}/decision-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/decision-unit.xml"
+        },
+        {
+          "id": "decision-live",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/decision_pilot.py",
+            "verify",
+            "--output",
+            "{evidence_dir}/decisions.json"
+          ],
+          "cwd": "."
+        }
+      ],
+      "status": "done",
+      "receipt": "artifacts/tasks/T48/20261004T074542Z/receipt.json",
+      "notes": "真实 T48 已完成：gate artifacts/tasks/T48/20261004T074542Z/receipt.json，14 项组件测试+只读 live 核验通过。真实实验目录 /mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-decision-pilot-152921：复用 fixed 不可行反例，真实 Curator 1 call（4543/255 tokens，保守 ¥0.047772），curated 不可行 1/1；来源缺失 needs_information 1/1、零 ERP 写入；完整来源控制 feasible/optimal 1/1、两单总额 2196。保留真实 computation 成功/失败对照、原响应与遮蔽视图、bank/source/evidence hash；仅证明描述性条件行为和管线，不宣称学习增益或 TRACE 统计提升。"
     }
-  ,{
-    "id": "T47",
-    "title": "真实 TRACE 小样本与三组消融",
-    "file": "docs/plan/tasks/T47.md",
-    "depends_on": ["T46"],
-    "requirements": ["R32"],
-    "reads": ["docs/runtime/self-evolution-spec-2026-10-03.md", "docs/runtime/learning-space-baseline.md", "docs/plan/contracts/planning.md"],
-    "checks": [
-      {"id": "evolution-unit", "mode": "unit", "kind": "test", "required": true, "min_tests": 8, "argv": ["uv", "run", "--frozen", "pytest", "tests/acceptance/test_t47.py", "-q", "--junitxml={evidence_dir}/evolution-unit.xml"], "cwd": ".", "report": "{evidence_dir}/evolution-unit.xml"},
-      {"id": "evolution-live", "mode": "live", "kind": "command", "required": true, "argv": ["uv", "run", "--frozen", "python", "scripts/planning/evolution_pilot.py", "--verify-existing", "--output", "{evidence_dir}/evolution-pilot"], "cwd": "."}
-    ]
-  }
   ]
 }

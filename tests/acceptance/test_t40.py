@@ -36,7 +36,8 @@ pytestmark = pytest.mark.integration
 
 @pytest.fixture(scope="module")
 def resources(db):
-    result = MongoResources(PersistenceSettings(database=db.name)).start()
+    result = MongoResources(PersistenceSettings.from_env().for_test_database(
+        db.name.removeprefix("rush_harness_test_"))).start()
     try:
         yield result
     finally:

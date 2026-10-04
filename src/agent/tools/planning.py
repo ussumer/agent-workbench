@@ -16,6 +16,7 @@ from agent.artifacts.service import resolve_scope
 from agent.planning.checker import check_plan
 from agent.planning.models import Plan, PlanningProblem
 from agent.planning.orders import PlanningOrders
+from agent.planning.decisions import PlanningDecision, record_decision
 
 
 def build_planning_tools(orders: PlanningOrders, channel: MCPWriteChannel) -> list[StructuredTool]:
@@ -47,6 +48,7 @@ def build_planning_tools(orders: PlanningOrders, channel: MCPWriteChannel) -> li
             body = problem.model_dump(mode="json")
             row = orders.load(owner, thread, thread)
             body["revision_change"] = row.get("revision_change")
+            body["decision"] = row.get("decision")
             body["plan_semantics"] = "additional quantities; commitments are already ordered and count toward the total budget"
             body["orders"] = [o["result"]["data"] for o in row["orders"]]
             body["execution_state"] = (row["execution"] or {}).get("phase")
@@ -139,6 +141,18 @@ def build_planning_tools(orders: PlanningOrders, channel: MCPWriteChannel) -> li
         except (ApprovalError, ValidationError, ValueError) as failure:
             return error(failure)
 
+    def planning_decision(decision: PlanningDecision, config: RunnableConfig) -> str:
+        """Record a reasoned request for missing information or business infeasibility.
+        Cite current part IDs and source_refs. This records your claim, does not prove
+        it, and never writes an order. Complete resolved data must not be called missing.
+        """
+        try:
+            owner, thread = scope(config)
+            return reply(record_decision(orders, owner, thread, decision))
+        except (ApprovalError, ValidationError) as failure:
+            return error(failure)
+
     return [StructuredTool.from_function(f) for f in
             (planning_read, planning_source, planning_check)] + [
-                StructuredTool.from_function(coroutine=planning_submit)]
+                StructuredTool.from_function(coroutine=planning_submit),
+                StructuredTool.from_function(planning_decision)]

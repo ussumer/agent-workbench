@@ -208,6 +208,7 @@ def run(
     skill_file: Path | None = None,
     goal_data: dict[str, Any] | None = None,
     case_id: str | None = None,
+    mask_source_part: str | None = None,
 ) -> int:
     output.mkdir(parents=True, exist_ok=False)
     owner = "demo-a"
@@ -334,6 +335,9 @@ def run(
                     ) as client:
                         session = client.post("/api/demo/session", json={"user_id": owner})
                         session.raise_for_status()
+                        if mask_source_part is not None:
+                            from scripts.planning.decision_pilot import install_source_mask
+                            install_source_mask(stack, mask_source_part, attempt)
                         goal = goal_data if goal_data is not None else public_goal()
                         goal_result = client.post(
                             f"/api/planning/{thread}/goal",
