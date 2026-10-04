@@ -29,14 +29,40 @@ from scripts.planning.gdpevo_v3_training import actor_messages, call_one, summar
 from scripts.planning.gdpevo_refinement import RealCalls  # noqa: E402
 
 BASE = EVAL / "procurement_eval/runs/planning-session-20261004/attempt-gdpevo-v3-closed-loop-20261004"
-SESSION = EVAL / "procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v3-recurate-20261005"
+SESSION = EVAL / "procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v3-recurate-compact-20261005"
 
 
 def _curator_input(training, records):
     joined = build_curator_records(training, records)
     if len(joined) != 20 or any(r["task_id"] not in training["tasks"] for r in joined):
         raise ValueError("Curator input must contain exactly the twenty train policies")
-    return joined
+    # Policy evidence repeats across the five tasks in each group.  Keep one
+    # canonical copy per rule and send only compact diagnostics; the previous
+    # request was 170 KB and the gateway rejected it before model generation.
+    group_rules = {}
+    for row in joined:
+        bucket = group_rules.setdefault(row["group_id"], {})
+        for rule in row["policy_evidence"]:
+            bucket[rule["rule_id"]] = {
+                key: rule[key] for key in ("rule_id", "name", "condition", "policy", "fields", "stop")
+            }
+    compact = []
+    for row in joined:
+        attempts = []
+        for attempt in row["attempts"]:
+            feedback = attempt["feedback"]
+            attempts.append({
+                "decision": attempt.get("decision"),
+                "grade": attempt["grade"],
+                "feedback": {
+                    "failed_outcomes": feedback.get("failed_outcomes", []),
+                    "diagnostic_codes": [item.get("code") for item in feedback.get("diagnostics", [])],
+                    "scope_note": feedback.get("scope_note", ""),
+                },
+            })
+        compact.append({"task_id": row["task_id"], "group_id": row["group_id"],
+                        "rule_ids": [r["rule_id"] for r in row["policy_evidence"]], "attempts": attempts})
+    return {"policies_by_group": group_rules, "train_records": compact}
 
 
 def run():
@@ -78,7 +104,7 @@ def run():
     write(SESSION / "candidate-skill.json", skill)
 
     base_report = json.loads((BASE / "report.json").read_text())
-    base_validation = [row for row in base_report["validation"] if row["group"] == "fixed-train"]
+    base_validation = [row for row in json.loads((BASE / "validation.json").read_text()) if row["group"] == "fixed-train"]
     if len(base_validation) != 20:
         raise ValueError("fixed train control is incomplete")
     write(SESSION / "fixed-validation.json", base_validation)
