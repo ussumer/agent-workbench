@@ -215,6 +215,19 @@ def test_formal_stale_approval_can_replan_without_rebuy_in_same_episode(traced):
     events = wiring.frames(client.post("/api/chat/stream", json={"thread_id": thread,
         "request_id": uuid.uuid4().hex, "message": "预算调整后按新目标继续规划，仅追加未采购物料"}))
     assert events[-1]["payload"]["status"] == "interrupted", events
+    # A real provider requires all tool results immediately after their AI
+    # message. Scripted models otherwise accept the invalid AI/Human/Tool order.
+    for turn in model.seen:
+        outstanding = set()
+        for message in turn:
+            if outstanding:
+                assert message["type"] == "tool", message
+            if message["type"] == "ai":
+                outstanding.update(c["id"] for c in message.get("tool_calls", []))
+            elif message["type"] == "tool":
+                assert message["tool_call_id"] in outstanding
+                outstanding.remove(message["tool_call_id"])
+        assert not outstanding
     current = wiring.pending(actor)
     assert current["interrupt_id"] != old["interrupt_id"]
     assert wiring.resume(actor)[-1]["payload"]["status"] == "completed"

@@ -1,6 +1,16 @@
 # 当前交接
 
-## 2026-10-04 训练前 Git 基线待提交
+## 2026-10-04 T46 检查点：消息配对修复、真实预算修订与持久复用
+
+训练前 Git 基线为 `3c36215`，未训练、未运行 Curator。正式 stale-goal 恢复原 `Command(update=用户消息)` 会把 HumanMessage 插入 AI tool call 和 ToolMessage 之间；现先用官方 `interrupt_before=["model"]` 完成过期工具，再输入新消息。T43 消息配对断言及 T40/T41/T43 真实 Mongo/Java/MCP 回归 54 passed，模型明确 scripted-component。改动整理中曾误删正常 astream，attempt 4 零调用失败，已修复并保留；不可将其记成功。
+
+真实 attempts 全部保留于外部 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-2` 至 `attempt-7`。attempt 3 初始最优但修订后 provider400；attempt 5 实际两单完成但收尾 Episode 查询排除 _id 导致导出失败；attempt 6 completed/11 calls，但修订计算未用 load_state，补强断言后失败；attempt 7 completed/12 calls、初始最优2493.50、预算2200后实际两单合计2196.00，revision2计算明确base_version2/read_names=[analysis]/load_state，原单未重复。3 live 断言通过。这些全部是基线，不能当学习收益。
+
+费用授权仍新增累计50CNY/单attempt2CNY。全部新增调用保守计入5.118624CNY（剩44.881376），包括未知usage预留；actual_cost仍null，用户指出其观察账单0.02元，不把保守估算称实际费用。权威会话账本 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/budget-ledger.json`；已将旧尝试按evidence/hash导入。driver新增独立lock文件+fsync/rename写入，损坏拒绝而非清空、固定会话路径、限制50/2、usage未知保留、并发预留/结算检查。23零模型unit通过。
+
+T46保持in_progress：现有gate receipt通过仅说明已实现断言通过，尚不足以完成全部task说明。仍需补齐：执行JAR与实际依赖的事前冻结/完整模型身份preflight证据；完整baseline双单独立场景与ERP内容/无额外订单严格比对；revision复用前后JSON/hash/同Episode与bank绑定强断言；prepare zero-generation验收；attempt整体deadline、取消并确认实际计算停止；外部评测器源码版本/hash绑定。不能以当前较弱live断言或结构checker把上述要求降掉。累计账本改动后尚无新增付费attempt，不要为补已有证据盲目再跑模型。下一次先做零调用补齐与现有attempt只读核验，再决定是否需要唯一新attempt，仍在既有50/2授权内。
+
+## 2026-10-04 训练前 Git 基线已提交
 
 用户明确要求先 commit 训练前代码以便消融对比。T46 in_progress，尚未gate通过；没有训练或Curator。新增费用授权50CNY，单attempt2CNY；首轮缺JAVA_HOME零模型失败保留。第二轮真实Actor7次请求、2次OpenSandbox计算持久化，候选2493.50可行，但评测入口未读SSE event名导致漏审批、后续provider400；零实际订单，不能把result completed当通过。全部证据复制到artifacts/planning/pre-training/并记录hash。已知费用0.468333CNY，未知usage仍预留，累计保守记账0.901188CNY；实际账单null。评测入口正在修复，commit保持T46进行中。下一步先核对Git训练前基线，再修复SSE协议/冻结源码/累计预算/真实ERP证据后执行同额度新attempt，不训练、不删除失败。
 

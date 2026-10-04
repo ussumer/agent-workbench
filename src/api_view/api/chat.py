@@ -299,25 +299,44 @@ async def _run_turn(
             if user_text:
                 await _setup_call(handle, lambda: preferences.apply_user_preferences(
                     owner_user_id=owner, message=user_text, source_is_user=True))
-                payload = await _setup_call(handle, lambda: _resume_revised_goal(
-                    context, owner, thread_id, graph, payload))
-            async for part in graph.astream(
-                payload,
-                config,
-                stream_mode=["messages", "values"],
-                subgraph=True,
-                version="v2",
-            ):
-                if handle.cancel_requested:
-                    cancelled = True
-                    adapter.cancelled()
-                    break
-                for event in adapter.consume(part):
-                    if event.event == "token":
-                        assistant_text.append(str(event.payload.get("text") or ""))
-                    if event.event == "interrupt":
-                        _record_interrupt(context, owner, thread_id, event)
-                    handle.publish(event)
+                retirement = await _setup_call(
+                    handle, lambda: _resume_revised_goal(context, owner, thread_id, graph, payload)
+                )
+                if retirement is not payload:
+                    # Finish the stale tool before appending the new HumanMessage.
+                    # Command(update=payload) would put that message between the
+                    # AI tool call and its ToolMessage, which providers reject.
+                    # The official static interrupt stops before any model call;
+                    # the normal invocation below then supplies the new message.
+                    async for part in graph.astream(
+                        retirement, config, stream_mode=["messages", "values"],
+                        subgraph=True, version="v2", interrupt_before=["model"],
+                    ):
+                        if handle.cancel_requested:
+                            cancelled = True
+                            adapter.cancelled()
+                            break
+                        for event in adapter.consume(part):
+                            if event.event == "token":
+                                assistant_text.append(str(event.payload.get("text") or ""))
+                            if event.event == "interrupt":
+                                _record_interrupt(context, owner, thread_id, event)
+                            handle.publish(event)
+            if not cancelled:
+                async for part in graph.astream(
+                    payload, config, stream_mode=["messages", "values"],
+                    subgraph=True, version="v2",
+                ):
+                    if handle.cancel_requested:
+                        cancelled = True
+                        adapter.cancelled()
+                        break
+                    for event in adapter.consume(part):
+                        if event.event == "token":
+                            assistant_text.append(str(event.payload.get("text") or ""))
+                        if event.event == "interrupt":
+                            _record_interrupt(context, owner, thread_id, event)
+                        handle.publish(event)
             if not cancelled and adapter.terminal_status != FAILED:
                 interrupts = await _setup_call(handle, lambda: _pending_interrupts(
                     context, owner, thread_id, graph=graph))
@@ -617,7 +636,7 @@ def _resume_revised_goal(context: WebContext, owner: str, thread: str, graph: An
             binding = action.planning_binding
             if binding["revision"] != goal["revision"] or binding["proposal_id"] != (goal["proposal"] or {}).get("id"):
                 stale = True
-    return Command(resume={"type": "planning_goal_revised"}, update=payload) if stale else payload
+    return Command(resume={"type": "planning_goal_revised"}) if stale else payload
 
 
 def _provide_graph(context: WebContext, owner: str, thread_id: str) -> Any:

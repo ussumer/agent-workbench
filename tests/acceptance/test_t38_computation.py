@@ -14,6 +14,8 @@ from agent.planning.computation_protocol import (
 )
 from agent.tools.planning_computation import build_computation_tools
 
+pytestmark = pytest.mark.unit
+
 OP = "a" * 32
 
 

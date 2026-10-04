@@ -279,10 +279,10 @@
       "notes": "修复并正式gate通过：22 unit + 9真实Mongo integration + 46 T44/T41 regression，0 failed/0 skipped。Feedback pending与完整EpisodeStore seq/chunk/hash核对后发布；并发CAS仅一条发布；不宣称真实Actor学习收益。"
     },
     "T46": {
-      "status": "in_progress",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "用户2026-10-04明确授权新增50CNY，单attempt2CNY，Actor/selector/Curator/重试累计。先冻结源码并跑真实规划基线/2500->2200预算修订，不沿用历史额度。 用户要求先Git commit训练前基线。首轮零模型JAVA_HOME失败、第二轮7模型调用/2真实计算/零订单；driver误读SSE漏审批，绝非passed。累计保守预算0.901188CNY，全部失败保留artifacts/planning/pre-training。"
+      "receipt": "artifacts/tasks/T46/20261004T021644Z/receipt.json",
+      "notes": "T46最终gate通过：23费用/协议/隔离unit、68 T44/T38/T45 unit回归、3只读live断言，0 failed/0 skipped。训练前基线commit 3c36215；attempt-2..7全部保留，attempt-7真实配置模型12次调用、约1.199547 CNY保守估算，初始独立judge最优2493.50，预算2200后追加P004 6件，已批准订单未重复，实际总额2196.00；修订计算base_version=2/read_names=[analysis]/load_state并导出Episode、计算代码/状态、ERP独立读回、源码冻结manifest。T46只证明真实Actor基线与持久计算/修订能力，不证明TRACE学习收益。新增累计费用会话账本保守5.118624 CNY/50，单attempt上限2，未知usage保留。"
     }
   }
 }
