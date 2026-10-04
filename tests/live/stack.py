@@ -459,6 +459,7 @@ def running_stack(
     run_dir: Path | None = None,
     database_name: str | None = None,
     preserve_data: bool = False,
+    planning_only: bool = False,
 ) -> Iterator[LiveStack]:
     """Start everything and tear it down, even on failure.
 
@@ -560,8 +561,12 @@ def running_stack(
                                 services=ServiceAddresses.from_env(),
                             )
                             # Built before the app starts, while no event loop is running.
-                            for owner in DEMO_USERS:
-                                stack.graphs[owner] = _assemble(stack, owner, model_config)
+                            # A planning-only experiment does not need the course main Agent;
+                            # skipping it avoids optional report-tool configuration becoming a
+                            # false blocker before the independent planning Actor is exercised.
+                            if not planning_only:
+                                for owner in DEMO_USERS:
+                                    stack.graphs[owner] = _assemble(stack, owner, model_config)
                             stack.app = _create_app(stack)
                             # Served on a real socket, because the background analyst reaches
                             # this process over HTTP. A TestClient has no port, so the callback

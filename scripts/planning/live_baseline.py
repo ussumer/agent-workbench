@@ -112,6 +112,48 @@ def public_goal() -> dict[str, Any]:
     return json.loads((ROOT / "fixtures/planning/goal-v1.json").read_text(encoding="utf-8"))
 
 
+def load_skill_bank(path: Path) -> list[Any]:
+    """Load an experiment bank without silently changing the active production bank.
+
+    T58 stores skills as a mapping keyed by business group, while older pilots pass a
+    single TextSkill JSON object.  Normalize both forms here and verify every body hash
+    before it can be materialized in the real planning Episode.  The loader deliberately
+    does not accept a bank that claims to have changed the production assignment.
+    """
+    from agent.evolution.episodes import TextSkill
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict) and payload.get("production_assignment_changed") is True:
+        raise ValueError("experiment bank cannot change production assignment")
+    if isinstance(payload, dict) and "skills" in payload:
+        raw = payload["skills"]
+        if isinstance(raw, dict):
+            entries = list(raw.values())
+        else:
+            entries = raw
+    elif isinstance(payload, dict) and {"skill_id", "description", "body"} <= set(payload):
+        entries = [payload]
+    else:
+        entries = payload
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("experiment bank must contain a non-empty skill list")
+    skills = [TextSkill.model_validate(entry) for entry in entries]
+    if len(skills) > 32 or any(skill.scope != "planning" for skill in skills):
+        raise ValueError("experiment bank exceeds planning scope or size")
+    if len({skill.skill_id for skill in skills}) != len(skills):
+        raise ValueError("experiment bank contains duplicate skill IDs")
+    expected = payload.get("skill_hashes") if isinstance(payload, dict) else None
+    for skill in skills:
+        body_hash = hashlib.sha256(skill.body.encode()).hexdigest()
+        hash_key = skill.skill_id
+        if isinstance(payload, dict) and isinstance(payload.get("skills"), dict):
+            hash_key = next(key for key, entry in payload["skills"].items()
+                            if entry["skill_id"] == skill.skill_id)
+        if isinstance(expected, dict) and expected.get(hash_key) != body_hash:
+            raise ValueError(f"skill body hash mismatch: {skill.skill_id}")
+    return skills
+
+
 def freeze_runtime(output: Path, configuration: dict, model: ModelConfig) -> dict:
     """Freeze actual execution dependencies before any generation request."""
     import httpx
@@ -206,6 +248,7 @@ def run(
     prepare: bool = False,
     experiment_group: str = "fixed-v1",
     skill_file: Path | None = None,
+    skill_bank_file: Path | None = None,
     goal_data: dict[str, Any] | None = None,
     case_id: str | None = None,
     mask_source_part: str | None = None,
@@ -237,22 +280,7 @@ def run(
     }
     (output / "started.json").write_text(json.dumps(attempt, indent=2) + "\n", encoding="utf-8")
 
-    env = load_env()
-    configuration = json.loads(config_path.read_text(encoding="utf-8"))
-    # The evaluator's isolated Linux JDK is outside the source checkout and must
-    # be explicit; never rely on a host JAVA_HOME inherited from WSL/Windows.
-    if not os.environ.get("JAVA_HOME"):
-        candidate = Path("/tmp/jdk21/usr/lib/jvm/java-21-openjdk-amd64")
-        if (candidate / "bin/javac").is_file():
-            os.environ["JAVA_HOME"] = str(candidate)
-    original = ModelConfig.from_env(
-        {**env, "MODEL_ID": configuration["model_id"], "MODEL_TEMPERATURE": "0"}
-    )
-    attempt["model_id"] = original.model_id
-    attempt["source_revision"] = fingerprint(ROOT)
-    archive_source(
-        ROOT, attempt["source_revision"], output / "source.tar.gz", output / "source-checkout"
-    )
+    env: dict[str, str] = {}
     model_log = (output / "model_calls.jsonl").open("x", encoding="utf-8")
     proxy_spec = {
         "total_cny": total_cny,
@@ -267,6 +295,33 @@ def run(
         "pricing_source": "configured evaluation policy",
     }
     try:
+        env_path = Path("/mnt/c/dev/rush-harness/.env")
+        env = load_env(path=env_path) if env_path.is_file() else load_env()
+        protocol_env = ROOT / ".venv-agent-protocol-linux"
+        if not protocol_env.exists():
+            protocol_env = Path("/mnt/c/dev/rush-harness/.venv-agent-protocol-linux")
+        agent_protocol_service.ENV_DIR = protocol_env
+        # The live stack reads optional local tool credentials directly from os.environ
+        # while this runner intentionally loads the main checkout dotenv explicitly.
+        # Copy only those tool configuration keys; never write them to evidence.
+        for key in ("MODELSCOPE_MCP_URL", "MODELSCOPE_API_TOKEN", "ZHIPU_API_KEY"):
+            if env.get(key):
+                os.environ[key] = env[key]
+        configuration = json.loads(config_path.read_text(encoding="utf-8"))
+        # The evaluator's isolated Linux JDK is outside the source checkout and must
+        # be explicit; never rely on a host JAVA_HOME inherited from WSL/Windows.
+        if not os.environ.get("JAVA_HOME"):
+            candidate = Path("/tmp/jdk21/usr/lib/jvm/java-21-openjdk-amd64")
+            if (candidate / "bin/javac").is_file():
+                os.environ["JAVA_HOME"] = str(candidate)
+        original = ModelConfig.from_env(
+            {**env, "MODEL_ID": configuration["model_id"], "MODEL_TEMPERATURE": "0"}
+        )
+        attempt["model_id"] = original.model_id
+        attempt["source_revision"] = fingerprint(ROOT)
+        archive_source(
+            ROOT, attempt["source_revision"], output / "source.tar.gz", output / "source-checkout"
+        )
         attempt["runtime_freeze"] = freeze_runtime(output, configuration, original)
         with gateway(original, proxy_spec, model_log, {"thinking": {"type": "disabled"}}) as (
             url,
@@ -291,7 +346,6 @@ def run(
                 }
             )
             sandbox_service.CONTROL_PORT = configuration["sandbox_port"]
-            agent_protocol_service.ENV_DIR = ROOT / ".venv-agent-protocol-linux"
             run_dir = output / "services"
             with sandbox_control(ROOT, run_dir / "sandbox-control", configuration["sandbox_port"]):
                 with running_stack(
@@ -300,6 +354,7 @@ def run(
                     database_name=thread,
                     preserve_data=True,
                     warm_pool_size=0,
+                    planning_only=True,
                 ) as stack:
                     import httpx
 
@@ -320,7 +375,11 @@ def run(
                     from agent.evolution.episodes import EpisodeStore, TextSkill
                     evolution = EpisodeStore(stack.database)
                     skills = []
-                    if skill_file is not None:
+                    if skill_bank_file is not None and skill_file is not None:
+                        raise ValueError("choose either --skill-file or --skill-bank")
+                    if skill_bank_file is not None:
+                        skills = load_skill_bank(skill_bank_file)
+                    elif skill_file is not None:
                         payload = json.loads(skill_file.read_text(encoding="utf-8"))
                         skills = [TextSkill.model_validate(payload)]
                     bank_id = evolution.freeze(
@@ -328,8 +387,19 @@ def run(
                         provenance="fixed-empty-baseline" if not skills else f"{experiment_group}-pilot",
                     )
                     evolution.set_current(owner, bank_id)
-                    attempt["bank"] = {"id": bank_id, "sha256": evolution.bank(owner, bank_id)["sha256"],
-                                       "skill_count": len(skills)}
+                    bound_bank = evolution.bank(owner, bank_id)
+                    attempt["bank"] = {
+                        "id": bank_id,
+                        "sha256": bound_bank["sha256"],
+                        "skill_count": len(skills),
+                        "skill_ids": [skill.skill_id for skill in skills],
+                        "body_sha256": {
+                            skill.skill_id: hashlib.sha256(skill.body.encode()).hexdigest()
+                            for skill in skills
+                        },
+                        "selector": "PlanningTraceMiddleware.per_model_turn",
+                        "production_assignment_changed": False,
+                    }
                     with httpx.Client(
                         base_url=stack.base_url, timeout=300, trust_env=False
                     ) as client:
@@ -540,6 +610,7 @@ def main() -> int:
     parser.add_argument("--prepare", action="store_true")
     parser.add_argument("--experiment-group", choices=["fixed-v1", "retrieval-v1", "curated-v1"], default="fixed-v1")
     parser.add_argument("--skill-file", type=Path)
+    parser.add_argument("--skill-bank", type=Path)
     args = parser.parse_args()
     return run(
         args.output,
@@ -549,6 +620,7 @@ def main() -> int:
         prepare=args.prepare,
         experiment_group=args.experiment_group,
         skill_file=args.skill_file,
+        skill_bank_file=args.skill_bank,
     )
 
 

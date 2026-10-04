@@ -1,5 +1,16 @@
 # 当前交接
 
+## T59 实际接线已提交，完整验收未完成；停止新增试跑等待讨论
+
+四个 T58 真实 scoped skills 已整体载入实验 bank，`live_baseline --skill-bank` 与 `gdpevo_dynamic.py` 复用现有 `PlanningTraceMiddleware`，没有新造selector。12项协议检查通过；最终`artifacts/tasks/T59/final-failure-boundary.xml`单条通过，证明失败业务运行不能通过验收。真实 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005d`：8完整Actor回合、9 selector尝试、2次OpenSandbox completed，首单真实批准2091.00；随后16请求上限耗尽，修订后整体目标失败。8次选择全为packages，动态调用机制真实运行但尚无状态切换收益。16调用保守1.065591CNY，生产assignment未变；不宣称学习增益。
+
+环境失败a/b/c全部保留且零模型费用：dotenv缺失、Protocol路径、无关课程主Agent的chart工具缺配置。已新增planning_only（课程默认不变），配置与源码冻结纳入try/finally，早期失败会结清预算/留result。a遗留2元预留已按零调用证据结清。运行后自建Java/MCP/OpenSandbox/Protocol均退出，用户Mongo不动。
+
+重要验收纠正：175812 gate配置blocked；180744 verifier把JSON转义串当原正文比较；181435默认c/d不一致使unit失败。182044旧passed只判已完成回合协议，不能证明完整目标，已保留但不得引用为T59 done；最终verifier恢复要求runtime_completed，真实失败返回blocked。T59 in_progress、receipt null；不再为绿色gate循环重跑。
+
+下一动作须先讨论：拆成操作级聚焦技能、统一selector+Actor请求数预算与执行额度（旧16预算实际只有8Actor回合），保持fixed/static/dynamic同协议；T58未晋升，v3到生产schema的adapter仍缺，不能把本运行当v3准确率。读`docs/runtime/gdpevo-dynamic-2026-10-05.md`。不要继续重跑这轮或恢复T51/T38。
+
+
 ## T58完成；下一主线为动态选择和工具执行
 
 T58 gate `artifacts/tasks/T58/20261004T170438Z/receipt.json`：6unit+只读实际请求/响应/评分重算通过。四组Curator各只看本组5train与train-only企业规则，真实生成四个技能；原有train/fixed控制复用。train scoped8/20(.853846) vs fixed4/20(.796154)，test scoped1/20(.761538) vs fixed0/20(.607692)。两题train退化(`quotes-train-04`,`kits-train-03`)，未晋升。44新调用，本轮保守2.123559元，累计36.926127/50元；实际provider账单未知。

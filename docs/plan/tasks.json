@@ -3174,6 +3174,60 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T59",
+      "title": "动态逐回合技能选择接入实验Actor",
+      "depends_on": [
+        "T58"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/paper-fidelity-audit-2026-10-03.md",
+        "docs/runtime/self-evolution-spec-2026-10-03.md",
+        "docs/runtime/gdpevo-procurement-taskset-v3.md"
+      ],
+      "checks": [
+        {
+          "id": "dynamic-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t59.py",
+            "-q",
+            "--junitxml={evidence_dir}/dynamic-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/dynamic-unit.xml"
+        },
+        {
+          "id": "dynamic-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_dynamic_evidence.py",
+            "--output",
+            "{evidence_dir}/dynamic-report.json",
+            "--attempt",
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005d"
+          ],
+          "cwd": "."
+        }
+      ],
+      "file": "docs/plan/tasks/T59.md"
     }
   ]
 }

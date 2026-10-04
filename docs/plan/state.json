@@ -355,6 +355,12 @@
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T58/20261004T170438Z/receipt.json",
       "notes": "四组各一次真实Curator，复用T57历史train/fixed controls；scoped train8/20 mean.853846 vs fixed4/20 .796154；test1/20 mean.761538 vs fixed0/20 .607692。quotes-train-04/kits-train-03逐题退化，拒绝实验晋升，生产assignment false。gate6unit+真实证据只读重算通过。44新calls，本轮保守2.123559 CNY，累计36.926127/50。仅group scope静态加载；动态per-turn选择、OpenSandbox v3 Actor和三重复监督比较仍待后续，非完整TRACE复现。"
+    },
+    "T59": {
+      "status": "in_progress",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": "代码已接入四技能bank和PlanningTraceMiddleware真实逐回合选择；12协议测试通过，最终单条失败边界检查通过。真实attempt-dynamic-tool-20261005d有8完整Actor turn、9 selector尝试、2次OpenSandbox completed、首单2091元已批准；16请求上限耗尽，修订完整目标失败；8次始终选packages。保守费用1.065591元。旧gate175812配置blocked、180744 verifier转义误判、181435默认c/d不一致失败保留；182044旧passed仅判部分协议，已明确失效，最终verifier要求runtime_completed，失败返回blocked。未完成，不切生产；停止新增试跑，等待讨论下一实验协议。"
     }
   }
 }
