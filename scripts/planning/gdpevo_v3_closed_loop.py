@@ -21,6 +21,20 @@ def feedback(task,row,value):
  points=row['grade'].get('points',{}); failed=[f for f in FIELDS if not points.get(task['task_id']+':'+f,False)]
  return {'success':bool(row['grade'].get('business_success')),'failed_outcomes':failed,'diagnostics':diagnose_submission(task,value),'arithmetic_audit':arithmetic_audit(task,value),'scope_note':'只诊断当前候选，不提供全局答案；候选非法不等于整体无解。','feedback_kind':'public-constraint-diagnostic-no-gold'}
 def compact(task,row,value): return {'task_id':task['task_id'],'group_id':task['group_id'],'decision':value or {},'grade':row['grade'],'feedback':feedback(task,row,value)}
+def build_curator_records(training, records):
+    """Join train policy evidence with public attempts, never test answers."""
+    result=[]
+    for r in records:
+        task=r['task']
+        evidence=training['tasks'].get(task['task_id'],{}).get('policy_evidence',[])
+        if task.get('split')!='train' or not evidence:
+            raise ValueError(f"missing train policy evidence: {task.get('task_id')}")
+        result.append({'task_id':task['task_id'],'group_id':task['group_id'],
+          'policy_evidence':evidence,
+          'attempts':[{'decision':a.get('model_output'),'grade':a['grade'],'feedback':a['feedback']} for a in r['attempts']]})
+    return result
+
+
 def run():
  from agent.env_utils import load_env
  for k,v in load_env(path=Path('/mnt/c/dev/rush-harness/.env')).items(): os.environ.setdefault(k,v)
@@ -43,7 +57,7 @@ def run():
    if val is not None: attempts.append({'attempt':2,'model_output':json.dumps(val,ensure_ascii=False),'grade':row['grade'],'feedback':feedback(task,row,val),'status':row['status']})
   records.append({'task':task,'attempts':attempts}); write(SESSION/'training-records.json',records)
  # Curator sees only public train task rules and attempts/feedback.
- curator_records=[{'task_id':r['task']['task_id'],'group_id':r['task']['group_id'],'policy_evidence':r['task'].get('policy_evidence',[]),'attempts':[{'decision':a.get('model_output'),'grade':a['grade'],'feedback':a['feedback']} for a in r['attempts']]} for r in records]
+ curator_records=build_curator_records(training,records)
  prompt='''你是GDPevo文字技能Curator。只看train公开规则、真实输出和公开诊断字段，不看test和私有答案。提炼条件、顺序、例外、停止条件；不记忆任何实例ID、报价ID、供应商ID、数字、价格、数量、revision或拉丁字段名。body只能用中文文字和中文标点，禁止阿拉伯数字与拉丁字母。不要改变权限、工具、审批或代码。只输出JSON恰好三个字段：skill_id为planning_strategy_v3，description字符串，body字符串且不超过一千六百字。'''
  response,curator_row=caller.call(SESSION/'curator',[{'role':'system','content':prompt},{'role':'user','content':json.dumps(curator_records,ensure_ascii=False)}])
  if response is None: raise RuntimeError('curator failed')
