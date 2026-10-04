@@ -38,7 +38,7 @@ INTERNAL_TOKEN_ENV = "INTERNAL_SERVICE_TOKEN"
 DEFAULT_MAIN_SERVICE_URL = "http://127.0.0.1:8000"
 
 #: The complete tool surface of this graph. Empty on purpose — see the module docstring.
-READ_TOOLS: tuple[str, ...] = ("inventory_warning",)
+READ_TOOLS: tuple[str, ...] = ("inventory_warning", "planning_goal")
 WRITE_TOOLS: tuple[str, ...] = ()
 
 #: The graph id this module is registered under, and the graph id of the supervisor-side
@@ -66,6 +66,9 @@ class AnalystState(TypedDict, total=False):
     report_markdown: str
     report_name: str
     error: str
+    owner_user_id: str
+    parent_thread_id: str
+    planning: bool
 
 
 def _main_service() -> tuple[str, str]:
@@ -87,7 +90,9 @@ def plan(state: AnalystState) -> dict[str, Any]:
         if role in ("user", "human") and content:
             instruction = str(content)
             break
-    return {"instruction": instruction}
+    return {"instruction": instruction,
+            "owner_user_id": str(state.get("owner_user_id") or ""),
+            "parent_thread_id": str(state.get("parent_thread_id") or "")}
 
 
 def read_warnings(state: AnalystState) -> dict[str, Any]:
@@ -103,13 +108,14 @@ def read_warnings(state: AnalystState) -> dict[str, Any]:
             f"{INTERNAL_TOKEN_ENV} is not set; the background analyst cannot authenticate"
         )
 
+    planning = any(word in state.get("instruction", "") for word in ("规划", "报价", "来源", "revision"))
     response = httpx.post(
         f"{base_url}/internal/analysis/read",
         json={
-            "owner_user_id": os.environ.get("ASYNC_OWNER_USER_ID", "demo-a"),
-            "thread_id": os.environ.get("ASYNC_PARENT_THREAD_ID", ""),
+            "owner_user_id": state.get("owner_user_id") or os.environ.get("ASYNC_OWNER_USER_ID", "demo-a"),
+            "thread_id": state.get("parent_thread_id") or os.environ.get("ASYNC_PARENT_THREAD_ID", ""),
             "operation_id": "analyst-read",
-            "tool": READ_TOOLS[0],
+            "tool": "planning_goal" if planning else READ_TOOLS[0],
             "arguments": {"page": 1, "page_size": 50},
         },
         headers={"x-internal-service-token": token},
@@ -130,7 +136,7 @@ def read_warnings(state: AnalystState) -> dict[str, Any]:
             raise RuntimeError(f"gateway returned unparsable JSON: {failure}") from failure
     if not isinstance(payload, dict):
         raise RuntimeError("gateway returned no readable payload")
-    return {"warnings": payload}
+    return {"warnings": payload, "planning": planning}
 
 
 def analyse(state: AnalystState) -> dict[str, Any]:
@@ -140,6 +146,14 @@ def analyse(state: AnalystState) -> dict[str, Any]:
     be reproducible, and a figure nobody can recompute is not a finding.
     """
     warnings = state.get("warnings") or {}
+    if state.get("planning"):
+        return {"analysis": {"planning": True, "revision": warnings.get("revision"),
+                              "goal_id": warnings.get("goal_id"),
+                              "decision": warnings.get("decision"),
+                              "order_count": len(warnings.get("orders") or []),
+                              "source_count": len(warnings.get("sources") or []),
+                              "missing_sources": [o.get("part_id") for o in (warnings.get("problem") or {}).get("offers", [])
+                                                   if o.get("source_status") != "verified"]}}
     data = warnings.get("data") if isinstance(warnings.get("data"), dict) else warnings
     items = (data or {}).get("items") or []
 
@@ -179,6 +193,16 @@ def analyse(state: AnalystState) -> dict[str, Any]:
 def finish(state: AnalystState) -> dict[str, Any]:
     """Produce the message the Protocol run returns."""
     analysis = state.get("analysis") or {}
+    if analysis.get("planning"):
+        missing = analysis.get("missing_sources") or []
+        summary = (f"规划目标 {analysis.get('goal_id')} 当前为第 {analysis.get('revision')} 版，"
+                   f"已创建 {analysis.get('order_count', 0)} 个订单，记录 {analysis.get('source_count', 0)} 个来源。")
+        if missing:
+            summary += "以下报价来源仍需核对：" + "、".join(missing) + "。"
+        return {"report": {"summary": summary, "facts": [], "warnings": missing},
+                "report_markdown": f"# 规划目标异步审查\n\n{summary}\n",
+                "report_name": "规划目标审查.md",
+                "messages": [AIMessage(content=summary)]}
     if not analysis:
         summary = "未取得库存数据，后台分析没有产出"
         return {

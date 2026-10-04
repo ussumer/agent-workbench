@@ -35,6 +35,7 @@ READ_ONLY_TOOLS: frozenset[str] = frozenset(
         "part_by_supplier",
         "supplier_query",
         "order_search_details",
+        "planning_goal",
     }
 )
 
@@ -54,7 +55,7 @@ class ReadRequest(BaseModel):
     arguments: dict[str, Any] = Field(default_factory=dict)
 
 
-def build_internal_analysis_router(*, mcp_url: str, service_token: str) -> APIRouter:
+def build_internal_analysis_router(*, mcp_url: str, service_token: str, database: Any = None) -> APIRouter:
     router = APIRouter(tags=["internal"])
 
     def _authorise(token: str | None) -> None:
@@ -85,12 +86,22 @@ def build_internal_analysis_router(*, mcp_url: str, service_token: str) -> APIRo
             )
         if not body.owner_user_id:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "owner_user_id is required")
+        arguments = _bounded_arguments(body.arguments)
+        if body.tool == "planning_goal":
+            if database is None:
+                raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "planning store is not configured")
+            goal = database.planning_goals.find_one({
+                "owner_user_id": body.owner_user_id, "thread_id": body.thread_id,
+                "goal_id": body.thread_id,
+            }, {"_id": 0})
+            if goal is None:
+                raise HTTPException(status.HTTP_404_NOT_FOUND, "planning goal not found")
+            return JSONResponse({"data": {"tool": body.tool, "result": _planning_payload(goal)},
+                                 "request_id": body.operation_id})
         if not mcp_url:
             raise HTTPException(
                 status.HTTP_503_SERVICE_UNAVAILABLE, "no MCP gateway is configured"
             )
-
-        arguments = _bounded_arguments(body.arguments)
         try:
             result = await _call_gateway(mcp_url, body.owner_user_id, body.tool, arguments)
         except Exception as failure:  # noqa: BLE001 - reported as unavailable, not crashed
@@ -104,6 +115,19 @@ def build_internal_analysis_router(*, mcp_url: str, service_token: str) -> APIRo
         )
 
     return router
+
+
+def _planning_payload(goal: Mapping[str, Any]) -> dict[str, Any]:
+    """Expose only public planning state; the async graph never receives approval tokens."""
+    problem = goal.get("problem") or {}
+    return {
+        "goal_id": goal.get("goal_id"), "revision": goal.get("revision"),
+        "problem": problem, "revision_change": goal.get("revision_change"),
+        "decision": goal.get("decision"),
+        "orders": [item.get("result", {}).get("data", {}) for item in goal.get("orders", [])],
+        "sources": [{"part_id": item.get("part_id"), "path": item.get("path"),
+                     "body": item.get("body")} for item in goal.get("sources", [])],
+    }
 
 
 def _bounded_arguments(arguments: dict[str, Any]) -> dict[str, Any]:

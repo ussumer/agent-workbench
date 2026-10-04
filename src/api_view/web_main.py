@@ -116,8 +116,6 @@ def create_app(
             sandboxes=sandboxes,
             mcp_url=_mcp_url(),
         )
-        resources = started
-
     app.state.context = context
     app.include_router(build_history_router(context), prefix="/api")
     app.include_router(build_chat_router(context), prefix="/api")
@@ -140,7 +138,8 @@ def create_app(
     # same internal token and neither is reachable from the browser.
     app.include_router(
         build_internal_analysis_router(
-            mcp_url=context.mcp_url, service_token=context.internal_service_token
+            mcp_url=context.mcp_url, service_token=context.internal_service_token,
+            database=context.resources.database,
         )
     )
     app.include_router(

@@ -70,7 +70,10 @@ class ProtocolClient(Protocol):
 
     def create_thread(self) -> str: ...
 
-    def start_run(self, *, thread_id: str, assistant_id: str, instruction: str) -> str: ...
+    def start_run(
+        self, *, thread_id: str, assistant_id: str, instruction: str,
+        context: Mapping[str, str] | None = None,
+    ) -> str: ...
 
     def run_status(self, *, thread_id: str, run_id: str) -> str: ...
 
@@ -143,12 +146,15 @@ class SdkProtocolClient:
             raise ProtocolUnavailable(f"cannot create a thread: {failure}") from failure
         return str(thread["thread_id"])
 
-    def start_run(self, *, thread_id: str, assistant_id: str, instruction: str) -> str:
+    def start_run(
+        self, *, thread_id: str, assistant_id: str, instruction: str,
+        context: Mapping[str, str] | None = None,
+    ) -> str:
         try:
             run = self.client.runs.create(
                 thread_id,
                 assistant_id=assistant_id,
-                input={"messages": [{"role": "user", "content": instruction}]},
+                input={"messages": [{"role": "user", "content": instruction}], **(context or {})},
             )
         except Exception as failure:  # noqa: BLE001
             raise ProtocolUnavailable(f"cannot start a run: {failure}") from failure
@@ -248,7 +254,8 @@ class AsyncTaskService:
         assistant_id = self._protocol.assistant_id(self._graph_id)
         async_thread_id = self._protocol.create_thread()
         async_run_id = self._protocol.start_run(
-            thread_id=async_thread_id, assistant_id=assistant_id, instruction=instruction
+            thread_id=async_thread_id, assistant_id=assistant_id, instruction=instruction,
+            context={"owner_user_id": owner_user_id, "parent_thread_id": parent_thread_id},
         )
 
         record = AsyncTaskRecord(
@@ -421,6 +428,7 @@ class AsyncTaskService:
             thread_id=record.async_thread_id,
             assistant_id=self._protocol.assistant_id(self._graph_id),
             instruction=instruction,
+            context={"owner_user_id": owner_user_id, "parent_thread_id": record.parent_thread_id},
         )
         entry = {
             "request_id": request_id,

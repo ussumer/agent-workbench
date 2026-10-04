@@ -1,6 +1,6 @@
 # 当前交接
 
-## 当前主线：T49
+## 当前主线：T50
 
 同线程Vue目标修订与继续规划，复用T43后端；不重跑T47/T48付费实验。
 
@@ -706,3 +706,6 @@ T48 gate `artifacts/tasks/T48/20261004T074542Z/receipt.json`：14 项组件测�
 ## 2026-10-04 T49 完成
 
 T49 gate `artifacts/tasks/T49/20261004T083808Z/receipt.json`：20 项 Vue 交互测试、生产构建、3 项真实 Mongo/Java/MCP revision API 回归全部通过。新增同线程目标修订入口：可修改预算/交期/数量，按物料选择刷新报价与交期；保存后显示受影响物料，保留已有订单，旧审批不复用，继续规划沿原 chat stream 生成新候选。前端依赖仅修复了缺失的 Rolldown 可选绑定；未新增付费模型调用。
+## 2026-10-04 T50 完成
+
+T50 gate `artifacts/tasks/T50/20261004T090438Z/receipt.json`：8 项异步规划单元测试与 5 项真实 Agent Protocol/OpenSandbox 回归通过。异步 run 通过官方 Protocol input 绑定可信 owner/thread；主进程内部 token 保护的 `planning_goal` 只读路由返回同一目标的 revision、来源状态、声明和已创建订单摘要；规划审查指令才走该路径，库存预警分析保持原行为。异步没有订单写权限，未新增付费模型调用。
