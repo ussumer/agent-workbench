@@ -3071,6 +3071,59 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T57",
+      "title": "GDPevo v3扩展真实训练与消融",
+      "file": "docs/plan/tasks/T57.md",
+      "depends_on": [
+        "T54",
+        "T56"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v3.md",
+        "docs/plan/contracts/planning.md"
+      ],
+      "checks": [
+        {
+          "id": "v3-boundaries",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 4,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t57.py",
+            "-q",
+            "--junitxml={evidence_dir}/v3-boundaries.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/v3-boundaries.xml"
+        },
+        {
+          "id": "v3-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_v3_training.py",
+            "verify",
+            "--output",
+            "{evidence_dir}/v3-report.json"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }

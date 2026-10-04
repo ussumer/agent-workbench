@@ -1,5 +1,10 @@
 # 当前交接
 
+## T57进行中
+
+T56已完成并Git保存；T54扩题冻结d07024e。首轮T57 20真实train（5全对），Curator因复述实例/authorization模式被校验拒绝；原attempt-gdpevo-v3-training-20261004保留。当前改进：复用原20train，补齐训练记录的公开规则和原输入；仅一次train失败修正，真实Curator重试一次，train筛选与新三组20test。产物在attempt-gdpevo-v3-expanded-20261004；不重复旧v2，未切生产bank。
+
+
 ## T56完成；准备T57扩展训练
 
 T56 gate `artifacts/tasks/T56/20261004T151202Z/receipt.json` 13 unit+只读真实verify通过。开发test fixed1/5(.48), raw4/5(.80), curated5/5(1.00)；train退化故未晋升，生产bank未改。第一次环境配置blocked保留；非mandatory Ruff import整理停止，不继续循环。扩题T54已从原工作区选择性引入（40新题、20train/20test、40反事实），私有裁判与公开训练材料分离。移植遗漏preserved-inputs导致一次143pass/1failed，补复制证据后144pass，validate通过；旧训练实现hash保持。预算沿用50/2。
