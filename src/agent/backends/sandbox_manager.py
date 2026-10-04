@@ -98,6 +98,7 @@ class SandboxRegistration:
     image_digest: str
     created_at: datetime
     last_seen: datetime
+    computation_quarantined: bool = False
 
     def as_document(self) -> dict[str, Any]:
         return {
@@ -108,6 +109,7 @@ class SandboxRegistration:
             "image_digest": self.image_digest,
             "created_at": self.created_at,
             "last_seen": self.last_seen,
+            "computation_quarantined": self.computation_quarantined,
         }
 
 
@@ -186,6 +188,7 @@ def _to_registration(document: dict[str, Any]) -> SandboxRegistration | None:
             image_digest=str(document.get("image_digest", "")),
             created_at=document["created_at"],
             last_seen=document["last_seen"],
+            computation_quarantined=document.get("computation_quarantined", False),
         )
     except KeyError:
         return None
@@ -518,6 +521,11 @@ class SandboxManager:
             self._registry.remove(user_id)
             return None
         proxy = self._proxy_for(user_id, handle, generation=max(1, registration.generation))
+        if registration.computation_quarantined:
+            proxy.quarantine_computation(expected_identity=(proxy.id, proxy.generation))
+            # _proxy_for re-registers the handle. Retain the durable quarantine
+            # so repeated API restarts cannot turn an uncertain container ready.
+            self._registry.upsert(registration)
         LOGGER.info("user=%s reconnected to sandbox %s", user_id, handle.sandbox_id)
         return proxy
 

@@ -172,6 +172,8 @@ class LiveStack:
     #: ``sandbox_breaker.BreakerRegistry``): one user's broken container must not stop another.
     breakers: Any = None
     graphs: dict[str, Any] = field(default_factory=dict)
+    planning_graphs: dict[str, Any] = field(default_factory=dict)
+    planning_episode_store: Any = None
     model_id: str = ""
     #: The configuration the graphs were built from, kept so the round can check that it is
     #: live *after* the stack came up — which is the first moment the services are all known
@@ -229,6 +231,14 @@ class LiveStack:
 
     def sandbox_for(self, owner: str) -> Any:
         return self.manager.get_or_create(owner)
+
+    def planning_graph_provider(self, owner: str) -> Any:
+        if owner not in DEMO_USERS:
+            raise KeyError("unknown planning owner")
+        if owner not in self.planning_graphs:
+            self.planning_graphs[owner] = _assemble_planning(self, owner, self.model_config)
+        graph = self.planning_graphs[owner]
+        return RecordingGraph(graph, self.recorder) if self.recorder is not None else graph
 
     def sandbox_url(self) -> str:
         """Where the *container* reaches the fixture site."""
@@ -410,6 +420,37 @@ def _assemble(stack: LiveStack, owner: str, model_config: ModelConfig) -> Any:
     return assembly.graph
 
 
+def _assemble_planning(stack: LiveStack, owner: str, model_config: ModelConfig) -> Any:
+    from langchain.agents.middleware import AgentMiddleware
+
+    from agent.planning.actor import build_planning_actor
+    from agent.planning.computation import ComputationService
+    from agent.planning.orders import PlanningOrders
+
+    backend = stack.manager.get_or_create(owner)
+    scoped = UserScopedStore(stack.store, owner)
+    virtual = build_virtual_backend(sandbox_backend=backend, store=scoped, owner_user_id=owner)
+    context = {
+        "manager": stack.manager, "owner_resolver": _owner_from_runtime,
+        "store_provider": lambda user: UserScopedStore(stack.store, user),
+        "backend_provider": lambda: backend,
+        "skill_reader": StoreAssignmentReader(stack.store, pointers=stack.skill_store),
+        "model": model_config.create_chat_model(), "backend": virtual,
+        "workspace_writer": lambda path, payload: backend.upload_files([(path, payload)]),
+        "breaker_registry": stack.breakers, "budget_config": stack.budget_config,
+    }
+    middleware = tuple(item for item in build_middlewares(context)
+                       if isinstance(item, AgentMiddleware) and item.name != "TodoListMiddleware")
+    return build_planning_actor(
+        model_config=model_config, orders=PlanningOrders(stack.database,
+                                                       grant_secret=stack.gateway.grant_secret),
+        kernel=ComputationService(stack.database, stack.manager.get_or_create),
+        channel=HttpMCPWriteChannel(stack.gateway.mcp_url), backend=virtual,
+        checkpointer=stack.resources.checkpointer, store=scoped, middleware=middleware,
+        episode_store=stack.planning_episode_store,
+    )
+
+
 @contextlib.contextmanager
 def running_stack(
     *,
@@ -464,10 +505,14 @@ def running_stack(
         protocol = contextlib.ExitStack()
         try:
             with erp_service.running_erp(run_dir / "erp", seed_path=loader.SEED_PATH) as erp:
+                app_port = _free_port()
                 with mcp_service.running_gateway(
                     run_dir / "gateway",
                     erp_base_url=erp.base_url,
                     erp_token=erp.token,
+                    extra_env={"MCP_APPROVAL_VERIFY_URL":
+                               f"http://127.0.0.1:{app_port}/internal/approvals/verify",
+                               INTERNAL_TOKEN_ENV: INTERNAL_TOKEN},
                 ) as gateway:
                     # The port is not ours to choose. Every procurement skill tells the agent to
                     # fetch quotes from the host at the port inside ``FIXTURES_BASE_URL``
@@ -523,7 +568,7 @@ def running_stack(
                             # had nowhere to go and the task ended with an empty last_error —
                             # a failure that looked like the task's fault and was the
                             # harness's.
-                            with _serving(stack) as base_url:
+                            with _serving(stack, port=app_port) as base_url:
                                 # The Protocol process reads these from *its* environment, so
                                 # they are set before it starts and removed after: a value left
                                 # behind would silently redirect the next thing that reads it.
@@ -563,7 +608,7 @@ def _free_port() -> int:
 
 
 @contextlib.contextmanager
-def _serving(stack: LiveStack) -> Iterator[str]:
+def _serving(stack: LiveStack, *, port: int | None = None) -> Iterator[str]:
     """Serve the app on a real port for the duration of the block, and yield its address.
 
     A real server rather than a ``TestClient``, because D08's background analyst lives in
@@ -576,7 +621,7 @@ def _serving(stack: LiveStack) -> Iterator[str]:
 
     import uvicorn
 
-    port = _free_port()
+    port = _free_port() if port is None else port
     base_url = f"http://127.0.0.1:{port}"
     server = uvicorn.Server(
         uvicorn.Config(stack.app, host="127.0.0.1", port=port, log_level="warning")
@@ -600,10 +645,17 @@ def _serving(stack: LiveStack) -> Iterator[str]:
 
 
 def _create_app(stack: LiveStack) -> Any:
+    from agent.env_utils import load_env, secret_values
+    from agent.evolution.episodes import EpisodeStore
+    from agent.planning.orders import PlanningOrders
     from api_view.api.deps import WebContext
     from api_view.run_registry import RunRegistry
     from api_view.web_main import create_app
-
+    stack.approvals.planning_guard = PlanningOrders(
+        stack.database, grant_secret=stack.gateway.grant_secret,
+    ).validate_action
+    stack.planning_episode_store = EpisodeStore(stack.database, secrets=secret_values(load_env()))
+    model_identity = {k: v for k, v in stack.model_config.redacted().items() if k != "api_key"}
     context = WebContext(
         resources=stack.resources,
         repository=ApplicationRepository(stack.database),
@@ -613,6 +665,10 @@ def _create_app(stack: LiveStack) -> Any:
         async_tasks=build_async_task_service(stack.database, artifacts=stack.artifacts),
         settings=stack.settings,
         graph_provider=stack.graph_provider,
+        extra={"planning_graph_provider": stack.planning_graph_provider,
+               "planning_erp_client": stack.erp.client,
+               "planning_episode_store": stack.planning_episode_store,
+               "planning_model_identity": {"provenance": "configured-live", "config": model_identity}},
         internal_service_token=INTERNAL_TOKEN,
         sandboxes=stack.manager,
         # The gateway *this stack started*, not the one the environment names. The internal

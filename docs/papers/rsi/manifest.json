@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "retrieved_at_utc": "2026-10-03T05:34:17.334246+00:00",
+  "versions": "Pinned to versions cited by the accepted implementation specification; not a latest-version claim.",
+  "text_extraction": "pdftotext -layout -enc UTF-8; formulas/tables may require checking the PDF.",
+  "papers": [
+    {
+      "arxiv_id": "2608.23552v1",
+      "title": "Prime Agent: A Self-Improving RLM Harness",
+      "pages": 16,
+      "sources": {
+        "pdf": "https://arxiv.org/pdf/2608.23552v1",
+        "html": "https://arxiv.org/html/2608.23552v1"
+      },
+      "files": [
+        {
+          "path": "prime-agent/2608.23552v1.pdf",
+          "bytes": 518236,
+          "sha256": "973323f2d3d85f3ec9b21709248b65ba236cf527cd5cc9ff556909104a5fd370"
+        },
+        {
+          "path": "prime-agent/2608.23552v1.html",
+          "bytes": 239715,
+          "sha256": "14e64b1ae601fec9169d257584bc0f40602d0df898f9d93efbbbd8bbdc2f7cb1"
+        },
+        {
+          "path": "prime-agent/2608.23552v1.txt",
+          "bytes": 59338,
+          "sha256": "23c683ee02c260c20c1b3f2f654cdfb0be7dd1ef8ea7e09d2da7774a323e937d"
+        }
+      ]
+    },
+    {
+      "arxiv_id": "2608.22793v2",
+      "title": "TRACE: A Self-Evolving Skill Bank for Consistent, Limit-Aware LLM Agents",
+      "pages": 9,
+      "sources": {
+        "pdf": "https://arxiv.org/pdf/2608.22793v2",
+        "html": "https://arxiv.org/html/2608.22793v2"
+      },
+      "files": [
+        {
+          "path": "trace/2608.22793v2.pdf",
+          "bytes": 708123,
+          "sha256": "5e4dbb0711f3f497210e27f1783da8f7042526ee38474029d71c00096b7ce162"
+        },
+        {
+          "path": "trace/2608.22793v2.html",
+          "bytes": 223477,
+          "sha256": "c98d268bbf218df6668b6e2a032773d2c0b4e1e8f75cc8dd46f5200bc267fa6b"
+        },
+        {
+          "path": "trace/2608.22793v2.txt",
+          "bytes": 61532,
+          "sha256": "0b0ff3957c01cfbc94a652e9277206d12e598b7796722dd3c48b7bca3e104a28"
+        }
+      ]
+    },
+    {
+      "arxiv_id": "2608.03764v1",
+      "title": "GDPevo: Evaluating Agent Self-Evolution on Real Business Tasks",
+      "pages": 22,
+      "sources": {
+        "pdf": "https://arxiv.org/pdf/2608.03764v1",
+        "html": "https://arxiv.org/html/2608.03764v1"
+      },
+      "files": [
+        {
+          "path": "gdpevo/2608.03764v1.pdf",
+          "bytes": 944846,
+          "sha256": "06d5391e998206251e50a1234fe9a622cc10b19fbce0b18be5ce8044a96f61f5"
+        },
+        {
+          "path": "gdpevo/2608.03764v1.html",
+          "bytes": 306879,
+          "sha256": "b05812e4a62de1a34dc3e1e023f3da3ebc2b09541dcdb6c5973779481989a60d"
+        },
+        {
+          "path": "gdpevo/2608.03764v1.txt",
+          "bytes": 106619,
+          "sha256": "584def6bbdca892a2f3b099b78aa61ed50861319aa50e52148ba24ceff474074"
+        }
+      ]
+    }
+  ]
+}

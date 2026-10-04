@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "goal_id": "procurement-planning-v1",
+  "revision": 1,
+  "currency": "CNY",
+  "budget": "2500.00",
+  "demands": [
+    {"part_id": "P001", "quantity": 42, "max_lead_days": 3, "required": true, "priority": 0, "allow_partial": false, "allow_supplier_split": false},
+    {"part_id": "P003", "quantity": 15, "max_lead_days": 7, "required": true, "priority": 0, "allow_partial": false, "allow_supplier_split": false},
+    {"part_id": "P004", "quantity": 30, "max_lead_days": 7, "required": false, "priority": 1, "allow_partial": true, "allow_supplier_split": false}
+  ]
+}

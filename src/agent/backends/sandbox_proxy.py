@@ -43,6 +43,7 @@ from deepagents.backends.protocol import (
     SandboxBackendProtocol,
     WriteResult,
 )
+from opensandbox.exceptions import SandboxApiException, SandboxException
 
 from agent.backends.custom_opensandbox import SandboxExecutionError, collect_sandbox_failures
 from agent.middlewares.sandbox_breaker import SandboxBreaker
@@ -91,6 +92,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
         self._execution_lock = execution_lock or threading.Lock()
         self._state_lock = threading.Lock()
         self._replacing = False
+        self._computation_quarantined = False
         self._replacements = 0
 
     # ------------------------------------------------------------- handle state
@@ -134,7 +136,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
         state forever, turning every later call into a confusing retry verdict.
         """
         with self._state_lock:
-            self._replacing = False
+            self._replacing = self._computation_quarantined
         LOGGER.warning("proxy owner=%s replacement aborted", self._owner_user_id)
 
     def replace_backend(self, backend: Any) -> int:
@@ -145,6 +147,7 @@ class SandboxBackendProxy(SandboxBackendProtocol):
             self._generation += 1
             self._replacements += 1
             self._replacing = False
+            self._computation_quarantined = False
             generation = self._generation
         LOGGER.info(
             "proxy owner=%s generation=%s replaced old=%s new=%s",
@@ -175,6 +178,13 @@ class SandboxBackendProxy(SandboxBackendProtocol):
                     self.breaker.record_failure(failures[0], expected_opened_count=epoch)
                 elif isinstance(failure, (SandboxExecutionError, httpx.HTTPError, OSError)):
                     self.breaker.record_failure("TRANSPORT_ERROR", expected_opened_count=epoch)
+                elif isinstance(failure, SandboxException) and (
+                    failure.error.code in {"TIMEOUT", "CONNECTION", "UNHEALTHY", "READY_TIMEOUT"}
+                    or isinstance(failure, SandboxApiException) and (
+                        failure.status_code is not None and failure.status_code >= 500
+                    )
+                ):
+                    self.breaker.record_failure("TRANSPORT_ERROR", expected_opened_count=epoch)
                 else:
                     self.breaker.record_ignored(expected_opened_count=epoch)
                 raise
@@ -194,10 +204,79 @@ class SandboxBackendProxy(SandboxBackendProtocol):
         with self._execution_lock:
             return self._invoke("execute", command, timeout=timeout)
 
+    def computation_run(self, command: str, *, timeout: float, cancel_path: str,
+                        should_cancel, on_started, expected_identity: tuple[str, int]) -> dict:
+        with self._execution_lock:
+            if should_cancel():
+                raise TimeoutError("COMPUTATION_CANCELLED_BEFORE_START")
+            if (self.id, self.generation) != expected_identity:
+                raise SandboxReplacedError(self.owner_user_id, self.generation)
+            return self._invoke("computation_run", command, timeout=timeout,
+                                cancel_path=cancel_path, should_cancel=should_cancel,
+                                on_started=on_started)
+
+    def computation_cancel(self, cancel_path: str, *, expected_identity: tuple[str, int]) -> None:
+        # Control plane must bypass the execution queue and an open breaker.
+        with self._state_lock:
+            if (str(self._backend.id), self._generation) != expected_identity:
+                raise SandboxReplacedError(self.owner_user_id, self.generation)
+            backend = self._backend
+        responses = backend.upload_files([(cancel_path, b"cancel")])
+        if any(response.error for response in responses):
+            raise SandboxExecutionError("cancellation marker could not be delivered")
+
+    def computation_wait(self, execution_id: str, *, expected_identity: tuple[str, int]) -> dict:
+        with self._state_lock:
+            if (str(self._backend.id), self._generation) != expected_identity:
+                raise SandboxReplacedError(self.owner_user_id, self.generation)
+            backend = self._backend
+        return backend.computation_wait(execution_id)
+
+    def quarantine_computation(self, *, expected_identity: tuple[str, int]) -> None:
+        with self._state_lock:
+            if (str(self._backend.id), self._generation) == expected_identity:
+                self._replacing = True
+                self._computation_quarantined = True
+
+    def computation_publish(self, action, *, expected_identity: tuple[str, int]):
+        # Hold the generation fence through publication; replacement must not
+        # race between the identity check and the authoritative Mongo CAS.
+        with self._state_lock:
+            if self._replacing or (str(self._backend.id), self._generation) != expected_identity:
+                raise SandboxReplacedError(self.owner_user_id, self.generation)
+            return action()
+
     async def aexecute(self, command: str, *, timeout: int | None = None) -> ExecuteResponse:
         # Delegated through the sync entry point so the per-owner execution lock is
         # held by the worker thread that actually runs the command.
         return await asyncio.to_thread(self.execute, command, timeout=timeout)
+
+    def kernel_create_context(self):
+        with self._execution_lock:
+            return self._invoke("kernel_create_context")
+
+    def kernel_get_context(self, context_id: str):
+        return self._invoke("kernel_get_context", context_id)
+
+    def kernel_run(self, code: str, context, handlers=None, *, should_cancel=None,
+                   expected_identity: tuple[str, int] | None = None):
+        with self._execution_lock:
+            if should_cancel is not None and should_cancel():
+                raise TimeoutError("KERNEL_CANCELLED_BEFORE_START")
+            if expected_identity is not None and (self.id, self.generation) != expected_identity:
+                raise SandboxReplacedError(self.owner_user_id, self.generation)
+            return self._invoke("kernel_run", code, context, handlers, should_cancel=should_cancel)
+
+    def kernel_interrupt(self, execution_id: str, *, expected_sandbox_id: str) -> None:
+        if self.id != expected_sandbox_id:
+            raise SandboxReplacedError(self.owner_user_id, self.generation)
+        # Control traffic must still stop code while an execution holds the queue
+        # or the breaker is open. It is not evidence that the data plane is healthy.
+        self._current().kernel_interrupt(execution_id)
+
+    def kernel_delete_context(self, context_id: str) -> None:
+        with self._execution_lock:
+            return self._invoke("kernel_delete_context", context_id)
 
     # --------------------------------------------------------------------- ls
 

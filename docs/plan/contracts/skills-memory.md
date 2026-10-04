@@ -85,3 +85,6 @@ Store 的 memories/{owner} 中，显式偏好仍在 preferences 键；自动历�
 archive/<thread_id>/<uuid>仅追加新key，记录应用run_id、checkpoint_ns及main/子代理scope；UUID避免同run多次摘要或并发覆盖。应用运行ID使用configurable.application_run_id，避免通用run_id被框架当成重入标记。非API调用可无应用run_id，但owner/thread/durable store不可缺失。BaseMessage采用model_dump(mode="json")，不只保存content；大于Mongo文档限制或不支持的状态序列化失败不得降级为仅摘要。
 
 主代理与每个子代理均装配独立摘要引擎，使用实际配置模型：显式models覆盖优先，其次YAML model，再继承父模型；不猜测模型ID。to_subagents新增可选parent_model用于装配，已有仅描述调用保持兼容。build_compaction_tool返回官方工具中间件子类，tools和Command协议保持。检查影响T11/T13/T19/T28/T29/T32/T34以及后续live验收。这里只修复归档与运行接线，尚未建立封存评测或RSI晋升闭环。
+
+## 2026-10-03 用户批准的新 T38（覆盖旧 kernel 约定）
+持久计算指Mongo权威版本化JSON数据，每步OpenSandbox内独立Python进程。通用load_state/save_state；Agent自行计算，无固定planner。按owner/thread/session、operation ID/base version与容器generation隔离；临时结果正常退出、JSON校验、进程树清理确认后CAS发布。失败/取消/超时不更新旧状态；无法确认停止则隔离环境。仅复制read_names所需数据，未变化数据复用；函数/模块/DataFrame下次显式重建，不保持对象身份。API/容器重建加载数据，不重放代码；无任意文件/网络副作用回滚保证，订单仍MCP审批。T40 Actor工具/提示与T41轨迹、T43版本变化需按新语义回归；旧交付组件证据不证明新计算机制。旧Jupyter补丁与失败证据保留但不再继续维护。

@@ -1773,10 +1773,716 @@
           "kind": "command",
           "required": true,
           "argv": [
-            "python",
+            "python3",
             "scripts/check_learning_docs.py"
           ],
           "cwd": "."
+        }
+      ]
+    },
+    {
+      "id": "T37",
+      "title": "多约束采购决策环境与独立裁判",
+      "file": "docs/plan/tasks/T37.md",
+      "depends_on": [
+        "T35"
+      ],
+      "requirements": [
+        "R29"
+      ],
+      "reads": [
+        "docs/runtime/procurement-planning-scenario-proposal-2026-10-03.md",
+        "docs/plan/contracts/planning.md",
+        "docs/plan/contracts/erp.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "planning-environment",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 25,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t37.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning.xml"
+        },
+        {
+          "id": "planning-erp",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 2,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t37_erp.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-erp.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-erp.xml"
+        }
+      ]
+    },
+    {
+      "id": "T38",
+      "title": "OpenSandbox持久JSON计算数据与每步独立Python执行",
+      "file": "docs/plan/tasks/T38.md",
+      "depends_on": [
+        "T37",
+        "T33",
+        "T35"
+      ],
+      "requirements": [
+        "R30"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/plan/contracts/storage-sandbox.md",
+        "docs/plan/contracts/skills-memory.md",
+        "docs/runtime/procurement-planning-implementation.md"
+      ],
+      "checks": [
+        {
+          "id": "computation-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t38_computation.py",
+            "-q",
+            "--junitxml={evidence_dir}/computation-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/computation-unit.xml"
+        },
+        {
+          "id": "computation-integration",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t38_process.py",
+            "-q",
+            "--junitxml={evidence_dir}/computation-integration.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/computation-integration.xml"
+        },
+        {
+          "id": "sandbox-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 81,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t08.py",
+            "tests/acceptance/test_t09.py",
+            "tests/acceptance/test_t33.py",
+            "tests/acceptance/test_t07.py",
+            "-q",
+            "--junitxml={evidence_dir}/sandbox-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/sandbox-regression.xml"
+        },
+        {
+          "id": "planning-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 104,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t37.py",
+            "tests/acceptance/test_t39.py",
+            "tests/acceptance/test_t40.py",
+            "tests/acceptance/test_t41.py",
+            "tests/acceptance/test_t43.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T39",
+      "title": "版本绑定的逐单审批与真实多订单执行",
+      "file": "docs/plan/tasks/T39.md",
+      "depends_on": [
+        "T37",
+        "T12",
+        "T35"
+      ],
+      "requirements": [
+        "R29",
+        "R14"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/plan/contracts/mcp.md",
+        "docs/plan/contracts/storage-sandbox.md",
+        "docs/plan/verification.md",
+        "docs/runtime/procurement-planning-implementation.md"
+      ],
+      "checks": [
+        {
+          "id": "planning-orders",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t39.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-orders.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-orders.xml"
+        },
+        {
+          "id": "approval-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 30,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t12.py",
+            "tests/acceptance/test_t07.py",
+            "-q",
+            "--junitxml={evidence_dir}/approval-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/approval-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T40",
+      "title": "独立规划Actor工具与逐单审批恢复接线",
+      "file": "docs/plan/tasks/T40.md",
+      "depends_on": [
+        "T37",
+        "T39",
+        "T35"
+      ],
+      "requirements": [
+        "R29",
+        "R14",
+        "R22"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/skills-memory.md",
+        "docs/plan/implementation-notes.md",
+        "docs/runtime/procurement-planning-implementation.md"
+      ],
+      "checks": [
+        {
+          "id": "actor-wiring",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 10,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t40.py",
+            "-q",
+            "--junitxml={evidence_dir}/actor-wiring.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/actor-wiring.xml"
+        },
+        {
+          "id": "planning-chat-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 50,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t39.py",
+            "tests/acceptance/test_t13.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-chat-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-chat-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T41",
+      "title": "规划Episode聚合与冻结技能逐回合编排组件",
+      "file": "docs/plan/tasks/T41.md",
+      "depends_on": [
+        "T40",
+        "T35",
+        "T32"
+      ],
+      "requirements": [
+        "R29",
+        "R22"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/skills-memory.md",
+        "docs/runtime/self-evolution-spec-2026-10-03.md",
+        "docs/runtime/paper-fidelity-audit-2026-10-03.md",
+        "docs/papers/rsi/trace/2608.22793v2.txt"
+      ],
+      "checks": [
+        {
+          "id": "episode-orchestration",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t41.py",
+            "-q",
+            "--junitxml={evidence_dir}/episode-orchestration.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/episode-orchestration.xml"
+        },
+        {
+          "id": "planning-persistence-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 38,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t40.py",
+            "tests/acceptance/test_t07.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-persistence-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-persistence-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T42",
+      "title": "Vue规划目标录入与实际订单展示",
+      "file": "docs/plan/tasks/T42.md",
+      "depends_on": [
+        "T40",
+        "T41",
+        "T14"
+      ],
+      "requirements": [
+        "R29",
+        "R14"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/plan/contracts/chat.md",
+        "docs/runtime/planning-actor-entry.md",
+        "docs/plan/verification.md"
+      ],
+      "checks": [
+        {
+          "id": "frontend-components",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 50,
+          "argv": [
+            "npm",
+            "run",
+            "test",
+            "--",
+            "--reporter=junit",
+            "--outputFile=../{evidence_dir}/frontend-components.xml"
+          ],
+          "cwd": "frontend",
+          "report": "{evidence_dir}/frontend-components.xml"
+        },
+        {
+          "id": "frontend-build",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "cwd": "frontend"
+        },
+        {
+          "id": "planning-api-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 14,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t40.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-api-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-api-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T43",
+      "title": "目标修订与已写订单差量重规划",
+      "file": "docs/plan/tasks/T43.md",
+      "depends_on": [
+        "T37",
+        "T39",
+        "T40",
+        "T41",
+        "T42"
+      ],
+      "requirements": [
+        "R29",
+        "R14",
+        "R22"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/plan/contracts/chat.md",
+        "docs/plan/contracts/erp.md",
+        "docs/runtime/planning-actor-entry.md",
+        "docs/runtime/procurement-planning-scenario-proposal-2026-10-03.md"
+      ],
+      "checks": [
+        {
+          "id": "revision-reconciliation",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 15,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t43.py",
+            "-q",
+            "--junitxml={evidence_dir}/revision-reconciliation.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/revision-reconciliation.xml"
+        },
+        {
+          "id": "planning-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 104,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t37.py",
+            "tests/acceptance/test_t39.py",
+            "tests/acceptance/test_t40.py",
+            "tests/acceptance/test_t41.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T44",
+      "title": "学习空间基线与独立反馈契约",
+      "file": "docs/plan/tasks/T44.md",
+      "depends_on": [
+        "T37",
+        "T38",
+        "T40",
+        "T41",
+        "T43"
+      ],
+      "requirements": [
+        "R31"
+      ],
+      "reads": [
+        "docs/runtime/procurement-planning-scenario-proposal-2026-10-03.md",
+        "docs/runtime/self-evolution-spec-2026-10-03.md",
+        "docs/runtime/paper-fidelity-audit-2026-10-03.md",
+        "docs/plan/contracts/planning.md"
+      ],
+      "checks": [
+        {
+          "id": "learning-space-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t44.py",
+            "-q",
+            "--junitxml={evidence_dir}/learning-space-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/learning-space-unit.xml"
+        },
+        {
+          "id": "learning-space-report",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/learning_space.py",
+            "validate",
+            "--output",
+            "{evidence_dir}/learning-space.json"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/learning-space.json"
+        },
+        {
+          "id": "planning-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 144,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t37.py",
+            "tests/acceptance/test_t38_computation.py",
+            "tests/acceptance/test_t39.py",
+            "tests/acceptance/test_t40.py",
+            "tests/acceptance/test_t41.py",
+            "tests/acceptance/test_t43.py",
+            "-q",
+            "--junitxml={evidence_dir}/planning-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T45",
+      "title": "独立反馈持久归档与真实基线闸门",
+      "file": "docs/plan/tasks/T45.md",
+      "depends_on": [
+        "T44"
+      ],
+      "requirements": [
+        "R32"
+      ],
+      "reads": [
+        "docs/runtime/learning-space-baseline.md",
+        "docs/runtime/self-evolution-spec-2026-10-03.md",
+        "docs/plan/contracts/planning.md"
+      ],
+      "checks": [
+        {
+          "id": "feedback-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t45.py",
+            "-q",
+            "-m",
+            "unit",
+            "--junitxml={evidence_dir}/feedback-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/feedback-unit.xml"
+        },
+        {
+          "id": "feedback-integration",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t45.py",
+            "-q",
+            "-m",
+            "integration",
+            "--junitxml={evidence_dir}/feedback-integration.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/feedback-integration.xml"
+        },
+        {
+          "id": "feedback-regression",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 27,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t44.py",
+            "tests/acceptance/test_t41.py",
+            "-q",
+            "--junitxml={evidence_dir}/feedback-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/feedback-regression.xml"
+        }
+      ]
+    },
+    {
+      "id": "T46",
+      "title": "真实规划 Actor 基线与预算修订评测入口",
+      "file": "docs/plan/tasks/T46.md",
+      "depends_on": [
+        "T45"
+      ],
+      "requirements": [
+        "R32"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md",
+        "docs/runtime/persistent-computation.md",
+        "docs/runtime/learning-space-baseline.md"
+      ],
+      "checks": [
+        {
+          "id": "evaluation-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t46.py",
+            "-q",
+            "--junitxml={evidence_dir}/evaluation-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/evaluation-unit.xml"
+        },
+        {
+          "id": "planning-regression",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 68,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t44.py",
+            "tests/acceptance/test_t38_computation.py",
+            "tests/acceptance/test_t45.py",
+            "-q",
+            "-m",
+            "unit",
+            "--junitxml={evidence_dir}/planning-regression.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/planning-regression.xml"
+        },
+        {
+          "id": "real-actor-baseline",
+          "mode": "live",
+          "kind": "test",
+          "required": true,
+          "min_tests": 3,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t46_live.py",
+            "-q",
+            "--junitxml={evidence_dir}/real-actor-baseline.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/real-actor-baseline.xml"
         }
       ]
     }

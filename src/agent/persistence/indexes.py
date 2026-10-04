@@ -38,6 +38,13 @@ COLLECTION_SKILL_SMOKE_ATTEMPTS = "skill_smoke_attempts"
 #: T20: the local mapping from a background task to the Agent Protocol thread/run performing
 #: it, plus the owner the Protocol service knows nothing about.
 COLLECTION_ASYNC_TASKS = "async_tasks"
+COLLECTION_KERNEL_SESSIONS = "planning_kernel_sessions"
+COLLECTION_KERNEL_EXECUTIONS = "planning_kernel_executions"
+COLLECTION_KERNEL_OUTPUTS = "planning_kernel_outputs"
+COLLECTION_PLANNING_GOALS = "planning_goals"
+COLLECTION_PLANNING_SKILL_BANKS = "planning_skill_banks"
+COLLECTION_PLANNING_EPISODES = "planning_episodes"
+COLLECTION_PLANNING_EPISODE_EVENTS = "planning_episode_events"
 
 APPLICATION_COLLECTIONS: tuple[str, ...] = (
     COLLECTION_THREADS,
@@ -51,6 +58,13 @@ APPLICATION_COLLECTIONS: tuple[str, ...] = (
     COLLECTION_SKILL_ASSIGNMENTS,
     COLLECTION_SKILL_SMOKE_ATTEMPTS,
     COLLECTION_ASYNC_TASKS,
+    COLLECTION_KERNEL_SESSIONS,
+    COLLECTION_KERNEL_EXECUTIONS,
+    COLLECTION_KERNEL_OUTPUTS,
+    COLLECTION_PLANNING_GOALS,
+    COLLECTION_PLANNING_SKILL_BANKS,
+    COLLECTION_PLANNING_EPISODES,
+    COLLECTION_PLANNING_EPISODE_EVENTS,
 )
 
 # Collections created and indexed by langgraph-checkpoint-mongodb / langgraph-store-mongodb.
@@ -72,6 +86,24 @@ class IndexSpec:
 
 
 INDEX_SPECS: tuple[IndexSpec, ...] = (
+    IndexSpec(COLLECTION_PLANNING_EPISODES, "uk_planning_episode_goal", (
+        ("owner_user_id", ASCENDING), ("thread_id", ASCENDING), ("goal_id", ASCENDING),
+    ), True, "同一目标跨API恢复聚合一个Episode"),
+    IndexSpec(COLLECTION_PLANNING_EPISODE_EVENTS, "ix_planning_episode_events", (
+        ("owner_user_id", ASCENDING), ("episode_id", ASCENDING), ("seq", ASCENDING),
+    ), False, "按归属导出顺序事件与完整分块"),
+    IndexSpec(COLLECTION_PLANNING_GOALS, "uk_planning_goal", (
+        ("owner_user_id", ASCENDING), ("thread_id", ASCENDING), ("goal_id", ASCENDING),
+    ), True, "规划目标的版本与执行租约在同一文档原子变更"),
+    IndexSpec(COLLECTION_KERNEL_SESSIONS, "uk_kernel_session", (
+        ("owner_user_id", ASCENDING), ("thread_id", ASCENDING), ("session", ASCENDING)
+    ), True, "持久计算context按可信owner/thread/session隔离"),
+    IndexSpec(COLLECTION_KERNEL_EXECUTIONS, "uk_kernel_execution", (
+        ("operation_id", ASCENDING),
+    ), True, "每次真实代码执行保留独立不可覆盖记录"),
+    IndexSpec(COLLECTION_KERNEL_OUTPUTS, "uk_kernel_output_chunk", (
+        ("operation_id", ASCENDING), ("seq", ASCENDING),
+    ), True, "完整代码输出分块，展示截断不丢原文"),
     IndexSpec(
         collection=COLLECTION_THREADS,
         name="uk_threads_thread_id",

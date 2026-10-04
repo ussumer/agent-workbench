@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { Menu, Send, User, XCircle } from 'lucide-vue-next'
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, onMounted, reactive, ref, shallowRef } from 'vue'
 
 import AsyncTasks from './components/AsyncTasks.vue'
 import Conversation from './components/Conversation.vue'
 import HistoryDrawer from './components/HistoryDrawer.vue'
+import PlanningGoal from './components/PlanningGoal.vue'
 import SidePanel from './components/SidePanel.vue'
 import { api, newRequestId, type ThreadSummary } from './api/client'
 import { ChatMachine } from './state/chat'
 
 const DEMO_USERS = ['demo-a', 'demo-b'] as const
 
-const machine = shallowRef(new ChatMachine())
+const machine = shallowRef(reactive(new ChatMachine()))
 const snapshot = computed(() => machine.value.snapshot())
 
 const currentUser = ref<string | null>(null)
@@ -21,6 +22,15 @@ const drawerOpen = ref(false)
 const draft = ref('')
 const busy = ref(false)
 const notice = ref('')
+const planningRefresh = ref(0)
+
+function planningCreated(threadId: string): void {
+  machine.value.resetForAccountSwitch()
+  machine.value.threadId = threadId
+  draft.value = ''
+  notice.value = '规划目标已保存，请输入目标说明开始规划。'
+  void refreshThreads()
+}
 
 const canSend = computed(() => !busy.value && draft.value.trim().length > 0)
 
@@ -36,6 +46,7 @@ onMounted(async () => {
 })
 
 async function switchUser(userId: string): Promise<void> {
+  if (busy.value) return
   await api.session(userId)
   currentUser.value = userId
   // Switching accounts must clear what the previous one could see: the previous user's
@@ -46,6 +57,7 @@ async function switchUser(userId: string): Promise<void> {
 }
 
 function dismissSession(): void {
+  if (busy.value) return
   currentUser.value = null
   machine.value.resetForAccountSwitch()
   threads.value = []
@@ -64,6 +76,7 @@ async function refreshThreads(): Promise<void> {
 }
 
 async function openThread(threadId: string): Promise<void> {
+  if (busy.value) return
   drawerOpen.value = false
   try {
     const detail = await api.threadDetail(threadId)
@@ -206,6 +219,7 @@ async function consume(stream: AsyncGenerator<Parameters<typeof machine.value.ap
     machine.value.applyFrame(frame)
   }
   machine.value.connectionEndedWithoutDone()
+  planningRefresh.value += 1
 }
 
 /** Re-read the server's view after a disconnect or a conflict. Never resend blindly. */
@@ -267,6 +281,7 @@ function messageOf(failure: unknown): string {
           class="chip"
           :class="{ 'chip--active': currentUser === user }"
           :aria-pressed="currentUser === user"
+          :disabled="busy"
           @click="switchUser(user)"
         >
           {{ user }}
@@ -276,6 +291,7 @@ function messageOf(failure: unknown): string {
           class="icon-button"
           type="button"
           aria-label="清除本地会话"
+          :disabled="busy"
           @click="dismissSession"
         >
           <XCircle :size="15" />
@@ -299,6 +315,7 @@ function messageOf(failure: unknown): string {
       />
 
       <section class="chat">
+        <PlanningGoal :key="currentUser" :thread-id="machine.threadId" :busy="busy" :refresh="planningRefresh" @created="planningCreated" />
         <Conversation :snapshot="snapshot" />
 
         <AsyncTasks :thread-id="machine.threadId" />

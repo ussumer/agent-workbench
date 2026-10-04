@@ -219,10 +219,70 @@
       "notes": "完整 gate 归档8+T19 28+装配35+聊天预算记忆45，共116 passed/0 failed/0 skipped；补充T34 7 passed。官方SDK子类自动/主动同步异步摘要前完整Mongo归档并读回；UUID追加、完整消息字段、待办与中断、owner/thread/namespace/scope/application_run_id，失败不提交压缩。主子实际模型接线。baseline两项真实覆盖/丢字段失败及SDK夹具中间失败XML均保留。Ruff六文件通过，归档/工具摘要/聊天三源码mypy通过；更广类型检查的旧backend名义类型、YAML存根与TypedDict问题未作为通过。尚非完整RSI。"
     },
     "T36": {
-      "status": "pending",
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T36/20261002T142011Z/receipt.json",
+      "notes": "用户要求分part学习，已新增docs/learning入口、七章机制文档和独立PROGRESS全部待确认。每章有目标/解释/代码入口/案例/自检/面试表达/确认。文档检查验证69个本地引用及章节结构；不声称应用、渲染或用户掌握通过。初轮WSL缺python命令失败收据141940保留，使用现有python3后完整gate142011 passed。"
+    },
+    "T37": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T37/20261003T061537Z/receipt.json",
+      "notes": "规划公共契约/方案checker、ERP真实读取、修订依赖元数据、控制面独立穷举裁判。53项确定性（含80生成小实例DP参照、8单独/组合/反事实条件）+2真实Java/H2通过，0失败/跳过。Ruff及7源码mypy通过；原失败061028、中间通过061318与component XML保留。无模型调用，不宣称kernel、多单审批、TRACE学习或迁移收益完成。"
+    },
+    "T38": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T38/20261003T111735Z/receipt.json",
+      "notes": "用户明确批准持久JSON+每步独立OpenSandbox Python。完整gate19协议+24真实Mongo/OpenSandbox+85原沙箱+125规划回归，共253passed/0failed/0skipped，所有证据hash核对。版本/operation/session CAS、仅所需数据加载/未变化结果复用、失败不发布、Linux subreaper实际终止/reap double-fork/setsid后代、取消迟到/容器generation fencing、API崩溃显式恢复、容器换代重建副本、持久隔离与重复API重连、Mongo发布应答丢失对账。Actor默认工具改computation，订单仍MCP审批。Ruff12变更文件/5源码mypy Linux目标通过。首轮unit18/1失败保留并修复scope求值顺序；旧kernel/Jupyter失败与候选补丁保留，不再维护。没有付费模型，组件通过不是学习空间/TRACE收益。review保持not_reviewed。"
+    },
+    "T39": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T39/20261003T095048Z/receipt.json",
+      "notes": "按用户要求暂停T38后独立交付逐单审批/执行组件；最终完整gate18新检查+原T12/T07回归52，共70 passed/0 failed/0 skipped。真实Mongo/MCP/Java双供应商逐单写入及独立ERP内容核对、重放无额外订单、版本/候选变化撤销旧批准和签名grant、网关缺验证配置拒绝、丢失真实写响应后同operation重试、CAS执行锁及部分执行禁止全量再采购。Ruff10文件通过；7源码mypy通过。首轮68通过收据094828保留，补充安全断言后最终095048收据。无模型调用/无T38运行；完整Actor、Vue批次、持久kernel、TRACE与持续对账尚未交付。inflight进程崩溃锁不自动解除，需后续专门恢复，不伪装已实现。用户review保持not_reviewed。"
+    },
+    "T40": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T40/20261003T100854Z/receipt.json",
+      "notes": "独立DeepAgents规划图/公共read-source-check-submit/kernel工具装配及真实ERP目标API；正式chat/resume/state选择规划provider，逐单中断使用既有独立pending_action ID（官方LangGraph同工具连续interrupt复用任务ID，原别名设计真实失败后修正）。最终完整gate14新检查+T39/T13回归50，共64 passed/0 failed/0 skipped。真实Mongo checkpoint/Java/MCP两次逐单写入、第二单拒绝保留第一单、重建graph恢复、直接Command(resume)不自批、未展示单和旧审批不能决定、公开schema无身份/凭据、自主求解无私有oracle。模型明确scripted，仅接线证据；未启动kernel、未调用付费模型、不宣称Prime/学习空间/TRACE通过。初轮100319 FAILED（夹具错误4pass/7error）及构造修正后3fail/8pass XML均保留，因果定位后11pass窄证据保留。9文件Ruff/7源码mypy通过；正式runtime装配代码已接入，完整live栈及Vue规划输入另验，T38保持blocked。"
+    },
+    "T41": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T41/20261003T102720Z/receipt.json",
+      "notes": "19新检查+原T40/T07回归38，共57passed/0failed/0skipped。真实Mongo/checkpoint/Java/MCP，模型explicit scripted-component。跨三次API审批同一Episode/冻结bank、每模型回合状态条件重选/有序正文/不累计、选择器同预算、原文在SDK offload前记录、失败阻止后续模型、chunk/hash/跨scope/转义密钥校验。Ruff8相关文件及mypy6源码通过。首轮102018 FAILED8/8与后续窄XML/中间102551通过保留，最终102720同attempt全部通过。SDK never-awaited warning未隐藏。无付费模型，无T38运行，无Curator；bank仅文字冻结不是完整环境Snapshot，Episode保持open/unscored，独立Feedback/学习效果另包。"
+    },
+    "T42": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T42/20261003T103423Z/receipt.json",
+      "notes": "Vue独立规划目标录入、两位金额/整数/唯一物料校验、可选优先级/部分/供应商拆分、正式chat接线、GET目标/实际订单刷新与不确定状态。新建goal不自动调用模型；账户/旧异步响应隔离、查询失败保留上次已知状态。修复App shallowRef包裹非reactive机器导致状态变化不触发视图更新，运行时拒绝切身份/线程。完整gate70Vitest/0失败/0跳过+TS/vite build+T40真实Mongo/Java/MCP API14/0/0，84tests。首轮103210缺报告/旧Node、第二103310默认Node20.18.1 jsdom7errors均保留；Windows进程内NODE_HOME指定已有v24.13.0后最终103423通过，未安装依赖或修改全局环境。没有live浏览器/模型验收，无付费模型/T38运行，review保持not_reviewed。"
+    },
+    "T43": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T43/20261003T104947Z/receipt.json",
+      "notes": "21新增+T37/T39/T40/T41回归104，共125passed/0failed/0skipped。schema2冻结原成交价/计划交期/已采购量，Plan只追加；真实ERP逐单核对、局部来源刷新/历史、CAS并发/迟到真实订单冲突、旧审批失效、正式chat退出旧中断继续追加且同Episode/bank、独立judge60小实例对照。10文件Ruff/9源码mypy通过。首轮104440FAILED10failed/8passed+104回归通过保留；ERP响应格式/夹具/HTTP约定纠正后17/1窄记录及正式chat1通过保留，最终104947完整通过。无付费模型/无T38运行，模型明确scripted组件，实际持久计算/学习空间/Curator/迁移/动态异步仍未验。用户随后明确要求将T38改为OpenSandbox独立Python进程+版本化JSON计算数据，下一任务更新规格并实施该已授权变化。"
+    },
+    "T44": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T44/20261003T133318Z/receipt.json",
+      "notes": "零模型学习空间与独立反馈完成。完整gate artifacts/tasks/T44/20261003T133318Z/receipt.json：27 unit + 报告命令 + 144 T37/T39/T40/T41/T43回归，0 failed/0 skipped；报告哈希与全部证据hash核对。4单条件train原子、4组合/control test、5严格反事实；独立judge证明反事实status或best改变；missing=unresolved与完整证据infeasible分开；Feedback白名单区分约束失败/SUBOPTIMAL/SOURCE_UNRESOLVED，不返回答案/凭据。proves_condition_sensitivity=true，proves_actor_learning_space=false，proves_learning_gain=false，curator_run=false。首轮漏T39的126<144失败及中间XML保留；无付费模型。review保持not_reviewed。"
+    },
+    "T45": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T45/20261003T153638Z/receipt.json",
+      "notes": "修复并正式gate通过：22 unit + 9真实Mongo integration + 46 T44/T41 regression，0 failed/0 skipped。Feedback pending与完整EpisodeStore seq/chunk/hash核对后发布；并发CAS仅一条发布；不宣称真实Actor学习收益。"
+    },
+    "T46": {
+      "status": "in_progress",
       "review": "not_reviewed",
       "receipt": null,
-      "notes": "用户要求改为分part文档学习与逐章确认，不继续逐问面试；仅文档，不改变应用验收。"
+      "notes": "用户2026-10-04明确授权新增50CNY，单attempt2CNY，Actor/selector/Curator/重试累计。先冻结源码并跑真实规划基线/2500->2200预算修订，不沿用历史额度。 用户要求先Git commit训练前基线。首轮零模型JAVA_HOME失败、第二轮7模型调用/2真实计算/零订单；driver误读SSE漏审批，绝非passed。累计保守预算0.901188CNY，全部失败保留artifacts/planning/pre-training。"
     }
   }
 }

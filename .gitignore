@@ -7,6 +7,8 @@
 # Isolated environment for the standalone Agent Protocol service. It cannot live in
 # the main lock: langgraph-api pins grpcio<1.82 and opensandbox-server needs >=1.83.
 .venv-agent-protocol/
+.venv-agent-protocol-linux/
+.venv-linux-t45/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -37,3 +39,4 @@ Thumbs.db
 # Agent Protocol service runtime artifacts
 infra/agent-protocol/server.pid
 infra/agent-protocol/server.*.log
+.langgraph_api/

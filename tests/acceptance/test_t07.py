@@ -209,7 +209,8 @@ def test_application_indexes_match_the_declared_manifest(resources):
         "thread_id",
         "slug",
     ]
-    assert len(APPLICATION_COLLECTIONS) == 11
+    # T38 adds three kernel collections; T39 adds the versioned planning goal/lease.
+    assert len(APPLICATION_COLLECTIONS) == 18
 
 
 def test_acceptance_runs_against_its_own_private_database(resources):

@@ -23,7 +23,7 @@ from pathlib import Path
 import httpx
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ENV_DIR = REPO_ROOT / ".venv-agent-protocol"
+ENV_DIR = REPO_ROOT / (".venv-agent-protocol" if os.name == "nt" else ".venv-agent-protocol-linux")
 CONFIG_PATH = REPO_ROOT / "infra" / "agent-protocol" / "langgraph.json"
 LOG_DIR = REPO_ROOT / "infra" / "agent-protocol"
 
@@ -59,8 +59,7 @@ class ServiceHandle:
 
 
 def environment_python() -> Path:
-    candidate = ENV_DIR / "Scripts" / "python.exe"
-    return candidate if candidate.is_file() else ENV_DIR / "bin" / "python"
+    return ENV_DIR / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 
 
 def require_environment() -> Path:
@@ -87,7 +86,7 @@ def service_health(base_url: str, *, timeout: float = 5.0) -> bool:
 
 
 def _launcher() -> Path:
-    for name in ("langgraph.exe", "langgraph"):
+    for name in (("langgraph.exe", "langgraph") if os.name == "nt" else ()):
         candidate = ENV_DIR / "Scripts" / name
         if candidate.is_file():
             return candidate

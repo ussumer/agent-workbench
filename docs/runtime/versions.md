@@ -35,6 +35,7 @@
 | mcp | 1.30.0 | `from mcp.server.fastmcp import FastMCP`、`mcp.ClientSession` |
 | langchain-mcp-adapters | 0.3.2 | `from langchain_mcp_adapters.client import MultiServerMCPClient` |
 | opensandbox | 0.1.16 | `from opensandbox.sync import SandboxSync`（同步）、`from opensandbox import Sandbox`（异步） |
+| opensandbox-code-interpreter | 0.1.2 | T38官方持久context；`from code_interpreter.sync.code_interpreter import CodeInterpreterSync`，与现有0.1.16兼容 |
 | opensandbox-server | 0.2.3 | 控制服务（dev 组）；`.venv\Scripts\opensandbox-server.exe` |
 | fastapi | 0.141.1 | `from fastapi import FastAPI` |
 | uvicorn | 0.53.0 | ASGI 服务器 |
@@ -514,3 +515,17 @@ cd frontend
 npm ci                              # 使用 package-lock.json 冻结安装
 npm run build                       # vue-tsc --noEmit && vite build
 ```
+
+## T38 Jupyter 通道补丁与复现
+
+默认控制配置已恢复官方 `opensandbox/execd:v1.0.22`。未通过完整gate的补丁仅保留在 `infra/sandbox/sandbox.t38-candidate.toml`，使用 `rush-harness/execd:1.0.22-kernel1`；不能作为已验收运行配置。它基于官方 execd v1.0.22 的固定 digest，只替换 `/execd`；控制服务、SDK、计算镜像和 Jupyter 未替换。源码 revision 为 `4a9db411879601610843af9c8e03563694325b2a`，下载包 SHA256 为 `934b517e10e20defd4d3bada8f07082632db3a5f701ed9302b27977c8d3de605`。
+
+补丁位于 `infra/sandbox/patches/execd-v1.0.22-jupyter-readers.patch`：reader 固定其连接、执行消息按 parent request ID 筛选、通道 query/header session 一致；每个 context 保持同一通道供串行执行，首次连接先等待 Jupyter 启动 IOPub idle，执行前以 kernel_info 匹配 shell 回包和同请求 IOPub idle 确认双通道 readiness（15 秒有界探测；每次无副作用探针使用独立消息签名，不重试 Actor 代码），连接失效时清除引用，删除 context 时关闭通道。原始 daemon 的 foreign-parent 缺陷已有原生失败记录；逐 cell 重连的真实停滞与后续诊断连接触发旧请求执行也已保留。这些原生检查不能代替完整真实服务 gate。
+
+Linux/WSL 使用 Go 1.25.9 linux/amd64 和 Docker 构建：
+
+```bash
+python3 scripts/build_kernel_execd.py --go /path/to/go1.25.9/bin/go
+```
+
+可用 `--source /path/to/exact-upstream.tar.gz` 复用下载包，仍校验 SHA256。脚本运行 execute/auth/session 原生 race 测试，拒绝零测试、失败或跳过，编译后基于官方镜像 digest 打包；`artifacts/tasks/T38/native-builds/<attempt>/provenance.json` 记录源码、补丁、测试、二进制和镜像哈希。宿主只编译基础设施；采购 Actor 代码始终在 OpenSandbox 执行。构建完成后重启本任务控制服务，避免缓存旧 daemon；用完整 T38 gate 验证部署结果。

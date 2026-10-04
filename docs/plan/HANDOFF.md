@@ -1,5 +1,129 @@
 # 当前交接
 
+## 2026-10-04 训练前 Git 基线待提交
+
+用户明确要求先 commit 训练前代码以便消融对比。T46 in_progress，尚未gate通过；没有训练或Curator。新增费用授权50CNY，单attempt2CNY；首轮缺JAVA_HOME零模型失败保留。第二轮真实Actor7次请求、2次OpenSandbox计算持久化，候选2493.50可行，但评测入口未读SSE event名导致漏审批、后续provider400；零实际订单，不能把result completed当通过。全部证据复制到artifacts/planning/pre-training/并记录hash。已知费用0.468333CNY，未知usage仍预留，累计保守记账0.901188CNY；实际账单null。评测入口正在修复，commit保持T46进行中。下一步先核对Git训练前基线，再修复SSE协议/冻结源码/累计预算/真实ERP证据后执行同额度新attempt，不训练、不删除失败。
+
+## T45 已完成：反馈两阶段归档与正式基线闸门
+
+T45 代码入口 `src/agent/evolution/feedback.py`，测试 `tests/acceptance/test_t45.py`。Feedback 使用严格公开白名单、固定 rule/category/evidence 引用、owner/episode/run fencing、Mongo CAS 与 pending -> 完整 EpisodeStore seq/chunk/hash 核对 -> 发布两阶段协议；缺事件、缺块、hash 损坏或事件写失败保持未评分，不回退并发事件序号。baseline config 只做零模型调用的模型身份、URL、预算和 Mongo/ERP/OpenSandbox/MCP 服务字段检查，不返回凭据。
+
+最终 gate 已通过：`artifacts/tasks/T45/20261003T153638Z/receipt.json`，22 unit + 9 真实 Mongo integration + 46 T44/T41 regression，0 failed/0 skipped；Ruff 与 mypy 亦通过。修复前的 `151334Z` 和修复中间失败 attempt 均保留；最终在隔离 `.venv-linux-t45` 与 `/tmp/jdk21` 中完成真实 gate。
+
+下一条精确命令：先审计真实 Actor 基线与 TRACE/Curator 实验范围；不得把 T44 的条件敏感性或 T45 的组件 gate 写成学习收益。
+
+## 最新交付：T44 学习空间基线完成，下一步反馈持久记录/真实基线
+
+T44 done/not_reviewed，artifacts/tasks/T44/20261003T133318Z/receipt.json：27零模型unit + 学习空间报告命令 + 144 T37/T39/T40/T41/T43规划回归，0 failed/0 skipped，所有artifact hash核对。报告`artifacts/tasks/T44/20261003T133318Z/learning-space.json`：4原子train、4未见组合/control test、5反事实；每组只改预算/来源/交期/分批声明条件，独立judge证明status或best改变；source-missing=unresolved，business-infeasible=infeasible；Feedback白名单含success/constraint_status/environment_status/error_categories/rule_ids/evidence_refs，区分SUBOPTIMAL与硬约束失败，不含offer/order/数量/目标答案。claims明确proves_condition_sensitivity=true、proves_actor_learning_space=false、proves_learning_gain=false、curator_run=false。
+
+入口scripts/planning/learning_space.py、tests/acceptance/test_t44.py、docs/runtime/learning-space-baseline.md。首轮132449失败（126回归，漏T39的18项，门槛144）保留；第二轮133318补T39后通过。T38已253通过登记。下一包可做控制面Feedback与Episode持久归档/真实Actor基线闸门；真实模型调用仍需具体新费用额度，不沿用任何历史额度。
+
+## 最新交付：新 T38 完成，下一包验证学习空间
+
+T38 done/not_reviewed，artifacts/tasks/T38/20261003T111735Z/receipt.json：19协议+24真实Mongo/OpenSandbox+85原沙箱+125规划回归，共253passed/0failed/0skipped，8证据hash核对。上一轮工具观察handle已失效，真实receipt证明gate11:28 UTC终态passed，不重跑。12相关文件Ruff通过，5源码mypy按Linux远端目标通过。首轮unit18/1失败与17真实初轮、42扩展和最终4边界专项XML保留；旧kernel/Jupyter失败保留。
+
+入口src/agent/planning/computation.py、computation_protocol.py、computation_process.py、tools/planning_computation.py，说明docs/runtime/persistent-computation.md。可信scope、Mongo JSON版本/operation CAS、声明read_names、仅success原子发布；Linux subreaper实际停止/reap double-fork/setsid后代，无法确认持久隔离（含API重复重连）；取消先撤销提交资格，generation锁覆盖Mongo发布；API执行中崩溃显式recover、容器换代加载JSON，不重放代码；丢Mongo发布应答先撤销再核对last_commit。Actor默认工具改computation，build_planning_actor保留kernel参数名兼容装配，旧kernel工具不进入Actor。函数/模块/DataFrame对象身份不保持，网络/文件副作用不承诺回滚，订单仍独立MCP+逐单审批。
+
+无付费模型。完整目标active/incomplete：真实Actor自主计算/学习空间与失败成功轨迹、TRACE独立Feedback/Curator/完整环境Snapshot/组合反事实/学习收益、动态异步/refinement尚待。下一任务先登记学习空间基线运行与独立Feedback，具体付费调用需新的费用额度，不沿用历史预算；可先完成零模型的评测接口/冻结环境与真实组件。上轮dev helper启动OpenSandbox控制服务Windows pid57124/18080是否仍在需只读核对；不触碰用户Mongo27017。
+
+## 最新交付：T43 差量重规划完成；用户已授权重定义T38
+
+T43 done/not_reviewed，artifacts/tasks/T43/20261003T104947Z/receipt.json：新增21+原T37/T39/T40/T41回归104，共125passed/0failed/0skipped。10文件Ruff/9源码mypy通过，证据hash核对。入口src/agent/planning/reconciliation.py、models/checker/orders、scripts/planning/judge.py及PATCH规划goal和正式chat stale中断恢复。schema2冻结真实成功订单原成交价/计划交期/数量，Plan表示追加量；真实ERP逐单核验后修订，局部来源刷新并归档，CAS覆盖revision/proposal/orders/execution。旧审批不可用、新审批只追加，原Episode/bank保持；60小实例与独立枚举对照。无付费模型/无T38运行；明确scripted接线，尚不能证明Prime/学习效果。
+
+失败可见：104440完整gateFAILED10failed/8passed（ERP响应没有MCP的ok字段、夹具header/来源线程/cookie错误），原104回归通过；after-erp-contract-fixes17passed/1failed（测试误猜STALE_PLAN HTTP409，既有协议400），正式chat窄1passed；最终104947完整125通过。不削减原业务断言。
+
+用户最新明确授权修改T38：OpenSandbox内每步独立Python执行，持久权威版本化JSON计算数据；每次只加载需要的数据，由Agent自己编写计算代码，成功后校验/发布新版本，无完整固定planner。失败不覆盖旧数据，实际停止进程及子进程，无法确认终止则隔离环境；保留operation/version/owner/session fencing，旧执行不能迟到提交。Mongo权威、sandbox执行副本；不保证回滚代码所有文件/网络副作用，正式下单仍独立MCP+审批。该最新选择替代旧活kernel/对象身份保持/Jupyter通道补丁要求；须先更新计划/契约/受影响Actor与工具、保留旧失败证据，然后按新T38验收，不再做旧daemon诊断。当前state T38仍blocked，下一步登记已接受变更后显式reopen。完整目标active：学习空间仍应先于Curator，TRACE真实学习/组合反事实、动态异步/refinement各另验，付费调用需具体新额度。
+
+## 最新交付：T42 Vue规划目标录入与实际订单展示完成
+
+T42 done/not_reviewed，artifacts/tasks/T42/20261003T103423Z/receipt.json：70Vitest+真实T40API14，共84passed/0failed/0skipped，vue-tsc/vite生产build通过，证据hash复核。Vue测试为mock网络的组件行为；API回归使用真实Mongo/checkpoint/Java/MCP及显式scripted模型，没有完整浏览器或live模型验收。本轮无付费模型/无T38运行。
+
+入口frontend/src/components/PlanningGoal.vue、api/client.ts与App.vue。创建独立thread目标表单支持预算/数量/交期/必需与可选/优先级/部分采购/供应商拆分；不自动调用chat/model。创建后用户发送消息走既有正式规划graph，逐单批准/拒绝卡保持。历史/每次run结束GET服务端目标与实际订单，未写不乐观显示成功，不确定写入提示先核对；刷新失败显示错误并保留上次目标，旧thread迟到响应丢弃，切账户销毁表单，run期间不切身份/目标。App原shallowRef机器非reactive导致UI不更新，本包增加reactive包裹并用集成组件测试验证。
+
+失败保留：103210 Node20.18.1使jsdom无法启动，报告落在frontend/artifacts错误相对位置，gate明确failed；路径修正后103310仍Node20.18.1，7启动errors，gatefailed。WSL直接设置NODE_HOME未传入Windows；最终通过Windows Python进程设置已有Node24.13.0，不改机器环境或依赖。精确复验命令：.venv/Scripts/python.exe -c 'import os,runpy,sys; os.environ["NODE_HOME"]=r"C:\Users\34114\AppData\Local\nvm\v24.13.0"; sys.argv=["scripts/gate.py","T42"]; runpy.run_path("scripts/gate.py",run_name="__main__")'。测试只启停自建Java/MCP/HTTP和独立测试库；Mongo用户服务保留。
+
+完整目标仍active/incomplete，T38按用户要求blocked，禁止自动恢复诊断/gate。尚缺真实Actor持久计算/学习空间、TRACE Curator/独立Feedback/完整环境Snapshot/学习实验、持续差量对账与进程崩溃恢复、动态异步/refinement；后续付费调用必须具体新增预算授权，不能拿组件成绩当真实学习效果。已登记暂无其他pending；下一包应登记独立goal修订/差量对账或Feedback/训练完成接口，先读execution/HANDOFF，check→next→packet，一次一个，不回T38。
+
+## 最新交付：T41 Episode聚合与冻结技能逐回合编排组件完成
+
+T41 done/not_reviewed，artifacts/tasks/T41/20261003T102720Z/receipt.json：19新检查+T40/T07回归38，共57passed/0failed/0skipped。真实Mongo/checkpoint/Java/MCP；模型明确scripted-component，技能正文synthetic fixture，未安装人工学习策略。Ruff相关8文件及mypy6源码通过。首轮102018 gate FAILED8failed/8passed（替身签名、系统消息blocks、错误码），修正后16窄检查通过；raw-offload-component17通过；102551完整18+38通过；最后补转义密钥反例后102720完整19+38通过。所有失败/中间记录保留，SDK never-awaited warnings未隐藏。
+
+代码入口src/agent/evolution/episodes.py与orchestration.py、planning/actor.py、正式chat生命周期、默认规划runtime装配。一个业务goal跨chat/resume/run聚合同一open/unscored Episode；首次固定文字bank与配置模型provenance，晋升/撤回不改变在途目标；每次Actor模型动作前按当前状态及全部描述选择有序ID并读取精确正文，下一回合不累计。空bank基线不制造学习策略。选择器同模型/同累计预算（组件替身明确独立），原始typed消息/完整工具输出、callback父ID/usage、每次审批与实际订单留证；官方SDK offload前保留原文已实测。大事件分块/hash/seq校验，故障即失败，并阻止ToolNode捕获后继续调用下一模型。凭据与转义凭据拒绝/脱敏。
+
+边界：文字bank不等于完整环境Snapshot；API completed/approval executed不当采购成功。独立Feedback/训练完成、Curator层级初始化与成功失败对照、真实Actor/kernel/学习空间/组合反事实/学习效果均另验。无付费模型、无T38服务/诊断/gate，T38仍按用户要求blocked。完整目标仍active。下一包Vue规划目标录入与订单展示，可独立推进；不得自动恢复T38。
+
+## 最新交付：T40 独立规划图与正式逐单审批恢复接线完成
+
+T40 done/not_reviewed，完整组件gate artifacts/tasks/T40/20261003T100854Z/receipt.json：14项新检查+原T39/T13回归50，共64 passed/0 failed/0 skipped。9相关源码/测试Ruff通过，7源码mypy通过。模型明确ScriptedChatModel，仅驱动组件接线；Mongo/checkpoint、MCP、Java及内部审批HTTP真实。没有调用付费模型，没有启动kernel、T38诊断/构建/gate；T38仍blocked（用户要求跳过）。完整目标仍active，Prime实际使用、学习空间、TRACE、持续目标和动态异步尚未完成。
+
+入口：src/agent/planning/actor.py、src/agent/tools/planning.py、src/api_view/api/planning.py；POST /api/planning/{thread}/goal输入budget/demands，服务端查询真实ERP并保存sources原JSON；对应chat/resume/state选独立planning provider。已有课程主子graph/技能保留。模型仅有公开problem/source/check/submit和通用kernel工具，shell/task/直写工具在模型与工具边界拒绝，私有裁判不注入。规划runtime接入tests/live/stack.py默认Demo装配，新增模型不生成调用直到用户使用；本轮未启动完整live stack，不能声称运行演示已通过。Vue规划目标录入尚未做，审批SSE沿用已有形状。
+
+关键失败和原因：首轮100319 gate FAILED，4新检查passed/7初始化error，SDK要求StateBackend实例而不是类；原50回归通过。修正夹具后的component-after-constructor.xml为3 failed/8 passed：真实checkpoint显示LangGraph在同工具多次interrupt复用任务ID，错误别名设计把第二单绑第一单。已经移除别名存储，规划SSE/state公开interrupt_id直接使用原pending_action ID；原官方graph序列/Command(resume)不改。component-after-business-ids.xml为11passed；补未展示单/旧批准复用和身份伪造反例后最终完整64passed。全部失败收据/XML保留，不改订单数、重复写入或恢复断言。
+
+正式API测试证明：两单分别批准各一次Java写入；拒绝第一单零写，拒绝第二单保留第一单；重建graph恢复第二次审批；直接Command(resume=approve)无服务端决定不写；尚未展示第二单/旧第一单审批不能消费当前中断；原审批operation/hash/goal binding保持。测试自建服务、独立库正常清理，未触及用户服务。
+
+下一包先推进TRACE轨迹/逐回合技能选用基础设施与Vue规划输入，均可不碰暂停的T38；不能制造真实训练经历或提前造Curator。实际模型/Prime基线、组合反事实、学习空间与迁移实验仍需T38恢复验收及用户具体新增费用授权，历史额度不沿用。完整持续差量对账和inflight进程崩溃恢复另需真实核验。不得自动回到T38试跑。已登记暂无其他pending包。
+
+## 最新交付：T38 按用户要求暂停，T39 多单组件完成
+
+用户明确要求先跳过 T38 推进进度。T38 保持 blocked/not_reviewed，无通过receipt；未再运行诊断、构建、kernel或T38 gate。代码及所有失败记录保留，未要求前不自动恢复补丁循环。
+
+T39 done/not_reviewed，最终收据 artifacts/tasks/T39/20261003T095048Z/receipt.json：18项新检查和原T12/T07回归52项，共70 passed/0 failed/0 skipped。初轮094828收据68通过保留；检查明确旧grant在真实内部HTTP得到STALE_PLAN、网关缺验证配置拒绝后，产生最终收据。真实Mongo独立库、独立MCP进程、Java/H2、真实HTTP内侧验证；双供应商逐单写入，直接读ERP核对订单内容/数量，重放无额外订单。测试自建服务和独立测试库均正常清理，未触及用户服务。无付费模型调用。
+
+代码入口 src/agent/planning/orders.py；pending_actions可选planning_binding；新planning_goals唯一owner/thread/goal文档保存revision/proposal、执行租约和结果；规划签名grant可选approval_ref，MCP执行前调用MCP_APPROVAL_VERIFY_URL并使用INTERNAL_SERVICE_TOKEN复核。默认FastAPI装配已安装版本guard，旧课程grant仍仅验签，不能误称原路径已有HTTP复核。10个组件/审批/协议/测试文件Ruff通过，7源码mypy通过。web_main原有未使用resources赋值的Ruff F841仍存在，本轮没有改其无关资源语义。
+
+重要边界：这是真实多单审批执行组件，不是完整Actor、Vue批次界面或TRACE学习。网络/超时/取消/上游retryable结果保留uncertain锁，只准同operation对账重试；inflight中进程崩溃不会自动放锁，专门恢复尚待后续包。已写订单跨修订保留，新的全量批次报RECONCILIATION_REQUIRED，持续目标需差量对账。完整Actor/kernel场景仍须T38通过，不以手工候选检查替代模型规划；后续预算仍需具体授权。下一工作优先登记不依赖T38验收的Actor工具/入口接线或TRACE机制组件，完整联调/真实学习另验，不能回到T38试跑。已登记任务中无其他pending包。
+
+## 用户授权跳过 T38，推进独立多单审批组件
+
+T38 改为 blocked（用户要求暂停让出活动位，不是完成），所有失败与代码保留；不再启动诊断、构建或完整gate。新增 T39：依赖已通过的 T37/T12/T35，完成版本绑定的逐单审批和真实 Mongo/MCP/Java 多单组件。完整 Actor/kernel 联调仍依赖 T38，TRACE 与持续目标未删除。无付费模型调用。
+
+## 最新处置：停止补丁循环，隔离候选并做一次路径对照
+
+默认 infra/sandbox/sandbox.toml 已恢复官方 opensandbox/execd:v1.0.22；未经稳定验收的v8补丁保留在独立 sandbox.t38-candidate.toml，不删除源码、不伪造通过。原三小时工作未交付通过验收的T38，关于根因已解决的判断撤回。
+
+只执行一次 scripts/diagnose_t38_routes.py，无完整gate重跑、无新daemon构建、无模型调用。证据 artifacts/tasks/T38/route-diagnostic/20261003T091415Z/result.json、control.log、probe-source.py/SHA256；外层日志bounded-route-diagnostic.log。一个官方原版容器，三个独立context、相同两条代码：Windows官方SDK、容器内HTTP→execd、容器内Tornado→Jupyter均分别得到711/712与真实终止信号；各路径7.72/1.83/1.48秒（不含创建启动）。这些是路径诊断，不是T38验收或稳定性证明；未复现偶发故障，不能认定WSL网络正常或有错。观察时Docker8GiB/32CPU，现存容器低CPU、未显示明显内存压力；单次快照不能排除历史压力。
+
+诊断仅有一次矩阵，没有重试失败请求。诊断容器206faf07-0f10-45ca-ace2-3a8b47f2ce6d及自建控制服务均由finally关闭，未触及其他服务。T38仍in_progress/not_reviewed，无通过receipt。默认runtime不再自动加载实验patch。今后若继续，只从官方最小路径逐层接回proxy/Mongo/取消找最小失败；未得到因果证据不继续改daemon，不自动重跑整套。上轮失败现场与历史在下方保留。
+
+## 最新停止现场：用户要求停止重复试跑（2026-10-03）
+
+T38仍in_progress/not_reviewed，无通过收据；本轮停止诊断与测试，不自动恢复同一路径试跑。最新完整 artifacts/tasks/T38/20261003T090118Z/receipt.json FAILED：30unit通过；19kernel中17passed/2failed，均shell/iopub readiness超时；原回归被本次用户停止请求中断，exit4294967295、缺JUnit，不是通过。gate session8854已经退出1。停止精确本轮测试PIDs63084/48392，让runner保留真实失败收据。前一轮v8真实19passed只是局部证据，不能声称问题已稳定解决；之前关于有效根因的表述过早。
+
+应用测试与控制服务一直是Windows原生.venv/Scripts/python.exe，WSL是启动shell。错误由容器execd返回，内侧execd↔Jupyter使用同容器127.0.0.1；不是已证实的WSL到宿主断连。较早Docker镜像下载IPv6失败属于另一链路。WSL/Docker底层因素未排除，但当前根因未定，不能因此替换技术栈。今后诊断应先设计单变量对照和明确观测点，不再先改daemon再重跑整套。
+
+当前源码是v8通道补丁：16原生race tests通过；官方Tornado同格式20次、直接官方Go20次、热启动debug SDK8次诊断通过，均不代替业务gate。当前补丁镜像tag rush-harness/execd:1.0.22-kernel1，binary df137a7d5e611b32d4154babd2f5bad47d440ef90c18c6c67e93e2ac6cf5b767；代码和全部失败记录保留，没有回滚用户修改，没有付费模型调用。本任务control session99835/PID14884已停止；c620诊断daemon PID509已停止。Mongo用户服务27017未动；失败数据库/残留测试容器保留供调查，不bulk删除。
+
+## 2026-10-03 T38 持久 Python 工作区（in_progress）
+
+T37完成，T38仍未通过完整gate，review=not_reviewed，无付费模型调用。入口 src/agent/planning/kernel.py、kernel_protocol.py、src/agent/tools/planning_kernel.py。extension0.1.2/SDK0.1.16锁定；可信scope、Mongo三集合、JSON显式检查点、跨进程重连、generation/lease fencing、输出offload、shell/kernel同owner队列、取消monitor均已实现。官方镜像入口显式保留；Windows环境缺文件已uv sync --frozen --reinstall修复，不更换锁版。
+
+完整gate071215/073404均FAILED：unit26或30通过、85原回归通过，kernel超时缺JUnit。原callback提前退出/延迟/Connection:close实验均无效并已删除，失败XML/log保留。最新native-fresh-channel-kernel同样300s超时无报告；实际容器c6201...binary与v3 SHA53e3...一致，镜像tag竞态已排除。sandbox内Tornado诊断新连接令先前被卡住的请求执行，随后五次诊断正常；见fresh-channel-container.log、tornado-reconnect-diagnostic.log。
+
+固定官方execd源码tag docker/execd/v1.0.22=4a9db411879601610843af9c8e03563694325b2a，source SHA934b517e10e20defd4d3bada8f07082632db3a5f701ed9302b27977c8d3de605。patch在infra/sandbox/patches/execd-v1.0.22-jupyter-readers.patch：固定reader连接/parentID筛选/query与header session一致，最新v4每context持有一个串行通道，断连清引用、删除context关闭。build_kernel_execd.py验证源码、Go1.25.9、patch/test不变，原生execute/auth/session-race拒绝零/失败/skipped，固定官方base digest编译打包。v4原生13passed，binary e5ebbaf11c8c79940147d8c2d432bd31cd0547d555ed739bd7490d01708beee3，image cd335f2508d85745b6d80adc6b604d1f31d35d4bb9ed331565074771d48a6c81。完整provenance在native-builds最新目录与reproducible-native-build-v4.log；v2构建中改patch属无效provenance，v2-invalid.md保留。原native baseline foreign-parent真FAIL；更早广包exit0含2上游skip不作为强制通过。Docker compiler拉取IPv6失败/原cwd错误均保留。
+
+最新Ruff与五源码mypy通过。正在运行19项真实Mongo/OpenSandbox验收：session16746，日志native-persistent-channel-kernel.log、目标XML同名；已9dots，先poll，不盲重跑。当前本任务control session29395/PID63216/18080；旧51244已停止，Mongo27017用户服务不动。旧失败库/测试容器保留，清理仅exact本任务资源。Windows应用命令require_escalated；不要Linuxuv覆盖Windows.venv。
+
+下一步：19真实checks通过后完整 .venv/Scripts/python.exe scripts/gate.py T38，同attempt所有checks通过/hash依赖核验才done；未过则保留失败定位。build复现命令：GOCACHE=/tmp/t38-go-cache GOPATH=/tmp/t38-go-path python3 scripts/build_kernel_execd.py --go /tmp/t38-go-sdk/go/bin/go --source /tmp/t38-opensandbox-pinned.tar.gz。宿主只编译基础设施，Actor仍只OpenSandbox。运行/版本/契约已记录通道patch。后续真实Actor多单审批、TRACE学习、动态重规划仍未实现，付费调用须具体额度。
+
+最新补充：v4完整真实test在第10项超时无JUnit；v5单shell-readiness 15passed/4failed，v6重发相同探针也15/4，触发Duplicate Signature，v7独立签名+双通道14/5，均失败保留。镜像中除被官方跳过的python3，仅python匹配，已排除map无序候选。官方Tornado发送Go相同格式20/20、直接官方Go客户端固定python20/20，以及在旧失败c620容器热重启元数据debug daemon后的官方SDK8/8诊断通过；不当作任务gate。诊断只在ignored artifacts代码；最终patch无调试日志。c620容器原daemon PID13已停止，/tmp/t38-diag-execd由session99124运行；精确容器属于本任务，完成后清理。
+
+v8新增等待服务端启动IOPub idle才发握手探针，已16native-race通过，binary df137a7d5e611b32d4154babd2f5bad47d440ef90c18c6c67e93e2ac6cf5b767，image4b5a8d5d6e26a599a875c984ca4144733aea2626b14c13c05c5307364bfaa6ce。build日志v8/provenance保留。真实19项test session52103已19passed/0failed/0skipped，78.69秒，native-startup-readiness-kernel.log/XML；控制session99835/PID14884，18080，旧53352已停。当前正在最终完整gate，final-startup-gate.log记录日志；收据待核验前state仍in_progress。此前失败不覆盖。
+
+## 2026-10-03 采购规划场景 T37
+
+用户已授权按场景与裁判 → 持久计算 → 技能学习 → 持续重规划推进，最新请求取代旧学习文档的“不自动继续代码”现场限制。完整范围见 docs/runtime/procurement-planning-implementation.md；不新增模型付费调用，训练额度尚未锁定。
+
+T37 done，review=not_reviewed。公共数据/校验在 src/agent/planning/；独立穷举裁判在 scripts/planning/judge.py，不注册 Actor 工具/同步进沙箱。fixtures/planning/ 有提案目标与8种公开单独/组合/反事实条件，非封存测试或已证学习收益。真实ERP读取不回退seed；允许部分量与允许供应商拆分分开；必需量/交期硬约束、可选优先级覆盖、成本依次比较。未知来源用乐观界与已核实可行域区分 unresolved/infeasible，合法方案与最优性分开，支持同目标不同解。修订输入标影响范围，所有旧revision方案拒绝；尚未接真实批准失效。
+
+完整 gate `.venv/Scripts/python.exe scripts/gate.py T37`（Windows锁定uv环境）生成 artifacts/tasks/T37/20261003T061537Z/receipt.json，53 unit +2真实Java/H2 passed/0 failed/0 skipped，hash已核对；改变独立seed的交期/价格导致不同目标，实际订单从Java查询。80生成小实例用独立budget DP核对，Ruff及7源码mypy通过。061028失败（UTF-8读取和测试DP空价格）与061318中间通过、component-utf8-fix.xml保留。首个直接pytest未运行因缺iniconfig，gate锁定环境补齐71个既定包；未更改uv.lock。WSL内uv默认cache只读、Windows进程互操作受限，实际应用检查通过require_escalated调用已锁定Windows Python；不要用WSL uv替换Windows .venv。
+
+下一包T38已登记pending（验收目标测试尚未创建，不计通过）：持久Python工作区；读取 execution/HANDOFF，check → next → packet。已安装 opensandbox=0.1.16 的低层 code_interpreting API支持context；PyPI与官方wheel预核查确认 opensandbox-code-interpreter=0.1.2兼容>=0.1.6,<0.2，Python包名code_interpreter，CodeInterpreterSync.create(sandbox)可包装既有SandboxSync。最新版1.1.0要求SDK>=1.1，不升级。wheel只下载/tmp，扩展尚未正式安装/锁版；先核实签名/锁版与真实镜像kernel能力，不用shell每次启动Python冒充持久状态。接入owner/thread/session、同owner执行队列、Mongo运行登记、取消/重连/重建协议，再接规划Actor。多单审批完整任务、TRACE回合编排/成功失败比较、冻结组合迁移、动态异步、在线refinement/可执行技能演化仍未实现。T37没有启动常驻服务，两个Java测试进程已由fixture关闭。
+
+## 2026-10-02 分章学习文档
+
+T36 done，review=not_reviewed。用户已切换为面试项目学习，明确不希望逐题模拟；当前产出为docs/learning/README.md、01–07七章和PROGRESS.md，全部学习状态待确认。后续按用户指定part集中解释与补充，不自动继续代码修正或逐题面试。docs/plan/review.md已加入口；未改应用代码。artifacts/tasks/T36/20261002T142011Z/receipt.json command passed，检查69个本地引用和必要章节结构，hash已核对；141940因WSL没有python失败保留，改用现有python3。此gate仅文档，不代表应用验收、页面渲染或用户理解。后续代码遗留事项见T35记录，但不是本次学习请求自动启动的任务。
+
 ## 2026-10-01 修正工作
 
 T35 done，review=not_reviewed。artifacts/tasks/T35/20261001T111034Z/receipt.json：归档8、T19 28、装配35、聊天预算记忆45，共116 passed/0 failed/0 skipped；hash核对，补充initialization-dependency.xml T34 7 passed。自动/主动同步异步官方SDK摘要模型生成前，独立Mongo查询完整原文与todos；写入失败不生成摘要/压缩事件。UUID追加、typed消息完整工具参数/配对/artifact、protected state、owner/thread/namespace/scope及application_run_id已接入，主子分别用实际模型。应用运行ID避开SDK通用run_id重入语义。baseline两项真实覆盖/丢字段失败及sdk-archive-first/checkpoint/planning中间失败XML保留；中间6项失败主要为todos OmitFromInput及run_id重入夹具问题，不能记为6项生产缺陷复现。最终测试使用生产build_main_agent，todos由真实write_todos写入。Ruff六文件通过，归档/工具摘要/聊天三源码mypy通过；初轮更广mypy的main_agent后端名义类型、YAML缺存根、loader TypedDict展开旧问题未修，不能称全仓静态通过。SDK异步callback/Starlette警告保留。控制服务session11620/PID55396暂留。后续优先处理不可覆盖评测attempt与冻结评测，再处理真实异步分析及全仓静态门槛；自进化晋升/回滚闭环仍未完成。
@@ -520,3 +644,15 @@ POST /api/async-tasks/{task_id}/cancel    {request_id}
 
 每次任务完成/暂停时替换当前现场，保留必要历史链接：当前 task/status；已完成步骤；文件入口；
 真实检查命令和 receipt；未过断言及根因；服务 PID/端口或容器；下一条命令；是否需用户配置/决策。
+
+## 2026-10-04 Linux 评测环境修复
+
+WSL/Linux 原先误用了 Windows `.venv-agent-protocol`，导致 Agent Protocol 将 `/mnt/c/...` 配置路径交给 Windows launcher 并退出。现已增加 `.venv-agent-protocol-linux`，锁定 `infra/agent-protocol/requirements-linux.lock`，fixture/provision 脚本按操作系统选择环境和 launcher；Windows 环境保留不动。外部评测 worker 同步使用 Linux launcher 与 `.venv/bin/opensandbox-server`。
+
+真实零模型检查已通过：
+
+```text
+/mnt/c/dev/rsi-eval/procurement_eval/runs/doctor-0634547ea8ab4d8d8ef4706165d9641e/doctor.json
+```
+
+`ready=true`，模型身份 `deepseek-flash`、provider `/models`、Mongo、Java、OpenSandbox、Agent Protocol 全部为 true，`model_calls=0`。随后 `prepare` 通过：真实 ERP/MCP/报价站/OpenSandbox/Agent Protocol 均启动；两个沙箱无宿主挂载且宿主探针退出 0；ERP 前后订单均为空。该证据只证明环境和隔离边界，不证明真实 Actor 学习收益。下一步仍需用户明确新增模型费用额度后，才运行真实 Actor 基线。

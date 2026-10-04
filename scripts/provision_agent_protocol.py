@@ -20,13 +20,14 @@ Re-running is safe: the environment is recreated in place.
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ENV_DIR = REPO / ".venv-agent-protocol"
+ENV_DIR = REPO / (".venv-agent-protocol" if os.name == "nt" else ".venv-agent-protocol-linux")
 
 #: Pinned so the service is reproducible. Kept out of uv.lock on purpose.
 SERVICE_REQUIREMENTS: tuple[str, ...] = (
@@ -57,6 +58,9 @@ def find_concrete_python(uv: str | None) -> str:
     ``uv python find`` returns the junction path on some hosts, which is exactly what
     fails here, so the versioned directory is preferred and only then falls back.
     """
+    if os.name != "nt":
+        return sys.executable
+
     versioned = (
         Path.home()
         / "AppData"
@@ -104,7 +108,11 @@ def install_requirements(uv: str | None, env_dir: Path) -> None:
         env_python = env_dir / "bin" / "python"
 
     if uv:
-        argv = [uv, "pip", "install", "--python", str(env_python), *SERVICE_REQUIREMENTS]
+        lock = REPO / "infra/agent-protocol/requirements-linux.lock"
+        if os.name != "nt" and lock.is_file():
+            argv = [uv, "pip", "sync", "--python", str(env_python), str(lock)]
+        else:
+            argv = [uv, "pip", "install", "--python", str(env_python), *SERVICE_REQUIREMENTS]
     else:
         argv = [str(env_python), "-m", "pip", "install", *SERVICE_REQUIREMENTS]
 
@@ -167,11 +175,10 @@ def main() -> int:
 
     print("installed:", installed_versions(env_dir))
     print("done. start it with:")
+    launcher = env_dir / ("Scripts/langgraph.exe" if os.name == "nt" else "bin/langgraph")
     print(
-        r'  $env:PYTHONIOENCODING="utf-8"; '
-        r".venv-agent-protocol\Scripts\langgraph.exe dev "
-        r"--config infra/agent-protocol/langgraph.json --port 8123 --host 127.0.0.1 "
-        r"--no-browser --no-reload"
+        f'  "{launcher}" dev --config infra/agent-protocol/langgraph.json '
+        "--port 8123 --host 127.0.0.1 --no-browser --no-reload"
     )
     return 0
 

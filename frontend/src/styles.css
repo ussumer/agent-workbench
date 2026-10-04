@@ -554,3 +554,14 @@ pre {
     display: none;
   }
 }
+.planning-goal {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  max-height: 48vh;
+  overflow: auto;
+}
+.planning-goal fieldset { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.planning-goal label { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; }
+.planning-goal input:not([type='checkbox']) { width: 110px; padding: 6px; }
+.planning-goal h2 { font-size: 16px; }
+.planning-goal h3 { font-size: 14px; }

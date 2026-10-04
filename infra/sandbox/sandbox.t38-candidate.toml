@@ -1,0 +1,88 @@
+# EXPERIMENTAL T38 candidate: full gate has failed; not the default runtime.
+# OpenSandbox control-service configuration for this project.
+#
+# Generated from the packaged `docker` example by
+#   uv run --frozen opensandbox-server init-config infra/sandbox/sandbox.toml --example docker
+# and then narrowed to the decisions this project actually relies on. Every
+# deviation from the example is called out with a comment.
+#
+# Topology (documented per T08 step 1):
+#   control service : host 127.0.0.1:18080  (API + /health)
+#   execution       : one Docker container per sandbox, bridge network
+#   execd           : opensandbox/execd, mounted into the sandbox as the I/O daemon
+#   host reachability from inside a sandbox: http://host.docker.internal:8088
+#
+# Port 8080 is deliberately NOT used: the Java ERP already owns it.
+
+[server]
+# Bound to loopback only. The sandbox API can create containers, so it must not be
+# reachable from the LAN.
+host = "127.0.0.1"
+# CHANGED from the example's 8080, which the Java ERP has.
+port = 18080
+max_sandbox_timeout_seconds = 86400
+
+# CHANGED: no api_key. This is a deliberate, documented consequence of an upstream
+# incompatibility, not an oversight:
+#
+#   * opensandbox-server 0.2.3 authenticates with the header `OPEN-SANDBOX-API-KEY`
+#     (opensandbox_server/middleware/auth.py: SANDBOX_API_KEY_HEADER).
+#   * every published opensandbox-sdk (0.1.0, 0.2.0, 0.3.0) instead sends `X-API-Key`
+#     (opensandbox/sandbox.py), and builds its own httpx client, so the header cannot
+#     be supplied by the caller.
+#
+# With a key set, every SDK call returns 401 and there is no supported way to make the
+# two agree. The server therefore runs unauthenticated, which is only acceptable
+# because it binds 127.0.0.1 and is started with the explicit
+# OPENSANDBOX_INSECURE_SERVER=YES acknowledgment (see infra/sandbox/README.md).
+# Revisit when an SDK release speaks the server's header.
+
+[log]
+level = "INFO"
+
+[runtime]
+type = "docker"
+# Same official v1.0.22, with the unaccepted T38 Jupyter channel candidate.
+# Build: python3 scripts/build_kernel_execd.py --go /path/to/go
+execd_image = "rush-harness/execd:1.0.22-kernel1"
+
+[storage]
+# Bind mounts are restricted to a private directory instead of the example's empty
+# "allow everything" list. This project never bind-mounts host paths into a sandbox,
+# and the path-containment tests rely on host paths staying out of reach.
+allowed_host_paths = ["~/.opensandbox/mounts"]
+volume_default_size = "1Gi"
+
+[store]
+type = "sqlite"
+path = "~/.opensandbox/opensandbox.db"
+
+[docker]
+network_mode = "bridge"
+port_range_min = 40000
+port_range_max = 60000
+api_timeout = 300
+drop_capabilities = [
+    "AUDIT_WRITE",
+    "MKNOD",
+    "NET_ADMIN",
+    "NET_RAW",
+    "SYS_ADMIN",
+    "SYS_MODULE",
+    "SYS_PTRACE",
+    "SYS_TIME",
+    "SYS_TTY_CONFIG",
+]
+no_new_privileges = true
+apparmor_profile = ""
+pids_limit = 4096
+seccomp_profile = ""
+
+[ingress]
+mode = "direct"
+
+# The `[egress]` section is omitted on purpose: this project requests no network
+# policy, so no egress sidecar is started and no extra image is needed. The sandbox
+# therefore reaches the demo quote site through the ordinary bridge gateway address.
+# Note: the section is all-or-nothing — supplying it with empty `image`/`mode` is
+# rejected at startup, which is why it is absent rather than blanked out.

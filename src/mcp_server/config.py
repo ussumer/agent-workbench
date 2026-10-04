@@ -8,8 +8,8 @@ well-known value.
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
 
 DEFAULT_ERP_BASE_URL = "http://localhost:8080"
 DEFAULT_HOST = "127.0.0.1"
@@ -34,6 +34,8 @@ class McpSettings:
     tool_budget: float = 20.0
     read_retries: int = 2
     streamable_http_path: str = "/mcp"
+    approval_verify_url: str = ""
+    internal_service_token: str = ""
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> McpSettings:
@@ -65,6 +67,8 @@ class McpSettings:
             tool_budget=float(source.get("MCP_TOOL_BUDGET", 20.0)),
             read_retries=int(source.get("MCP_READ_RETRIES", 2)),
             streamable_http_path=source.get("MCP_STREAMABLE_PATH", "/mcp"),
+            approval_verify_url=source.get("MCP_APPROVAL_VERIFY_URL", "").strip(),
+            internal_service_token=source.get("INTERNAL_SERVICE_TOKEN", "").strip(),
         )
 
     def timeout_description(self) -> str:

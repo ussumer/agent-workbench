@@ -43,3 +43,9 @@ API 保存 pending_action：owner、thread、interrupt_id、tool_call_id、tool_
 内部端点不暴露前端，需独立 service token；批准令牌不进入模型消息、SSE 或沙箱。一次授权只对应一个 operation_id；重放同一操作可查询原结果，不能授权其他内容。Java 不公开宿主端口给沙箱网络，沙箱也没有网关/ERP 凭据。
 
 测试必须证明：直接调用写 MCP 无审批被拒、approve 后仅写一次、reject 零写、改参数不能沿用授权、demo-b 不能使用 demo-a 的授权。
+
+## T39 规划授权的版本检查
+
+规划grant签名内增加可选approval_ref（thread_id/interrupt_id），不是模型可写参数。携带该字段的写入必须调用MCP_APPROVAL_VERIFY_URL（完整 /internal/approvals/verify URL），使用INTERNAL_SERVICE_TOKEN。缺配置/不可达/拒绝或响应绑定不一致都不转发Java。原课程grant字节格式和工具参数保持兼容；历史课程grant原实现仅验签，不能称已通过内部HTTP复核。T39为规划grant实现真实复核，未来统一课程路径需另包验证。
+
+内部API验证goal/revision/proposal及当前执行租约；目标更新后旧grant即使未过期也被拒。规划组件使用实际business envelope判断结果，retryable失败按不确定执行保留锁与operation，避免已提交但响应丢失后再次采购。影响T12及MCP写工具回归。

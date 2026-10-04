@@ -1,0 +1,230 @@
+--- a/components/execd/pkg/jupyter/execute/execute.go
++++ b/components/execd/pkg/jupyter/execute/execute.go
+@@ -20,6 +20,7 @@
+ 	"errors"
+ 	"fmt"
+ 	"net/http"
++	"net/url"
+ 	"sync"
+ 	"time"
+ 
+@@ -42,6 +43,7 @@
+ 
+ 	// WebSocket connection
+ 	conn *websocket.Conn
++	channelReady chan struct{}
+ 
+ 	// Message handler mappings
+ 	handlers map[MessageType]func(*Message)
+@@ -74,6 +76,20 @@
+ 	c.mu.Lock()
+ 	defer c.mu.Unlock()
+ 
++	// A context owns one channel across serial executions.
++	if c.conn != nil { return nil }
++
++	// Use a fresh routing identity for each websocket, shared by its requests.
++	c.session = uuid.New().String()
++	// Match Jupyter channel identity to the execute_request session header.
++	// Without session_id, the server invents a new routing identity on every
++	// reconnect and shell replies can remain buffered on the previous channel.
++	parsed, err := url.Parse(wsURL)
++	if err != nil { return err }
++	query := parsed.Query()
++	query.Set("session_id", c.session)
++	parsed.RawQuery = query.Encode()
++	wsURL = parsed.String()
+ 	// Save WebSocket URL
+ 	c.wsURL = wsURL
+ 
+@@ -86,14 +102,73 @@
+ 		return fmt.Errorf("failed to connect to kernel: %w", err)
+ 	}
+ 	c.conn = conn
++	ready := make(chan struct{})
++	c.channelReady = ready
+ 
+ 	// Register default message handlers
+ 	c.registerDefaultHandlers()
+ 
+ 	// Start message receiving goroutine
+-	safego.Go(func() { c.receiveMessages() })
++	safego.Go(func() { c.receiveMessages(conn, ready) })
+ 
+ 	return nil
++}
++
++// WaitReady verifies the context's own shell channel, not a transient server nudge socket.
++// Actor code is submitted only after this request has a matching reply.
++func (c *Client) WaitReady() error {
++    c.mu.Lock()
++    started := c.channelReady
++    c.mu.Unlock()
++    select {
++    case <-started:
++    case <-time.After(15 * time.Second): return errors.New("kernel websocket startup readiness timed out")
++    }
++    ready := make(chan struct{}, 1)
++    var mu sync.Mutex
++    replies := make(map[string]uint8)
++    mark := func(id string, flag uint8) {
++        mu.Lock()
++        defer mu.Unlock()
++        state, known := replies[id]
++        if !known { return }
++        state |= flag
++        replies[id] = state
++        if state == 3 { select { case ready <- struct{}{}: default: } }
++    }
++    c.registerHandler(MsgKernelInfoReply, func(reply *Message) {
++        mark(reply.ParentHeader.MessageID, 1)
++    })
++    c.registerHandler(MsgStatus, func(reply *Message) {
++        var status StatusUpdate
++        if json.Unmarshal(reply.Content, &status) == nil && status.ExecutionState == StateIdle {
++            mark(reply.ParentHeader.MessageID, 2)
++        }
++    })
++    send := func() error {
++        msg, err := c.buildExecuteMessage("")
++        if err != nil { return err }
++        msg.Header.MessageType = string(MsgKernelInfo)
++        msg.Content = json.RawMessage(`{}`)
++        mu.Lock()
++        replies[msg.Header.MessageID] = 0
++        mu.Unlock()
++        return c.writeMessage(msg)
++    }
++    if err := send(); err != nil { return err }
++    deadline := time.NewTimer(15 * time.Second)
++    defer deadline.Stop()
++    ticker := time.NewTicker(500 * time.Millisecond)
++    defer ticker.Stop()
++    for {
++        select {
++        case <-ready: return nil
++        case <-ticker.C:
++            // Each harmless probe gets a fresh signature; Actor code is never replayed.
++            if err := send(); err != nil { return err }
++        case <-deadline.C: return errors.New("kernel shell/iopub channel readiness timed out")
++        }
++    }
+ }
+ 
+ // Disconnect disconnects the WebSocket connection to the kernel
+@@ -180,7 +255,7 @@
+ 
+ 	// Clear temporary handlers
+ 	c.clearTemporaryHandlers()
+-	c.registerExecuteCodeStreamHandlers(state, resultChan)
++	c.registerExecuteCodeStreamHandlers(state, resultChan, msg.Header.MessageID)
+ 
+ 	if err := c.writeMessage(msg); err != nil {
+ 		return fmt.Errorf("failed to send execution request: %w", err)
+@@ -223,20 +298,35 @@
+ 	return msg, nil
+ }
+ 
+-func (c *Client) registerExecuteCodeStreamHandlers(state *streamExecutionState, resultChan chan *ExecutionResult) {
++func (c *Client) registerExecuteCodeStreamHandlers(state *streamExecutionState, resultChan chan *ExecutionResult, messageID string) {
+ 	c.registerHandler(MsgExecuteReply, func(msg *Message) {
++		if msg.ParentHeader.MessageID != messageID {
++			return
++		}
+ 		c.handleExecuteReply(msg, state)
+ 	})
+ 	c.registerHandler(MsgExecuteResult, func(msg *Message) {
++		if msg.ParentHeader.MessageID != messageID {
++			return
++		}
+ 		c.handleExecuteResult(msg, state, resultChan)
+ 	})
+ 	c.registerHandler(MsgStream, func(msg *Message) {
++		if msg.ParentHeader.MessageID != messageID {
++			return
++		}
+ 		c.handleStreamOutput(msg, state, resultChan)
+ 	})
+ 	c.registerHandler(MsgError, func(msg *Message) {
++		if msg.ParentHeader.MessageID != messageID {
++			return
++		}
+ 		c.handleExecutionError(msg, state, resultChan)
+ 	})
+ 	c.registerHandler(MsgStatus, func(msg *Message) {
++		if msg.ParentHeader.MessageID != messageID {
++			return
++		}
+ 		c.handleExecutionStatus(msg, state, resultChan)
+ 	})
+ }
+@@ -509,11 +599,15 @@
+ }
+ 
+ // Receive WebSocket messages
+-func (c *Client) receiveMessages() {
++func (c *Client) receiveMessages(conn *websocket.Conn, ready chan struct{}) {
++	var readyOnce sync.Once
++	// Bind each reader to its own connection, never a successor published by Connect.
++	defer func() {
++		c.mu.Lock()
++		defer c.mu.Unlock()
++		if c.conn == conn { c.conn = nil }
++	}()
+ 	for {
+-		c.mu.Lock()
+-		conn := c.conn
+-		c.mu.Unlock()
+ 
+ 		if conn == nil {
+ 			break
+@@ -527,6 +621,14 @@
+ 			break
+ 		}
+ 
++        // Jupyter completes its asynchronous channel setup with a nudge.
++        // Do not submit requests before its IOPub subscription is established.
++        if msg.Channel == "iopub" && msg.Header.MessageType == string(MsgStatus) {
++            var status StatusUpdate
++            if json.Unmarshal(msg.Content, &status) == nil && status.ExecutionState == StateIdle {
++                readyOnce.Do(func() { close(ready) })
++            }
++        }
+ 		// Process message
+ 		c.handleMessage(&msg)
+ 	}
+--- a/components/execd/pkg/jupyter/client.go
++++ b/components/execd/pkg/jupyter/client.go
+@@ -156,7 +156,8 @@
+ 		wsURL = fmt.Sprintf("%s?token=%s", wsURL, c.Auth.Token)
+ 	}
+ 
+-	return c.executeClient.Connect(wsURL)
++	if err := c.executeClient.Connect(wsURL); err != nil { return err }
++	return c.executeClient.WaitReady()
+ }
+ 
+ // DisconnectFromKernel closes the websocket connection.
+--- a/components/execd/pkg/runtime/jupyter.go
++++ b/components/execd/pkg/runtime/jupyter.go
+@@ -67,7 +67,7 @@
+ 	if err != nil {
+ 		return err
+ 	}
+-	defer kernel.client.DisconnectFromKernel()
++	// Keep the channel with its context; reconnecting per cell can strand shell requests.
+ 
+ 	results := make(chan *execute.ExecutionResult, 10)
+ 
+--- a/components/execd/pkg/runtime/context.go
++++ b/components/execd/pkg/runtime/context.go
+@@ -115,6 +115,9 @@
+ 	if err := c.jupyterClient().DeleteSession(session); err != nil {
+ 		return err
+ 	}
++	if kernel := c.getJupyterKernel(session); kernel != nil {
++		kernel.client.DisconnectFromKernel()
++	}
+ 	c.jupyterClientMap.Delete(session)
+ 	c.deleteDefaultSessionByID(session)
+ 	return nil

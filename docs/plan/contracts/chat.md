@@ -82,3 +82,13 @@ resume 先校验归属、interrupt_id、类型、当前状态及去重；然后 
 run_started 在图提供器初始化前发送；图获取、resume读取原问题、用户偏好保存及checkpoint终态读取均在本次时长预算保护内。同步初始化在线程等待，不阻塞取消请求。初始化异常发送error并持久化failed，释放活动线程后发送一次done；失败收尾不重新调用图提供器，失败请求重放只读原run，不重新初始化。
 
 初始化等待期间取消可直接终结为cancelled，未开始的模型/工具不会启动。Python无法强行停止已经运行的同步线程；超时或取消后丢弃迟到结果，禁止其进入该run的astream。已开始的初始化内部SDK/数据库操作仍按自身超时收尾，显式用户偏好写入不冒称回滚。图提供器仍为同步owner到compiled graph接口，生产栈预先装配的图与现有配置保持。
+
+## 规划会话（T40）
+
+POST /api/planning/{thread_id}/goal创建独立规划会话，输入budget/demands、不接受owner/grant；读取实际ERP并归档原始JSON。无规划provider拒绝，其他owner线程404，有旧课程对话的线程不切换。已有课程chat/resume/state/SSE形状保持。
+
+planning_submit可在同一工具中逐单interrupt。LangGraph给同任务连续中断复用其任务ID，故规划事件/state使用工具控制面给出的planning_action_id作为公开interrupt_id，恰是原pending_action ID；不另造审批/operation。恢复仍用官方Command(resume)，按原interrupt顺序消费。API仅允许当前checkpoint正在等待的规划订单被决定；旧单/未展示的后续单返回STALE_INTERRUPT。模型或直接graph resume不能写服务端批准记录。
+
+T41 规划run装配可配置planning_episode_store与显式planning_model_identity；正式Demo已配置，旧课程路径不采集该Episode。目标首次run绑定bank，chat/resume跨run聚合；归档错误通过EPISODE_EVIDENCE_FAILED/failed可见，ERP已发生写入不回滚。API completed与Episode业务成功独立，默认Episode保持open/unscored。完整环境快照与独立反馈接入另验。
+
+T43 增加PATCH /api/planning/{thread_id}/goal：预期revision、局部预算/需求更新及指定物料ERP刷新。修订只改目标/来源/历史对账，不调用模型。旧规划审批/签名grant失效；用户后续发送新的chat消息时，服务器可通过官方Command恢复过期工具并提交新用户输入，旧工具STALE_PLAN不能写入，随后仍逐单重新批准。保持原课程chat/resume/SSE字段，规划Episode/bank不切换。

@@ -41,6 +41,8 @@ level = "INFO"
 
 [runtime]
 type = "docker"
+# Default remains the official pinned version.
+# Unaccepted T38 patch is isolated in sandbox.t38-candidate.toml.
 execd_image = "opensandbox/execd:v1.0.22"
 
 [storage]

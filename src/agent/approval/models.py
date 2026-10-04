@@ -18,9 +18,10 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from enum import StrEnum
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 
 class ApprovalError(RuntimeError):
@@ -114,6 +115,7 @@ class PendingAction:
     resume_request_id: str | None = None
     attempts: int = 0
     last_error: str | None = None
+    planning_binding: dict[str, Any] | None = None
 
     # ------------------------------------------------------------------ views
 
@@ -150,6 +152,7 @@ class PendingAction:
             "resume_request_id": self.resume_request_id,
             "attempts": self.attempts,
             "last_error": self.last_error,
+            "planning_binding": self.planning_binding,
         }
 
     @classmethod
@@ -174,6 +177,7 @@ class PendingAction:
             resume_request_id=document.get("resume_request_id"),
             attempts=int(document.get("attempts") or 0),
             last_error=document.get("last_error"),
+            planning_binding=document.get("planning_binding"),
         )
 
     def with_status(self, status: PendingStatus, **changes: Any) -> PendingAction:

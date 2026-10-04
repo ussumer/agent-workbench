@@ -41,6 +41,8 @@ dependencies = [
     # `opensandbox` distribution is the one generated from the server's own OpenAPI
     # spec: it sends `OPEN-SANDBOX-API-KEY` and ships both async and sync clients.
     "opensandbox>=0.1.16,<0.2",
+    # T38: official persistent Python contexts over the existing SandboxSync.
+    "opensandbox-code-interpreter==0.1.2",
 ]
 
 [project.optional-dependencies]

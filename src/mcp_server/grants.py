@@ -46,6 +46,7 @@ class Grant:
     payload_sha256: str
     issued_at: int
     expires_at: int
+    approval_ref: dict[str, str] | None = None
 
 
 def _b64url_encode(raw: bytes) -> str:
@@ -74,6 +75,7 @@ def issue_grant(
     payload_sha256: str,
     ttl_seconds: int = DEFAULT_TTL_SECONDS,
     now: int | None = None,
+    approval_ref: dict[str, str] | None = None,
 ) -> str:
     """Mint a grant. Called by the approval service once a user approves a frozen payload."""
     issued_at = int(time.time() if now is None else now)
@@ -86,6 +88,8 @@ def issue_grant(
         "iat": issued_at,
         "exp": issued_at + ttl_seconds,
     }
+    if approval_ref is not None:
+        payload["approval_ref"] = approval_ref
     encoded = _b64url_encode(
         json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     )
@@ -131,9 +135,17 @@ def verify_grant(
             payload_sha256=str(payload["payload_sha256"]),
             issued_at=int(payload["iat"]),
             expires_at=int(payload["exp"]),
+            approval_ref=payload.get("approval_ref"),
         )
     except (KeyError, TypeError, ValueError) as exc:
         raise GrantError("INVALID_GRANT", f"grant is missing fields: {exc}") from exc
+
+    if grant.approval_ref is not None and (
+        not isinstance(grant.approval_ref, dict)
+        or set(grant.approval_ref) != {"thread_id", "interrupt_id"}
+        or not all(isinstance(v, str) and v for v in grant.approval_ref.values())
+    ):
+        raise GrantError("INVALID_GRANT", "invalid planning approval reference")
 
     moment = int(time.time() if now is None else now)
     if moment >= grant.expires_at:

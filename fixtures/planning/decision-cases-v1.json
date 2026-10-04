@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "purpose": "公开环境设计案例，非封存学习测试；真实模型与迁移收益尚未运行",
+  "base_goal": "goal-v1.json",
+  "cases": [
+    {"case_id": "deadline-conflict", "condition": "单独交期冲突", "budget": "3000.00", "p001_deadline": 3, "allow_partial": true, "source_status": "verified"},
+    {"case_id": "budget-partial", "condition": "单独预算与部分满足", "budget": "2300.00", "p001_deadline": 4, "allow_partial": true, "source_status": "verified"},
+    {"case_id": "source-missing", "condition": "单独必需物料来源缺失", "budget": "3000.00", "p001_deadline": 4, "allow_partial": true, "source_status": "missing"},
+    {"case_id": "deadline-budget", "condition": "重组交期与预算", "budget": "2200.00", "p001_deadline": 3, "allow_partial": true, "source_status": "verified"},
+    {"case_id": "deadline-budget-missing", "condition": "重组三种条件", "budget": "2200.00", "p001_deadline": 3, "allow_partial": true, "source_status": "missing"},
+    {"case_id": "sufficient-budget", "condition": "预算足不截断", "budget": "3000.00", "p001_deadline": 4, "allow_partial": true, "source_status": "verified"},
+    {"case_id": "no-partial", "condition": "不允许分批时不擅自买部分", "budget": "2500.00", "p001_deadline": 3, "allow_partial": false, "source_status": "verified"},
+    {"case_id": "business-infeasible", "condition": "完整证据但必需预算不足", "budget": "2000.00", "p001_deadline": 3, "allow_partial": true, "source_status": "verified"}
+  ]
+}

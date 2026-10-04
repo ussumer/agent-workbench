@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="7" failures="0" errors="7" time="0">
+    <testsuite name="vitest unhandled errors" timestamp="2026-10-03T10:32:12.132Z" hostname="Legion-of-Ussumer" tests="7" failures="0" errors="7" skipped="0" time="0">
+        <testcase classname="vitest unhandled errors" name="Unhandled Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/App.spec.ts." time="0">
+            <error message="[vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/App.spec.ts." type="Error">
+Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/App.spec.ts.
+Caused by: Error: require() of ES Module C:\dev\rush-harness\frontend\node_modules\@exodus\bytes\encoding-lite.js from C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ ❯ Object.&lt;anonymous&gt; node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_REQUIRE_ESM&apos; }
+            </error>
+        </testcase>
+        <testcase classname="vitest unhandled errors" name="Unhandled Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/components/PlanningGoal.spec.ts." time="0">
+            <error message="[vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/components/PlanningGoal.spec.ts." type="Error">
+Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/components/PlanningGoal.spec.ts.
+Caused by: Error: require() of ES Module C:\dev\rush-harness\frontend\node_modules\@exodus\bytes\encoding-lite.js from C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ ❯ Object.&lt;anonymous&gt; node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_REQUIRE_ESM&apos; }
+            </error>
+        </testcase>
+        <testcase classname="vitest unhandled errors" name="Unhandled Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/state/async_tasks.spec.ts." time="0">
+            <error message="[vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/state/async_tasks.spec.ts." type="Error">
+Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/src/state/async_tasks.spec.ts.
+Caused by: Error: require() of ES Module C:\dev\rush-harness\frontend\node_modules\@exodus\bytes\encoding-lite.js from C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ ❯ Object.&lt;anonymous&gt; node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_REQUIRE_ESM&apos; }
+            </error>
+        </testcase>
+        <testcase classname="vitest unhandled errors" name="Unhandled Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/chat-machine.spec.ts." time="0">
+            <error message="[vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/chat-machine.spec.ts." type="Error">
+Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/chat-machine.spec.ts.
+Caused by: Error: require() of ES Module C:\dev\rush-harness\frontend\node_modules\@exodus\bytes\encoding-lite.js from C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ ❯ Object.&lt;anonymous&gt; node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_REQUIRE_ESM&apos; }
+            </error>
+        </testcase>
+        <testcase classname="vitest unhandled errors" name="Unhandled Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/markdown.spec.ts." time="0">
+            <error message="[vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/markdown.spec.ts." type="Error">
+Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/markdown.spec.ts.
+Caused by: Error: require() of ES Module C:\dev\rush-harness\frontend\node_modules\@exodus\bytes\encoding-lite.js from C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ ❯ Object.&lt;anonymous&gt; node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_REQUIRE_ESM&apos; }
+            </error>
+        </testcase>
+        <testcase classname="vitest unhandled errors" name="Unhandled Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/planning-integration.spec.ts." time="0">
+            <error message="[vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/planning-integration.spec.ts." type="Error">
+Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/planning-integration.spec.ts.
+Caused by: Error: require() of ES Module C:\dev\rush-harness\frontend\node_modules\@exodus\bytes\encoding-lite.js from C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ ❯ Object.&lt;anonymous&gt; node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_REQUIRE_ESM&apos; }
+            </error>
+        </testcase>
+        <testcase classname="vitest unhandled errors" name="Unhandled Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/sse.spec.ts." time="0">
+            <error message="[vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/sse.spec.ts." type="Error">
+Error: [vitest-pool]: Failed to start forks worker for test files C:/dev/rush-harness/frontend/tests/sse.spec.ts.
+Caused by: Error: require() of ES Module C:\dev\rush-harness\frontend\node_modules\@exodus\bytes\encoding-lite.js from C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js not supported.
+Instead change the require of encoding-lite.js in C:\dev\rush-harness\frontend\node_modules\html-encoding-sniffer\lib\html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+ ❯ Object.&lt;anonymous&gt; node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: &apos;ERR_REQUIRE_ESM&apos; }
+            </error>
+        </testcase>
+    </testsuite>
+</testsuites>

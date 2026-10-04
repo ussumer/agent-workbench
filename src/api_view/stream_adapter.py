@@ -436,12 +436,13 @@ class StreamAdapter:
     # --------------------------------------------------------------- interrupts
 
     def _interrupt(self, interrupt: Any, namespace: Sequence[str]) -> AgentEvent | None:
-        interrupt_id = str(getattr(interrupt, "id", "") or "")
-        if interrupt_id and interrupt_id in self._interrupt_emitted:
-            return None
+        graph_id = str(getattr(interrupt, "id", "") or "")
         value = getattr(interrupt, "value", None)
         if not isinstance(value, Mapping):
             value = {"raw": _truncate(str(value))}
+        interrupt_id = public_interrupt_id(value, graph_id)
+        if interrupt_id and interrupt_id in self._interrupt_emitted:
+            return None
 
         kind, prompt, candidates = describe_interrupt(value, interrupt_id)
         if interrupt_id:
@@ -481,6 +482,16 @@ class StreamAdapter:
             self._terminal = status
 
 
+def public_interrupt_id(value: Mapping[str, Any], graph_id: str) -> str:
+    """Sequential interrupt() calls in one task share the framework ID.
+
+    Planning orders have their own durable approval IDs; use those on the API/UI,
+    while leaving LangGraph's internal task identity and resume sequence unchanged.
+    """
+    reference = value.get("planning_action_id")
+    return reference if isinstance(reference, str) and reference else graph_id
+
+
 def describe_interrupt(
     value: Mapping[str, Any], interrupt_id: str
 ) -> tuple[str, str, list[dict[str, Any]]]:
@@ -498,6 +509,7 @@ def describe_interrupt(
             [{"type": "supplement", "missing_fields": missing}],
         )
 
+    interrupt_id = public_interrupt_id(value, interrupt_id)
     requests = value.get("action_requests")
     if isinstance(requests, Sequence) and not isinstance(requests, (str, bytes)) and requests:
         # The action requests are carried through, not summarised away: the API records the
@@ -514,6 +526,8 @@ def describe_interrupt(
                     "tool_name": str(request.get("name") or ""),
                     "arguments": dict(request.get("args") or {}),
                     "description": str(request.get("description") or ""),
+                    **({"planning_action_id": str(value["planning_action_id"])}
+                       if value.get("planning_action_id") else {}),
                 }
             )
 

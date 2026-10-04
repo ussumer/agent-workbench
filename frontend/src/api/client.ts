@@ -89,7 +89,44 @@ export interface ThreadState {
   cancel_requested: boolean
 }
 
+export interface PlanningDemand {
+  part_id: string
+  quantity: number
+  max_lead_days: number
+  required: boolean
+  priority: number
+  allow_partial: boolean
+  allow_supplier_split: boolean
+}
+
+export interface PlanningProblem {
+  goal_id: string
+  revision: number
+  budget: string
+  currency: string
+  demands: PlanningDemand[]
+}
+
+export interface PlanningGoalState {
+  problem: PlanningProblem
+  orders: Array<{ interrupt_id: string; revision: number; result: {
+    ok: boolean
+    data: { order_id: string; supplier_id?: string; total_amount?: string }
+  } }>
+  execution_state: string | null
+}
+
 export const api = {
+  createPlanningGoal(threadId: string, body: { budget: string; demands: PlanningDemand[] }) {
+    return request<PlanningProblem>(`/planning/${encodeURIComponent(threadId)}/goal`, {
+      method: 'POST', body: JSON.stringify(body),
+    })
+  },
+
+  planningGoal(threadId: string) {
+    return request<PlanningGoalState>(`/planning/${encodeURIComponent(threadId)}/goal`)
+  },
+
   session(userId: string) {
     return request<{ user_id: string; note: string }>('/demo/session', {
       method: 'POST',

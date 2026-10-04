@@ -6,6 +6,8 @@
 顺序追加；当前进度见上述状态文件，不再据旧演示成绩声称整个项目质量已验收。
 所有 `review` 仍是 `not_reviewed`，自动检查通过不等于人工审阅完成。
 
+2026-10-03 用户授权新增多约束采购规划方向，按场景与独立裁判 → OpenSandbox 持久计算 → TRACE 技能学习 → 持续重规划推进，参见[实施现场](../runtime/procurement-planning-implementation.md)与[规划契约](contracts/planning.md)。T37 是首包，后续机制仍需实测，旧课程模式保留。
+
 ## 执行入口
 
 给编码模型的完整消息见 [START-HERE](START-HERE.md)。运行 `python3 scripts/plan_guard.py check`、`python3 scripts/plan_guard.py next`；这两个命令只检查方案结构和任务状态，不代表应用通过验收。

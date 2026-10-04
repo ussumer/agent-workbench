@@ -30,11 +30,13 @@ from agent.artifacts.service import ArtifactService
 from agent.artifacts.store import MongoArtifactStore
 from agent.async_tasks.service import build_async_task_service
 from agent.persistence.repository import ApplicationRepository
+from agent.planning.orders import PlanningOrders
 from api_view.api.artifacts import build_artifacts_router
 from api_view.api.async_tasks import build_async_tasks_router
 from api_view.api.chat import build_chat_router
 from api_view.api.deps import WebContext
 from api_view.api.history import build_history_router
+from api_view.api.planning import build_planning_router
 from api_view.run_registry import RunRegistry
 from api_view.web_config import (
     DEFAULT_INTERNAL_SERVICE_TOKEN_ENV,
@@ -97,6 +99,9 @@ def create_app(
             approvals=ApprovalService(
                 store=MongoPendingActionStore(started.database),
                 grant_secret=_grant_secret(resolved_settings),
+                planning_guard=PlanningOrders(
+                    started.database, grant_secret=_grant_secret(resolved_settings)
+                ).validate_action,
             ),
             artifacts=artifacts,
             # The SDK client is built but not connected: starting the application must not
@@ -118,6 +123,7 @@ def create_app(
     app.include_router(build_chat_router(context), prefix="/api")
     app.include_router(build_artifacts_router(context), prefix="/api")
     app.include_router(build_async_tasks_router(context), prefix="/api")
+    app.include_router(build_planning_router(context), prefix="/api")
 
     from api_view.internal.analysis import build_internal_analysis_router
     from api_view.internal.approval import build_internal_router

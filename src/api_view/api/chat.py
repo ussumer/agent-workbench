@@ -10,6 +10,7 @@ tokens.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from collections.abc import AsyncIterator, Callable, Mapping, Sequence
 from typing import Any
@@ -264,9 +265,26 @@ async def _run_turn(
     assistant_text: list[str] = []
     cancelled = False
     interrupts: list[dict[str, Any]] = []
+    episode_store = context.extra.get("planning_episode_store")
+    episode_id = None
+    episode_error = None
+    episode_guard = None
     try:
         async with asyncio.timeout(budget.clock.remaining()):
-            graph = await _setup_call(handle, context.graph_provider, owner)
+            if episode_store is not None:
+                goal = context.resources.database["planning_goals"].find_one({
+                    "owner_user_id": owner, "thread_id": thread_id, "goal_id": thread_id})
+                if goal is not None:
+                    from agent.evolution.orchestration import EpisodeCallbacks
+                    identity = context.extra["planning_model_identity"]
+                    episode_id = episode_store.begin_run(owner, thread_id, thread_id, handle.run_id,
+                        model=identity, interrupt_id=interrupt_id,
+                        public={"user_text": user_text, "goal": _episode_goal(goal)})
+                    config["configurable"]["planning_episode_id"] = episode_id
+                    episode_guard = EpisodeCallbacks(episode_store, owner, episode_id, handle.run_id)
+                    config["configurable"]["planning_evidence_guard"] = episode_guard
+                    config["callbacks"].append(episode_guard)
+            graph = await _setup_call(handle, lambda: _provide_graph(context, owner, thread_id))
             # Resume reads the original question from the same graph. A failed or expired
             # initializer must never be called again during settlement.
             if not query:
@@ -281,6 +299,8 @@ async def _run_turn(
             if user_text:
                 await _setup_call(handle, lambda: preferences.apply_user_preferences(
                     owner_user_id=owner, message=user_text, source_is_user=True))
+                payload = await _setup_call(handle, lambda: _resume_revised_goal(
+                    context, owner, thread_id, graph, payload))
             async for part in graph.astream(
                 payload,
                 config,
@@ -306,8 +326,10 @@ async def _run_turn(
         adapter.cancelled()
     except TimeoutError:
         failure = budget.expired()
+        episode_error = failure.code
         handle.publish(adapter.error(code=failure.code, message=str(failure), retryable=False))
     except Exception as failure:  # noqa: BLE001 - surfaced to the client, not swallowed
+        episode_error = _error_code(failure)
         LOGGER.exception("run %s failed while streaming", handle.run_id)
         handle.publish(
             adapter.error(code=_error_code(failure), message=str(failure), retryable=False)
@@ -316,6 +338,9 @@ async def _run_turn(
     # the parent can still answer. That must not convert exhaustion into a completed run.
     if budget.failure is not None and adapter.terminal_status != FAILED:
         handle.publish(adapter.error(code=budget.failure.code, message=str(budget.failure), retryable=False))
+    if episode_guard is not None and episode_guard.failure is not None:
+        episode_error = episode_guard.failure.code
+        handle.publish(adapter.error(code=episode_error, message=str(episode_guard.failure), retryable=False))
 
     # The terminal state comes from the checkpoint and the adapter, never from "no more
     # tokens arrived".
@@ -346,6 +371,24 @@ async def _run_turn(
         final = FAILED
         handle.publish(adapter.error(code="MEMORY_PERSISTENCE_FAILED",
                                      message="采购运行已经结束，但记忆保存失败；请查看已完成的工具结果。", retryable=False))
+
+    if episode_id is not None and episode_store is not None:
+        try:
+            episode_store.export(owner, episode_id)
+            goal = context.resources.database["planning_goals"].find_one({
+                "owner_user_id": owner, "thread_id": thread_id, "goal_id": thread_id})
+            approvals = [{**{k: getattr(action, k) for k in (
+                "interrupt_id", "tool_name", "payload_sha256", "status", "planning_binding", "decided_at")},
+                "payload": json.loads(action.payload_bytes)}
+                for action in context.approvals.store.list_for_thread(owner, thread_id)]
+            episode_store.settle(owner, episode_id, handle.run_id, status=final,
+                budget=budget.as_dict(), goal=_episode_goal(goal or {}), approvals=approvals,
+                error_code=episode_error or (budget.failure.code if budget.failure else None))
+        except Exception:  # noqa: BLE001 - an evidence gap cannot become a pass
+            LOGGER.exception("run %s could not persist planning evidence", handle.run_id)
+            final = FAILED
+            handle.publish(adapter.error(code="EPISODE_EVIDENCE_FAILED",
+                message="规划轨迹归档失败；已写入的订单不会回滚。", retryable=False))
 
     context.repository.update_run_status(
         owner_user_id=owner, run_id=handle.run_id, status=final,
@@ -386,9 +429,10 @@ async def _setup_call(handle: RunHandle, call: Callable[..., Any], *args: Any) -
 
 def _error_code(failure: Exception) -> str:
     from agent.backends.sandbox_proxy import SandboxCircuitOpenError
+    from agent.evolution.episodes import EvidenceError
     from agent.run_budget import BudgetExceeded
 
-    if isinstance(failure, (BudgetExceeded, SandboxCircuitOpenError)):
+    if isinstance(failure, (BudgetExceeded, SandboxCircuitOpenError, EvidenceError)):
         return failure.code
     return type(failure).__name__.upper()
 
@@ -464,6 +508,22 @@ def _record_interrupt(
         return
 
     try:
+        planning_refs = [r for r in requests if r.get("planning_action_id")]
+        if planning_refs:
+            if len(requests) != 1:
+                raise ApprovalError("BATCH_NOT_SUPPORTED", "planning approvals are reviewed individually")
+            item = planning_refs[0]
+            action = context.approvals.store.find(owner, thread_id, item["planning_action_id"])
+            if action is None or action.planning_binding is None:
+                raise ApprovalError("ACTION_NOT_FOUND", "no recorded planning action")
+            from agent.approval.service import canonical_bytes
+            if (item["tool_name"] != action.tool_name
+                    or not action.matches_bytes(canonical_bytes(action.tool_name, item["arguments"]))):
+                raise ApprovalError("PARAMETERS_CHANGED", "planning interrupt differs from recorded action")
+            context.approvals._check_planning(action)
+            if str(payload["interrupt_id"]) != action.interrupt_id:
+                raise ApprovalError("INVALID_INTERRUPT_BINDING", "planning approval ID differs")
+            return
         context.approvals.record(
             owner_user_id=owner,
             thread_id=thread_id,
@@ -498,6 +558,11 @@ def _decide(
     request_id: str,
     decisions: Sequence[Mapping[str, Any]],
 ) -> None:
+    action = context.approvals.store.find(owner, thread_id, interrupt_id)
+    if action is not None and action.planning_binding is not None:
+        if not any(i["interrupt_id"] == interrupt_id
+                   for i in _pending_interrupts(context, owner, thread_id)):
+            raise ApprovalError("STALE_INTERRUPT", "this planning order is not awaiting a decision")
     approve = any(str(item.get("type")) == "approve" for item in decisions)
     if approve:
         context.approvals.approve(
@@ -528,10 +593,48 @@ def _graph_config(owner: str, thread_id: str, interrupt_id: str | None) -> dict[
     return {"configurable": configurable}
 
 
+def _episode_goal(goal: dict[str, Any]) -> dict[str, Any]:
+    return {k: goal[k] for k in ("goal_id", "revision", "problem", "sources", "proposal", "orders", "revision_change")
+            if k in goal}
+
+
+def _resume_revised_goal(context: WebContext, owner: str, thread: str, graph: Any, payload: Any) -> Any:
+    """A fresh user message may retire a stale planning tool interrupt, never approve it."""
+    from langgraph.types import Command
+    goal = context.resources.database["planning_goals"].find_one({
+        "owner_user_id": owner, "thread_id": thread, "goal_id": thread})
+    if goal is None:
+        return payload
+    state = graph.get_state(_graph_config(owner, thread, None))
+    stale = False
+    for interrupt in getattr(state, "interrupts", ()):
+        value = interrupt.value
+        action_id = value.get("planning_action_id") if isinstance(value, Mapping) else None
+        if not action_id:
+            continue
+        action = context.approvals.store.find(owner, thread, action_id)
+        if action is not None and action.planning_binding is not None:
+            binding = action.planning_binding
+            if binding["revision"] != goal["revision"] or binding["proposal_id"] != (goal["proposal"] or {}).get("id"):
+                stale = True
+    return Command(resume={"type": "planning_goal_revised"}, update=payload) if stale else payload
+
+
+def _provide_graph(context: WebContext, owner: str, thread_id: str) -> Any:
+    provider = context.extra.get("planning_graph_provider")
+    if provider is not None:
+        from agent.persistence.indexes import COLLECTION_PLANNING_GOALS
+        if context.resources.database[COLLECTION_PLANNING_GOALS].find_one({
+            "owner_user_id": owner, "thread_id": thread_id, "goal_id": thread_id,
+        }) is not None:
+            return provider(owner)
+    return context.graph_provider(owner)
+
+
 def _graph_snapshot(context: WebContext, owner: str, thread_id: str, *, graph: Any = None) -> dict[str, Any]:
     """Current checkpoint values for a thread, or an empty mapping."""
     try:
-        graph = graph if graph is not None else context.graph_provider(owner)
+        graph = graph if graph is not None else _provide_graph(context, owner, thread_id)
         state = graph.get_state(_graph_config(owner, thread_id, None))
     except Exception:  # noqa: BLE001 - an absent checkpoint is normal for a new thread
         LOGGER.info("no checkpoint for thread %s yet", thread_id)
@@ -550,7 +653,7 @@ def _pending_interrupts(
     moved past would be a lie the UI acts on.
     """
     try:
-        graph = graph if graph is not None else context.graph_provider(owner)
+        graph = graph if graph is not None else _provide_graph(context, owner, thread_id)
         state = graph.get_state(_graph_config(owner, thread_id, None))
     except Exception:  # noqa: BLE001
         return []
@@ -561,14 +664,14 @@ def _pending_interrupts(
             value = getattr(interrupt, "value", None)
             if not isinstance(value, Mapping):
                 continue
-            from api_view.stream_adapter import describe_interrupt
+            from api_view.stream_adapter import describe_interrupt, public_interrupt_id
 
             kind, prompt, candidates = describe_interrupt(
                 value, str(getattr(interrupt, "id", "") or "")
             )
             found.append(
                 {
-                    "interrupt_id": str(getattr(interrupt, "id", "") or ""),
+                    "interrupt_id": public_interrupt_id(value, str(getattr(interrupt, "id", "") or "")),
                     "interrupt_type": kind,
                     "prompt": prompt,
                     "candidates": candidates,

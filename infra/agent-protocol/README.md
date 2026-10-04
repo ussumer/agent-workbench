@@ -47,6 +47,22 @@ $env:PYTHONIOENCODING="utf-8"; $env:PYTHONUTF8="1"
 
 测试由 `tests/fixtures/agent_protocol_service.py` 自行拉起与收尾。
 
+WSL/Linux 使用独立的 `.venv-agent-protocol-linux`，与 Windows 环境并存；启动器和 Python 按当前操作系统选择，不能把 `/mnt/c/...` 配置路径传给 Windows launcher。
+
+```bash
+.venv-linux-t45/bin/python scripts/provision_agent_protocol.py
+.venv-agent-protocol-linux/bin/langgraph dev \
+  --config infra/agent-protocol/langgraph.json \
+  --port 8123 --host 127.0.0.1 --no-browser --no-reload
+```
+
+Linux 完整依赖冻结在 `requirements-linux.lock`；复建时可在已创建的独立环境中运行：
+
+```bash
+uv pip sync --python .venv-agent-protocol-linux/bin/python \
+  infra/agent-protocol/requirements-linux.lock
+```
+
 ## 踩过的两个坑（已写入脚本，勿删）
 
 1. **`.venv-agent-protocol` 必须用具体解释器创建**：`uv venv` 会生成指向 uv 托管目录

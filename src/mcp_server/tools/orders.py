@@ -14,6 +14,7 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
+from ..approval_verify import verify_planning_approval
 from ..deps import caller, erp_client, runtime
 from ..grants import GrantError, verify_grant
 from ..http_base import error_result
@@ -54,6 +55,7 @@ async def order_create(
                 expect_target=create_target(),
                 expect_payload_sha256=_sha256(frozen),
             )
+            await verify_planning_approval(grant, settings)
         except GrantError as failure:
             return error_result(failure.code, str(failure), retryable=False)
 
@@ -96,6 +98,7 @@ async def order_update(
                 expect_target=update_target(order_id),
                 expect_payload_sha256=_sha256(frozen),
             )
+            await verify_planning_approval(grant, settings)
         except GrantError as failure:
             return error_result(failure.code, str(failure), retryable=False)
 

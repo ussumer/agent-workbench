@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import calendar
 import logging
-import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -35,7 +34,6 @@ from agent.approval.models import (
     ApprovalError,
     PendingAction,
     PendingStatus,
-    freeze_payload,
     new_operation_id,
     payload_digest,
     summarise,
@@ -125,6 +123,7 @@ class ApprovalService:
     grant_ttl_seconds: int = 300
     approval_ttl: timedelta = DEFAULT_APPROVAL_TTL
     clock: Callable[[], datetime] = _now
+    planning_guard: Callable[..., None] | None = None
 
     # ------------------------------------------------------------------ recording
 
@@ -136,6 +135,7 @@ class ApprovalService:
         interrupt_id: str,
         interrupt_value: Mapping[str, Any],
         before_snapshot: Mapping[str, Any] | None = None,
+        planning_binding: Mapping[str, Any] | None = None,
     ) -> PendingAction:
         """Freeze one interrupt into a pending action.
 
@@ -174,6 +174,7 @@ class ApprovalService:
             thread_id=thread_id,
             interrupt_id=interrupt_id,
             tool_call_id=tool_call_id,
+            planning_binding=dict(planning_binding) if planning_binding else None,
             tool_name=tool_name,
             target=target_for(tool_name, arguments),
             payload_bytes=payload,
@@ -227,6 +228,7 @@ class ApprovalService:
         ``ALREADY_DECIDED`` — which is what "两个 tab 同时点击只成功一次" means at this layer.
         """
         existing = self._load(owner_user_id, thread_id, interrupt_id)
+        self._check_planning(existing)
 
         if existing.resume_request_id == request_id and existing.status is target:
             LOGGER.info("resume %s replayed; returning the original decision", request_id)
@@ -242,7 +244,7 @@ class ApprovalService:
             self.store.transition(
                 owner_user_id,
                 thread_id,
-                interrupt_id,
+                existing.interrupt_id,
                 expect=PendingStatus.PENDING,
                 target=PendingStatus.EXPIRED,
             )
@@ -253,7 +255,7 @@ class ApprovalService:
         moved = self.store.transition(
             owner_user_id,
             thread_id,
-            interrupt_id,
+            existing.interrupt_id,
             expect=PendingStatus.PENDING,
             target=target,
             decided_at=self.clock().isoformat(),
@@ -300,6 +302,7 @@ class ApprovalService:
                 "no approved action matches this interrupt; approve it before writing",
             )
 
+        self._check_planning(action, executing=True)
         if action.tool_name != tool_name:
             raise ApprovalError(
                 "GRANT_MISMATCH",
@@ -328,6 +331,10 @@ class ApprovalService:
             raise ApprovalError(
                 "APPROVAL_REQUIRED", "this action has not been approved yet"
             )
+
+        if action.status not in (PendingStatus.APPROVED, PendingStatus.EXECUTING,
+                                  PendingStatus.EXECUTED):
+            raise ApprovalError("APPROVAL_REQUIRED", f"action is {action.status}")
 
         # The decisive check: the arguments about to be sent must be the arguments that were
         # approved. A model that edits a price between approval and execution fails here.
@@ -366,6 +373,8 @@ class ApprovalService:
             payload_sha256=action.payload_sha256,
             ttl_seconds=self.grant_ttl_seconds,
             now=_epoch(self.clock()),
+            approval_ref={"thread_id": thread_id, "interrupt_id": interrupt_id}
+            if action.planning_binding else None,
         )
         return WriteAuthorization(
             grant=grant,
@@ -428,6 +437,7 @@ class ApprovalService:
         still exists, still belongs to that owner, and has not been revoked or superseded.
         """
         action = self._load(owner_user_id, thread_id, interrupt_id)
+        self._check_planning(action, executing=True)
         mismatches = [
             name
             for name, actual, expected in (
@@ -469,6 +479,12 @@ class ApprovalService:
                 "ACTION_NOT_FOUND", "no pending action matches this thread and interrupt"
             )
         return action
+
+    def _check_planning(self, action: PendingAction, *, executing: bool = False) -> None:
+        if action.planning_binding is not None:
+            if self.planning_guard is None:
+                raise ApprovalError("PLANNING_UNAVAILABLE", "planning revision guard is required")
+            self.planning_guard(action, executing=executing)
 
     def _is_expired(self, action: PendingAction) -> bool:
         if not action.expires_at:

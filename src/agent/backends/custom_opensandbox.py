@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import threading
 import time
 from collections.abc import Iterable, Iterator, Sequence
 from contextlib import contextmanager
@@ -170,6 +171,8 @@ class OpenSandboxBackend(BaseSandbox):
         self._sandbox = sandbox
         self._config = config
         self._default_timeout = default_timeout or config.default_exec_timeout
+        self._code_service = None
+        self._code_service_lock = threading.Lock()
 
     # ------------------------------------------------------------------ identity
 
@@ -187,7 +190,79 @@ class OpenSandboxBackend(BaseSandbox):
     def config(self) -> SandboxRuntimeConfig:
         return self._config
 
+    # Official persistent code service over this same container. The proxy owns
+    # execution serialization; interruption deliberately uses a separate request.
+    def _codes(self):
+        from code_interpreter.sync.adapters.factory import AdapterFactorySync
+        from opensandbox.constants import DEFAULT_EXECD_PORT
+        from opensandbox.transport import unwrap_retry_transport
+
+        with self._code_service_lock:
+            if self._code_service is None:
+                config = self._sandbox.connection_config
+                config = config.model_copy(update={
+                    "transport": unwrap_retry_transport(config.transport),
+                })
+                self._code_service = AdapterFactorySync(config).create_code_execution_service(
+                    self._sandbox.get_endpoint(DEFAULT_EXECD_PORT))
+            return self._code_service
+
+    def kernel_create_context(self):
+        return self._codes().create_context("python")
+
+    def kernel_get_context(self, context_id: str):
+        return self._codes().get_context(context_id)
+
+    def kernel_run(self, code: str, context, handlers=None, *, should_cancel=None):
+        if not context.id or context.language != "python":
+            raise ValueError("explicit Python context identity is required")
+        if should_cancel is not None and should_cancel():
+            raise TimeoutError("KERNEL_CANCELLED_BEFORE_START")
+        return self._codes().run(code, context=context, handlers=handlers)
+
+    def kernel_interrupt(self, execution_id: str) -> None:
+        self._codes().interrupt(execution_id)
+
+    def kernel_delete_context(self, context_id: str) -> None:
+        self._codes().delete_context(context_id)
+
     # ------------------------------------------------------------------ execute
+
+    def computation_run(self, command: str, *, timeout: float, cancel_path: str,
+                        should_cancel, on_started) -> dict:
+        """Launch one supervised process with the official background Commands API.
+
+        Cancellation stops the supervised children, not just our HTTP wait. A
+        missing/uncertain terminal status is handled as quarantine by the caller.
+        """
+        started = time.monotonic()
+        execution = self._sandbox.commands.run(command, opts=RunCommandOpts(
+            background=True, timeout=timedelta(seconds=timeout + 15)))
+        if not execution.id or execution.error is not None:
+            raise SandboxExecutionError("computation supervisor did not start")
+        on_started(execution.id)
+        signalled = False
+        while time.monotonic() - started < timeout + 12:
+            if should_cancel() and not signalled:
+                self._sandbox.files.write_files([WriteEntry(path=cancel_path, data=b"cancel")])
+                signalled = True
+            status = self._sandbox.commands.get_command_status(execution.id)
+            if status.running is False:
+                return {"execution_id": execution.id, "exit_code": status.exit_code}
+            time.sleep(0.05)
+        # Killing only the command is not proof its children ended. The caller
+        # quarantines this container rather than accepting partial cleanup.
+        self._sandbox.commands.interrupt(execution.id)
+        raise SandboxExecutionError("supervisor termination was not confirmed")
+
+    def computation_wait(self, execution_id: str, *, timeout: int = 20) -> dict:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            status = self._sandbox.commands.get_command_status(execution_id)
+            if status.running is False:
+                return {"execution_id": execution_id, "exit_code": status.exit_code}
+            time.sleep(0.05)
+        raise SandboxExecutionError("supervisor did not terminate during recovery")
 
     def execute(self, command: str, *, timeout: int | None = None) -> ExecuteResponse:
         """Run a shell command inside the container."""
@@ -420,6 +495,10 @@ def create_backend(
     resolved = config or SandboxRuntimeConfig.from_env(env)
     sandbox = SandboxSync.create(
         resolved.image,
+        # The SDK defaults to `tail -f /dev/null`, overriding this image's
+        # entrypoint and leaving execd's persistent context service without
+        # Jupyter. Start the same pinned image's actual runtime instead.
+        entrypoint=["/opt/code-interpreter/code-interpreter.sh"],
         timeout=resolved.create_timeout,
         ready_timeout=resolved.ready_timeout,
         env=resolved.extra_env or None,
