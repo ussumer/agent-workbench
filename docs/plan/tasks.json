@@ -3116,8 +3116,7 @@
             "run",
             "--frozen",
             "python",
-            "scripts/planning/gdpevo_v3_training.py",
-            "verify",
+            "scripts/planning/gdpevo_v3_evidence.py",
             "--output",
             "{evidence_dir}/v3-report.json"
           ],
