@@ -1,5 +1,12 @@
 # 当前交接
 
+## 2026-10-05 T57完成；Curator输入边界已修复
+
+T57 gate `artifacts/tasks/T57/20261004T164702Z/receipt.json`：6个边界测试与只读真实证据核验通过。Git提交 `f997bd2` 及后续 verifier 提交需以当前日志为准。v3 任务集40题，20 train/20 test；原始 train 5/20全对、均分0.815。完整旧闭环（15个失败各一次修正、Curator、train fixed/candidate验证、fixed/candidate test）candidate mean `.823` vs fixed `.796`，两者4/20全对，但7题逐题退化，拒绝晋升；复用fixed控制的candidate test `.719` vs `.608`，均0/20全对。首次闭环Curator漏传policy evidence；修复后显式从train-only文件join四组规则，并对重复规则压缩，避免170KB网关拒绝；首次缺规则和170KB HTTP429均保留。修正后的Curator实验结果仍不进入生产bank，`production_assignment_changed=false`。累计保守账本约34.80/50 CNY，实际provider账单未知。
+
+剩余方法问题已收敛为全局单技能的过宽作用域、无按操作分组和无状态条件选择；下一步若继续，应先实现模块化skill bank/按当前任务选择，再做一次新的train-only选择，不能用本轮test倒选。T38不恢复，旧v2/T56证据不覆盖。
+
+
 ## T57进行中
 
 T56已完成并Git保存；T54扩题冻结d07024e。首轮T57 20真实train（5全对），Curator因复述实例/authorization模式被校验拒绝；原attempt-gdpevo-v3-training-20261004保留。当前改进：复用原20train，补齐训练记录的公开规则和原输入；仅一次train失败修正，真实Curator重试一次，train筛选与新三组20test。产物在attempt-gdpevo-v3-expanded-20261004；不重复旧v2，未切生产bank。

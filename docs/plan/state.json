@@ -345,10 +345,10 @@
       "notes": "T54完成：复用v2输入契约，新增quotes/packages/kits/revisions四组各5 train+5 test，共40主任务、40单因素反事实。138测试全通过；旧v2 oracle与独立整数枚举、固定手算答案、Actor阶段隔离和私有裁判均核对。新fixture/训练材料/私有answers/control/说明文档hash已记录。0模型调用；不声称校准收益或生产Actor能力。训练保持外部T55隔离。"
     },
     "T57": {
-      "status": "in_progress",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "用户授权扩大v3训练；首轮20真实train完成，Curator实例复制被拒，失败保留。仅复用train，修正输入一次，执行有界诊断修正、train验证、三组20test。"
+      "receipt": "artifacts/tasks/T57/20261004T164702Z/receipt.json",
+      "notes": "T57真实v3扩展训练与闭环修复完成。原20 train复用；15失败各一次公开诊断修正；首次Curator缺policy evidence的闭环失败保留，网关170KB请求过大零生成失败保留。修正后Curator显式join每组train policy并压缩重复规则，candidate train mean .823 vs fixed .796，4/20 vs4/20但7题逐题退化，拒绝晋升；复用fixed控制的candidate test mean .719 vs .608，均0/20全对，单次开发test不作学习增益结论。production_assignment_changed=false。T57 gate 6 unit + 只读证据核验通过。累计保守账本约34.80/50 CNY，provider actual_cost未知。"
     }
   }
 }
