@@ -1,5 +1,15 @@
 # 当前交接
 
+## 2026-10-04 T46 新检查点：严格只读核验与零生成运行前冻结
+
+T46仍in_progress，不重跑attempt-7。新gate `artifacts/tasks/T46/20261004T025447Z/receipt.json`：33 unit + 68既有回归 + 4只读live断言 + 1真实prepare断言，106passed/0failed/0skipped。新入口 `scripts/planning/evidence.py` 校验attempt manifest和归档源码，重新独立评分；ERP完整订单集合恰好两单2196.00、每行金额与批准payload/hash一致；137条Episode事件hash/seq/owner/run/bank、两个revision、每次computation operation/result绑定、v1→v2→v3权威JSON、失败不发布和报价/required中间结果保持均核对通过。旧失败全部保留。
+
+新增 `live_baseline.freeze_runtime` 在生成前冻结实际JAR、138 Python依赖、78 Protocol依赖、执行/execd镜像ID、provider GET/models身份和外部评测器源码归档；实际启动JAR hash不符即拒绝。prepare网关硬限制0调用。真实 `attempt-prepare-023631` 和带冻结 `attempt-prepare-frozen-025040` 均prepared/0calls/0保守费用/空ERP，无新增付费Actor尝试。账本仍5.118624CNY保守累计，actual_cost=null。检查点说明 `docs/runtime/planning-baseline-evidence.md`；测试新增hash篡改/foreign owner/run/bank/缺revision/额外ERP单等拒绝反例。
+
+剩余两类必要证据：历史付费attempt缺事前冻结，不能由后来的prepare追认；需要冻结后的独立2500预算两单执行（当前attempt-7只批准第一单后改预算）。入口还缺attempt整体deadline/取消和实际子进程停止验证，须先零模型实现/验证，再执行缺失场景；不能循环重跑已验证预算修订。开发修改测试/评测器先读旧证据；常驻服务热重载可减少启动，但本轮没有实现常驻评测命令，不把建议写成已交付。完整目标active；真实TRACE训练/Curator/固定raw curated消融和组合反事实仍未运行。
+
+下一条命令：`python3 scripts/plan_guard.py check` → `next` → `packet T46`，随后只实现deadline/取消入口及零模型真实停止验证，再决定缺失双单场景的一次受额度保护执行。不要再跑prepare或attempt-7模型。当前本轮自建服务已随prepare退出；用户Mongo27017与外部评测Mongo27028保留。
+
 ## 2026-10-04 T46 检查点：消息配对修复、真实预算修订与持久复用
 
 训练前 Git 基线为 `3c36215`，未训练、未运行 Curator。正式 stale-goal 恢复原 `Command(update=用户消息)` 会把 HumanMessage 插入 AI tool call 和 ToolMessage 之间；现先用官方 `interrupt_before=["model"]` 完成过期工具，再输入新消息。T43 消息配对断言及 T40/T41/T43 真实 Mongo/Java/MCP 回归 54 passed，模型明确 scripted-component。改动整理中曾误删正常 astream，attempt 4 零调用失败，已修复并保留；不可将其记成功。

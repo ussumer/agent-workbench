@@ -11,12 +11,15 @@ import argparse
 import dataclasses
 import fcntl
 import hashlib
+import importlib.metadata
 import json
 import math
 import os
 import socket
+import subprocess
 import sys
 import time
+import tomllib
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
@@ -35,9 +38,9 @@ from procurement_eval.worker import all_orders, parse_sse, sandbox_boundary  # n
 from scripts.planning.judge import grade, solve  # noqa: E402
 
 from agent.config import ModelConfig  # noqa: E402
-from agent.env_utils import load_env  # noqa: E402
+from agent.env_utils import load_env, redact, secret_values  # noqa: E402
 from agent.planning.models import Plan, PlanningProblem  # noqa: E402
-from fixtures import agent_protocol_service, sandbox_service  # noqa: E402
+from fixtures import agent_protocol_service, erp_service, sandbox_service  # noqa: E402
 from live.stack import running_stack  # noqa: E402
 
 
@@ -107,6 +110,54 @@ def settle_attempt(ledger_path: Path, reservation_id: str, metrics: dict[str, An
 
 def public_goal() -> dict[str, Any]:
     return json.loads((ROOT / "fixtures/planning/goal-v1.json").read_text(encoding="utf-8"))
+
+
+def freeze_runtime(output: Path, configuration: dict, model: ModelConfig) -> dict:
+    """Freeze actual execution dependencies before any generation request."""
+    import httpx
+
+    jar = erp_service.ensure_jar(output / "java-package.log")
+    protocol_python = agent_protocol_service.require_environment()
+    versions_code = (
+        "import importlib.metadata,json; "
+        "print(json.dumps({d.metadata['Name']:d.version "
+        "for d in importlib.metadata.distributions()},sort_keys=True))"
+    )
+    protocol = subprocess.run([str(protocol_python), "-c", versions_code],
+                              capture_output=True, text=True, check=True, timeout=30)
+    sandbox_config = tomllib.loads((ROOT / "infra/sandbox/sandbox.toml").read_text())
+    image_names = [sandbox_service.control_settings().image,
+                   sandbox_config["runtime"]["execd_image"]]
+    images = []
+    for name in image_names:
+        completed = subprocess.run(["docker", "image", "inspect", name],
+                                   capture_output=True, text=True, check=True, timeout=15)
+        info = json.loads(completed.stdout)[0]
+        images.append({"tag": name, "id": info["Id"], "repo_digests": info.get("RepoDigests", [])})
+    with httpx.Client(timeout=15, trust_env=False) as client:
+        response = client.get(model.base_url.rstrip("/") + "/models",
+                              headers={"Authorization": "Bearer " + model.api_key})
+        response.raise_for_status()
+        identities = [item["id"] for item in response.json()["data"]]
+    if model.model_id not in identities:
+        raise RuntimeError("configured model is absent from provider /models")
+    evaluator = fingerprint(EVAL_ROOT / "procurement_eval")
+    archive_source(EVAL_ROOT / "procurement_eval", evaluator,
+                   output / "evaluator-source.tar.gz", output / "evaluator-source-checkout")
+    frozen = {"frozen_at": time.time(), "model_calls": 0,
+              "model": model.redacted(), "available_models": identities,
+              "model_identity_source": "provider GET /models before generation",
+              "erp_jar_path": str(jar), "erp_jar_sha256": hashlib.sha256(jar.read_bytes()).hexdigest(),
+              "python_executable": sys.executable,
+              "python_version": sys.version,
+              "dependencies": {d.metadata["Name"]: d.version for d in importlib.metadata.distributions()},
+              "agent_protocol_python": str(protocol_python),
+              "agent_protocol_dependencies": json.loads(protocol.stdout),
+              "images": images, "evaluator_source": evaluator,
+              "mongo_database_scope": "fresh independent attempt database",
+              "sandbox_port": configuration["sandbox_port"]}
+    (output / "runtime-freeze.json").write_text(json.dumps(frozen, indent=2) + "\n")
+    return frozen
 
 
 def drive_turn(client: Any, thread: str, message: str) -> list[dict[str, Any]]:
@@ -198,7 +249,7 @@ def run(
     proxy_spec = {
         "total_cny": total_cny,
         "per_attempt_cny": per_attempt_cny,
-        "max_model_calls": 16,
+        "max_model_calls": 0 if prepare else 16,
         "max_output_tokens": 2048,
         "max_request_bytes": 131072,
         "timeout_seconds": 240,
@@ -208,6 +259,7 @@ def run(
         "pricing_source": "configured evaluation policy",
     }
     try:
+        attempt["runtime_freeze"] = freeze_runtime(output, configuration, original)
         with gateway(original, proxy_spec, model_log, {"thinking": {"type": "disabled"}}) as (
             url,
             budget,
@@ -242,6 +294,10 @@ def run(
                     warm_pool_size=0,
                 ) as stack:
                     import httpx
+
+                    actual_jar = Path(stack.erp.process.args[stack.erp.process.args.index("-jar") + 1])
+                    if hashlib.sha256(actual_jar.read_bytes()).hexdigest() != attempt["runtime_freeze"]["erp_jar_sha256"]:
+                        raise RuntimeError("executed ERP JAR differs from pre-generation freeze")
 
                     attempt["erp_before"] = all_orders(stack)
                     attempt["sandbox_boundary"] = sandbox_boundary(stack, output)
@@ -411,9 +467,11 @@ def run(
             attempt["model_calls"] = budget.calls
     except Exception as failure:  # retain structured failure; caller/gate decides pass
         attempt["terminal_status"] = "failed"
-        attempt["errors"].append({"type": type(failure).__name__, "message": str(failure)[:1000]})
+        attempt["errors"].append({"type": type(failure).__name__,
+                                  "message": redact(str(failure), secret_values(env))[:1000]})
         attempt["metrics"] = (
-            locals().get("budget").summary() if "budget" in locals() else {"model_calls": 0}
+            locals().get("budget").summary() if "budget" in locals() else
+            {"model_calls": 0, "reserved_upper_cny": 0.0, "usage_complete": True}
         )
         attempt["model_calls"] = attempt["metrics"].get("model_calls", 0)
     finally:

@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 
 import pytest
+from scripts.planning.evidence import audit
 
 
 @pytest.fixture(scope="module")
@@ -51,3 +52,12 @@ def test_live_revision_rejects_old_approval_and_reuses_episode_data(result):
     revision_execs = [e for e in result["kernel_executions"] if e["base_version"] >= 2]
     assert revision_execs
     assert any(e["read_names"] and "load_state" in e["code"] for e in revision_execs)
+
+
+def test_live_strict_evidence_binds_source_episode_computation_and_erp(result):
+    """The live receipt must bind every business claim to one immutable attempt."""
+    report = audit(Path(os.environ["PLANNING_LIVE_SESSION"]))
+    assert report["status"] == "business-evidence-verified"
+    assert report["episode"]["events"] == result["episode"]["event_seq"]
+    assert report["orders"]["total_cny"] == "2196.00"
+    assert report["computations"]["states"][-1]["version"] == 3

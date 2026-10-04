@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from scripts.planning.evidence import verify_episode, verify_manifest, verify_orders
 from scripts.planning.live_baseline import reserve_attempt, settle_attempt, sse_frames, terminal
+
+from agent.evolution.episodes import digest
 
 
 class Response:
@@ -163,3 +167,88 @@ def test_usage_settlement_preserves_failed_call_reservations(tmp_path):
     with pytest.raises(RuntimeError):
         reserve_attempt(ledger, 1, 2)
     assert json.loads(ledger.read_text())["reservations"][0]["reserved_cny"] == 1.5
+
+
+@pytest.fixture
+def bound_evidence():
+    """Synthetic control-plane data only; never counted as live model evidence."""
+    bank = {"_id": "bank", "owner_user_id": "owner", "skills": [], "sha256": digest([])}
+    episode = {"_id": "episode", "owner_user_id": "owner", "thread_id": "thread",
+               "goal_id": "goal", "bank_id": "bank", "bank_sha256": bank["sha256"],
+               "event_seq": 2, "run_ids": ["run1", "run2"]}
+    events = []
+    for revision in (1, 2):
+        payload = {"public_input": {"goal": {"revision": revision}}}
+        events.append({"kind": "run_started", "owner_user_id": "owner", "episode_id": "episode",
+                       "run_id": f"run{revision}", "seq": revision, "payload": payload,
+                       "sha256": digest(payload)})
+    return {"owner": "owner", "thread_id": "thread", "goal": {"goal_id": "goal"},
+            "episode": episode, "episode_export": {"episode": deepcopy(episode), "bank": bank,
+                                                       "events": events}}
+
+
+@pytest.mark.unit
+def test_episode_hash_and_two_revision_binding(bound_evidence):
+    assert verify_episode(bound_evidence)["runs"] == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("corruption", ["payload", "sequence", "owner", "run", "bank", "revision"])
+def test_episode_audit_rejects_corrupt_or_foreign_evidence(bound_evidence, corruption):
+    export = bound_evidence["episode_export"]
+    if corruption == "payload":
+        export["events"][0]["payload"]["public_input"]["goal"]["revision"] = 9
+    elif corruption == "sequence":
+        export["events"].pop(0)
+    elif corruption == "owner":
+        export["events"][0]["owner_user_id"] = "other"
+    elif corruption == "run":
+        export["events"][0]["run_id"] = "late-run"
+    elif corruption == "bank":
+        export["bank"]["skills"] = [{"body": "changed"}]
+    else:
+        event = export["events"][1]
+        event["payload"]["public_input"]["goal"]["revision"] = 1
+        event["sha256"] = digest(event["payload"])
+    with pytest.raises(ValueError):
+        verify_episode(bound_evidence)
+
+
+@pytest.mark.unit
+def test_evidence_manifest_rejects_rewritten_result(tmp_path):
+    import hashlib
+
+    for name in ("result.json", "source.tar.gz"):
+        (tmp_path / name).write_bytes(b"original")
+    expected = hashlib.sha256(b"original").hexdigest()
+    (tmp_path / "evidence-manifest.json").write_text(json.dumps(
+        {"result.json": expected, "source.tar.gz": expected}))
+    verify_manifest(tmp_path)
+    (tmp_path / "result.json").write_bytes(b"rewritten")
+    with pytest.raises(ValueError, match="hash mismatch"):
+        verify_manifest(tmp_path)
+
+
+@pytest.mark.unit
+def test_evidence_manifest_rejects_path_outside_attempt(tmp_path):
+    (tmp_path / "evidence-manifest.json").write_text(json.dumps(
+        {"result.json": "none", "source.tar.gz": "none", "../outside": "none"}))
+    # Validate the path set independently of its insertion order; missing files
+    # are also a rejection, so create the first two to reach the traversal case.
+    import hashlib
+
+    expected = hashlib.sha256(b"").hexdigest()
+    for name in ("result.json", "source.tar.gz"):
+        (tmp_path / name).write_bytes(b"")
+    (tmp_path / "evidence-manifest.json").write_text(json.dumps(
+        {"result.json": expected, "source.tar.gz": expected, "../outside": expected}))
+    with pytest.raises(ValueError, match="escapes"):
+        verify_manifest(tmp_path)
+
+
+@pytest.mark.unit
+def test_order_audit_rejects_extra_erp_write():
+    result = {"erp_before": [], "orders": [{}, {}], "erp_after": [
+        {"order_id": "one"}, {"order_id": "two"}, {"order_id": "extra"}]}
+    with pytest.raises(ValueError, match="exactly two"):
+        verify_orders(result)

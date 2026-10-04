@@ -2471,7 +2471,7 @@
           "mode": "live",
           "kind": "test",
           "required": true,
-          "min_tests": 3,
+          "min_tests": 4,
           "argv": [
             "uv",
             "run",
@@ -2483,6 +2483,24 @@
           ],
           "cwd": ".",
           "report": "{evidence_dir}/real-actor-baseline.xml"
+        },
+        {
+          "id": "zero-generation-prepare",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 1,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t46_prepare.py",
+            "-q",
+            "--junitxml={evidence_dir}/zero-generation-prepare.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/zero-generation-prepare.xml"
         }
       ]
     }
