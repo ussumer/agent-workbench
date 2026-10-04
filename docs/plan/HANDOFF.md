@@ -1,5 +1,12 @@
 # 当前交接
 
+## T58完成；下一主线为动态选择和工具执行
+
+T58 gate `artifacts/tasks/T58/20261004T170438Z/receipt.json`：6unit+只读实际请求/响应/评分重算通过。四组Curator各只看本组5train与train-only企业规则，真实生成四个技能；原有train/fixed控制复用。train scoped8/20(.853846) vs fixed4/20(.796154)，test scoped1/20(.761538) vs fixed0/20(.607692)。两题train退化(`quotes-train-04`,`kits-train-03`)，未晋升。44新调用，本轮保守2.123559元，累计36.926127/50元；实际provider账单未知。
+
+业务组静态加载是中间步骤，还没有动态per-turn selector或v3 OpenSandbox工具轨迹；不可称完整TRACE/Prime。用户goal“开修!记得git好”仍active，下一步须复用已有PlanningTraceMiddleware和ComputationService接多步计算与状态选择，再补三次重复/多监督评估；不能把本T58 done当整个修复目标完成。不要继续调总prompt、倒用test结果选择或自动切生产bank。
+
+
 ## T58进行中：按组拆分技能库
 
 T57已通过gate并提交。其结果显示单一全局技能candidate train均分略升但逐题退化，未晋升；policy evidence边界已修复。当前T58复用T57闭环的train记录和fixed控制，不重复旧train，四组各独立Curator，生成scoped skills，按group加载并只用train选择。生产assignment保持false。

@@ -351,10 +351,10 @@
       "notes": "T57真实v3扩展训练与闭环修复完成。原20 train复用；15失败各一次公开诊断修正；首次Curator缺policy evidence的闭环失败保留，网关170KB请求过大零生成失败保留。修正后Curator显式join每组train policy并压缩重复规则，candidate train mean .823 vs fixed .796，4/20 vs4/20但7题逐题退化，拒绝晋升；复用fixed控制的candidate test mean .719 vs .608，均0/20全对，单次开发test不作学习增益结论。production_assignment_changed=false。T57 gate 6 unit + 只读证据核验通过。累计保守账本约34.80/50 CNY，provider actual_cost未知。"
     },
     "T58": {
-      "status": "in_progress",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "用户要求继续修复。T58将复用T57训练轨迹，按quotes/packages/kits/revisions四组独立Curator与scoped skill，train-only选择，复用fixed控制，生产bank不改。"
+      "receipt": "artifacts/tasks/T58/20261004T170438Z/receipt.json",
+      "notes": "四组各一次真实Curator，复用T57历史train/fixed controls；scoped train8/20 mean.853846 vs fixed4/20 .796154；test1/20 mean.761538 vs fixed0/20 .607692。quotes-train-04/kits-train-03逐题退化，拒绝实验晋升，生产assignment false。gate6unit+真实证据只读重算通过。44新calls，本轮保守2.123559 CNY，累计36.926127/50。仅group scope静态加载；动态per-turn选择、OpenSandbox v3 Actor和三重复监督比较仍待后续，非完整TRACE复现。"
     }
   }
 }
