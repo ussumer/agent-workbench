@@ -349,6 +349,12 @@
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T57/20261004T164702Z/receipt.json",
       "notes": "T57真实v3扩展训练与闭环修复完成。原20 train复用；15失败各一次公开诊断修正；首次Curator缺policy evidence的闭环失败保留，网关170KB请求过大零生成失败保留。修正后Curator显式join每组train policy并压缩重复规则，candidate train mean .823 vs fixed .796，4/20 vs4/20但7题逐题退化，拒绝晋升；复用fixed控制的candidate test mean .719 vs .608，均0/20全对，单次开发test不作学习增益结论。production_assignment_changed=false。T57 gate 6 unit + 只读证据核验通过。累计保守账本约34.80/50 CNY，provider actual_cost未知。"
+    },
+    "T58": {
+      "status": "in_progress",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": "用户要求继续修复。T58将复用T57训练轨迹，按quotes/packages/kits/revisions四组独立Curator与scoped skill，train-only选择，复用fixed控制，生产bank不改。"
     }
   }
 }

@@ -3123,6 +3123,57 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T58",
+      "title": "按业务组拆分的GDPevo技能库",
+      "file": "docs/plan/tasks/T58.md",
+      "depends_on": [
+        "T57"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v3.md",
+        "docs/runtime/self-evolution-spec-2026-10-03.md"
+      ],
+      "checks": [
+        {
+          "id": "scoped-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 5,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t58.py",
+            "-q",
+            "--junitxml={evidence_dir}/scoped-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/scoped-unit.xml"
+        },
+        {
+          "id": "scoped-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_v3_scoped_evidence.py",
+            "--output",
+            "{evidence_dir}/scoped-report.json"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }
