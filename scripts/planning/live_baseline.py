@@ -204,6 +204,10 @@ def run(
     per_attempt_cny: float = 2.0,
     config_path: Path = EVAL_ROOT / "config.t46.json",
     prepare: bool = False,
+    experiment_group: str = "fixed-v1",
+    skill_file: Path | None = None,
+    goal_data: dict[str, Any] | None = None,
+    case_id: str | None = None,
 ) -> int:
     output.mkdir(parents=True, exist_ok=False)
     owner = "demo-a"
@@ -211,7 +215,6 @@ def run(
     ledger_path = EVAL_ROOT / "procurement_eval/runs/planning-session-20261004/budget-ledger.json"
     reservation = reserve_attempt(ledger_path, per_attempt_cny, total_cny)
     attempt = {
-        "schema_version": 1,
         "kind": "real-planning-baseline",
         "owner": owner,
         "thread_id": thread,
@@ -226,6 +229,10 @@ def run(
         "errors": [],
         "budget_reservation": reservation,
         "budget_ledger": str(ledger_path),
+        "schema_version": 2,
+        "protocol_version": "procurement-evolution-v2",
+        "experiment_group": experiment_group,
+        "case_id": case_id,
     }
     (output / "started.json").write_text(json.dumps(attempt, indent=2) + "\n", encoding="utf-8")
 
@@ -306,12 +313,28 @@ def run(
                         attempt["erp_after"] = all_orders(stack)
                         attempt["metrics"] = budget.summary()
                         return 0
+                    # Bind an immutable bank before the goal starts.  The three
+                    # pilot groups use the same Actor and tools; only this
+                    # control-plane bank differs.
+                    from agent.evolution.episodes import EpisodeStore, TextSkill
+                    evolution = EpisodeStore(stack.database)
+                    skills = []
+                    if skill_file is not None:
+                        payload = json.loads(skill_file.read_text(encoding="utf-8"))
+                        skills = [TextSkill.model_validate(payload)]
+                    bank_id = evolution.freeze(
+                        owner, skills,
+                        provenance="fixed-empty-baseline" if not skills else f"{experiment_group}-pilot",
+                    )
+                    evolution.set_current(owner, bank_id)
+                    attempt["bank"] = {"id": bank_id, "sha256": evolution.bank(owner, bank_id)["sha256"],
+                                       "skill_count": len(skills)}
                     with httpx.Client(
                         base_url=stack.base_url, timeout=300, trust_env=False
                     ) as client:
                         session = client.post("/api/demo/session", json={"user_id": owner})
                         session.raise_for_status()
-                        goal = public_goal()
+                        goal = goal_data if goal_data is not None else public_goal()
                         goal_result = client.post(
                             f"/api/planning/{thread}/goal",
                             json={
@@ -321,6 +344,14 @@ def run(
                         )
                         goal_result.raise_for_status()
                         attempt["goal"] = goal_result.json()["data"]
+                        if goal_data is not None:
+                            from scripts.planning.evolution_pilot import drive_case
+                            drive_case(stack, client, thread, owner, attempt)
+                            attempt["metrics"] = budget.summary()
+                            attempt["model_calls"] = budget.calls
+                            if fingerprint(ROOT)["files"] != attempt["source_revision"]["files"]:
+                                raise RuntimeError("source changed during execution")
+                            return 0 if attempt["terminal_status"] == "completed" else 1
                         frames = drive_turn(
                             client,
                             thread,
@@ -503,6 +534,8 @@ def main() -> int:
     parser.add_argument("--per-attempt-cny", type=float, default=2.0)
     parser.add_argument("--config", type=Path, default=EVAL_ROOT / "config.t46.json")
     parser.add_argument("--prepare", action="store_true")
+    parser.add_argument("--experiment-group", choices=["fixed-v1", "retrieval-v1", "curated-v1"], default="fixed-v1")
+    parser.add_argument("--skill-file", type=Path)
     args = parser.parse_args()
     return run(
         args.output,
@@ -510,6 +543,8 @@ def main() -> int:
         per_attempt_cny=args.per_attempt_cny,
         config_path=args.config,
         prepare=args.prepare,
+        experiment_group=args.experiment_group,
+        skill_file=args.skill_file,
     )
 
 

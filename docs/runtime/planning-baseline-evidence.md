@@ -1,6 +1,6 @@
 # T46 真实基线证据与零生成复核
 
-训练前原始 Git 基线为 `3c36215`。当前仍没有 Curator、训练或学习消融结果。
+训练前原始 Git 基线为 `3c36215`。T47 的真实 Curator 与小样本消融现已交付，见 [evolution-pilot.md](evolution-pilot.md)。
 
 ## 已有证据
 
@@ -45,9 +45,9 @@ UV_PROJECT_ENVIRONMENT=.venv-linux-t45 .venv-linux-t45/bin/python scripts/gate.p
 
 最近 gate `artifacts/tasks/T46/20261004T025447Z/receipt.json`：33 unit、68 原回归、
 4 已有真实 Actor 证据检查、1 真实 prepare 检查，106 passed / 0 failed / 0 skipped。
-它只证明已实现的断言，不将 T46 提前标 done。
+用户明确授权简历版加速后，T46 按这些真实断言完成；下列额外专项明确延期。
 
-## 剩余验收
+## 延期专项
 
 - 当前历史付费 attempt 无事前 JAR/依赖/评测器冻结，不能由后来 prepare 追认。
   新的独立 2500 元双单场景需要在生成前冻结，且完整核对两单和零额外订单。

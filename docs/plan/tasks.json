@@ -2504,5 +2504,17 @@
         }
       ]
     }
+  ,{
+    "id": "T47",
+    "title": "真实 TRACE 小样本与三组消融",
+    "file": "docs/plan/tasks/T47.md",
+    "depends_on": ["T46"],
+    "requirements": ["R32"],
+    "reads": ["docs/runtime/self-evolution-spec-2026-10-03.md", "docs/runtime/learning-space-baseline.md", "docs/plan/contracts/planning.md"],
+    "checks": [
+      {"id": "evolution-unit", "mode": "unit", "kind": "test", "required": true, "min_tests": 8, "argv": ["uv", "run", "--frozen", "pytest", "tests/acceptance/test_t47.py", "-q", "--junitxml={evidence_dir}/evolution-unit.xml"], "cwd": ".", "report": "{evidence_dir}/evolution-unit.xml"},
+      {"id": "evolution-live", "mode": "live", "kind": "command", "required": true, "argv": ["uv", "run", "--frozen", "python", "scripts/planning/evolution_pilot.py", "--verify-existing", "--output", "{evidence_dir}/evolution-pilot"], "cwd": "."}
+    ]
+  }
   ]
 }

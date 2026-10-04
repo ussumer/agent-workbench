@@ -1,5 +1,17 @@
 # 当前交接
 
+## 2026-10-04 简历版推进决定
+
+用户明确要求加速产出，T46 按已有真实证据收尾，不再循环补做冻结后独立2500双单冷跑或整体 deadline/取消专项；两项延期限制已写入 T46 任务说明和 state。T46 gate `artifacts/tasks/T46/20261004T025447Z/receipt.json` 为 106 passed/0 failed/0 skipped。下一任务登记 T47，优先运行真实 TRACE 小样本与 fixed/raw/curated 三组消融，记录真实调用、费用、源码 commit、bank hash 和独立 judge；不伪造提升。
+
+## 2026-10-04 T47 已登记
+
+T47 已完成，入口为 `scripts/planning/evolution_pilot.py`，验收为 `tests/acceptance/test_t47.py` 加一轮受 50 CNY/2 CNY 网关限制的真实小样本。所有 attempt 及失败保留。
+
+## 2026-10-04 T47 完成
+
+gate `artifacts/tasks/T47/20261004T043016Z/receipt.json`：11 个组件测试和只读 live 核验通过。真实实验目录为 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-evolution-pilot-040413`，含训练记录、Curator 原始输出/技能 hash、三组 bank、6 条 Actor attempt、ERP/计算/独立 judge 和 manifest；`retry-fixed-no-partial` 是保留原端口失败后的独立环境补跑。结果 fixed 2/2、raw 1/2、curated 2/2；raw 失败为模型调用预算耗尽，fixed 原失败为端口占用，均留在分母。Curator 未读测试答案，训练前基线仍为 `3c36215`；该 pilot 只支持真实管线和描述性对照，不支持学习提升结论。下一步可做简历演示/动态重规划，不再重复本轮模型运行。
+
 ## 2026-10-04 T46 新检查点：严格只读核验与零生成运行前冻结
 
 T46仍in_progress，不重跑attempt-7。新gate `artifacts/tasks/T46/20261004T025447Z/receipt.json`：33 unit + 68既有回归 + 4只读live断言 + 1真实prepare断言，106passed/0failed/0skipped。新入口 `scripts/planning/evidence.py` 校验attempt manifest和归档源码，重新独立评分；ERP完整订单集合恰好两单2196.00、每行金额与批准payload/hash一致；137条Episode事件hash/seq/owner/run/bank、两个revision、每次computation operation/result绑定、v1→v2→v3权威JSON、失败不发布和报价/required中间结果保持均核对通过。旧失败全部保留。

@@ -279,10 +279,16 @@
       "notes": "修复并正式gate通过：22 unit + 9真实Mongo integration + 46 T44/T41 regression，0 failed/0 skipped。Feedback pending与完整EpisodeStore seq/chunk/hash核对后发布；并发CAS仅一条发布；不宣称真实Actor学习收益。"
     },
     "T46": {
-      "status": "in_progress",
+      "status": "done",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T46/20261004T025447Z/receipt.json",
-      "notes": "真实attempt-7只读加强复核与实际环境事前冻结已补齐入口；最新gate33费用/证据unit+68回归+4live只读+1真实零生成prepare=106passed/0failed/0skipped。ERP恰好两单2196.00、批准payload/hash、同Episode137事件/4runs/bank、计算v1→v2→v3与失败不发布/报价hash保持均严格核对。attempt-prepare-frozen-025040零生成/零费用/空ERP，冻结JAR、138Python依赖、78Protocol依赖、执行/execd镜像、GET/models身份和外部评测器源码。历史付费attempt的事前冻结不能追认；仍缺冻结后的独立2500预算双单执行、attempt整体deadline/取消与实际进程树停止证据，保持in_progress。无训练/Curator/新增付费调用，费用保守累计5.118624CNY。"
+      "notes": "简历版完成：真实attempt-7只读加强复核与实际环境事前冻结已补齐入口；gate artifacts/tasks/T46/20261004T025447Z/receipt.json 为33 unit+68回归+4只读live+1真实零生成prepare，共106 passed/0 failed/0 skipped。ERP恰好两单2196.00、批准payload/hash、同Episode137事件/4runs/bank、计算v1→v2→v3与失败不发布/报价hash保持均严格核对。attempt-prepare-frozen-025040零生成/零费用/空ERP，冻结JAR、138 Python依赖、78 Protocol依赖、执行/execd镜像、GET/models身份和外部评测器源码。按用户2026-10-04授权，冻结后的独立2500双单冷跑及整体deadline/取消专项延期，不阻塞交付；不宣称TRACE学习收益。无训练/Curator，费用保守累计5.118624 CNY。"
+    },
+    "T47": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T47/20261004T043016Z/receipt.json",
+      "notes": "真实 TRACE-inspired pilot 已完成。gate 11 unit + 只读 live hash/judge 通过，0 failed/0 skipped。实验目录 /mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-evolution-pilot-040413：两条真实 train Episode，一次真实 Curator（deepseek-flash，1 call），fixed/raw/curated 各两条公开案例；curated 2/2，fixed 2/2（另一次端口启动失败后独立补跑成功），raw 1/2（另一条达到模型调用预算）。保留所有失败和费用；独立 judge/ERP/计算检查通过的业务样本均有证据。只声明管线完成和描述性对照，不声明学习增益或统计显著。"
     }
   }
 }
