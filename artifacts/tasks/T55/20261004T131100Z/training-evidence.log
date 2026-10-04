@@ -1,0 +1,2 @@
+
+[gate] status=blocked reason=missing configuration: 真实模型凭据（MODEL_* 或 OPENAI_*）: missing MODEL_API_KEY / OPENAI_API_KEY / DASHSCOPE_API_KEY; MODEL_BASE_URL / OPENAI_BASE_URL; MODEL_ID / MODEL_NAME

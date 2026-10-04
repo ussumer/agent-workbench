@@ -1,6 +1,12 @@
 # 当前交接
 
-## 当前状态：T53新任务内容试跑完成；T51仍暂停
+## 2026-10-04 T55：GDPevo真实训练与固定消融
+
+训练前基线为 Git `9f2ea2e` / tag `pre-training-gdpevo-20261004`，训练隔离在 `/mnt/c/dev/rush-harness-training`，不改 T54 扩题文件或生产 Harness 活动技能。真实目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-gdpevo-training-20261004` 已保存五个 train（失败最多一次诊断重试）、一次 Curator、retrieval/raw 五题和 curated 五题的请求、响应、usage、私有评分、技能 hash、bank 与 manifest。模型为 `deepseek-flash`，no-tools、temperature 0、thinking disabled。
+
+结果：train-01 0.267（重试后仍 0.267）、train-02 1.000、train-03 1.000、train-04 0.467（重试后仍 0.467）、train-05 0.467→1.000；retrieval/raw 2/5 全对、mean 0.76；curated 2/5 全对、mean 0.76。没有观察到训练增益，停止新增调用；这是真实文字决策小样本，不代表生产 Actor/OpenSandbox/ERP 端到端能力或统计显著学习。T55 gate `artifacts/tasks/T55/20261004T131342Z/receipt.json` 已通过：6 unit 和只读真实证据核验，0 failed/0 skipped。初次 gate 缺环境配置的 blocked receipt 保留；已复制历史必要收据到隔离目录，未修改检查器。本轮保守费用 1.030536 CNY，账本累计 18.867582/50 CNY；用户报告实际总花费 0.51 CNY，provider actual_cost 仍未知。报告见 `docs/runtime/gdpevo-training-2026-10-04.md`；实验技能见 `fixtures/planning/gdpevo-text-skill-v1.json`。
+
+## T53历史试跑记录（训练前）
 
 用户授权“新任务跑一下”，T53已完成真实模型只读内容校准，不恢复T51旧题或启动训练。配置 `deepseek-flash`，no-tools/one-shot、thinking disabled；base和policy-visible各5题，均2/5整题全对、76%加权分，无网络/格式失败。给规则没有改善，不能宣称学习增益或正式校准；错误为超预算仍执行、重复采购历史件、违反现场包装盈余和免邮门槛。详细结果 `docs/runtime/gdpevo-calibration-2026-10-04.md`。
 

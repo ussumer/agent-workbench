@@ -1,0 +1,13 @@
+{
+  "scope": "experiment-only",
+  "production_assignment_changed": false,
+  "body_sha256": "7dafbc8414829b0541546e71c53762e6ce5ed527d37a46fa4f2859272e7b5ce1",
+  "skill": {
+    "skill_id": "planning_strategy",
+    "description": "面向采购决策记录的结构化规划策略：先按商务文件版本与状态确定有效报价，再按站点盈余约束与kit整组约束枚举可行覆盖，最后核对预算与运费门槛，输出与解释一致的决策。",
+    "body": "一、报价有效性（先做，独立于ERP）\n1) 同一part+supplier按revision取最新正式版本；正式状态含signed/pending/revoked，draft不覆盖正式文件。\n2) 最新正式为revoked则关闭该关系，不回退旧价。\n3) ERP只控制active/交期/容量，商务文件不能覆盖；报价过期或未生效不采用。\n4) 价格未知（pending且无价）时，按给定合法包价区间的最低/最高两端分别枚举完整计划；若两端可行性与最优覆盖/成本均与仅用已知报价的最优相同，则记录pending不追问；否则判needs_information且不提交新订单。不得把资料未决写成infeasible，不得发布假设包价。\n\n二、覆盖与盈余\n1) 只买整数包，件数=包数×pack_size，按最小包数覆盖剩余需求。\n2) depot允许整包盈余；pit_stop每个物料本轮盈余最多1件。\n3) 可选覆盖只计需求件数，盈余不加分。\n4) 必需需求优先满足；可选需求按priority数字从小到大最大化覆盖件数，同级合计覆盖后再最小化累计成本。\n\n三、kit约束\n同一kit的未完成目标必须全部补足或全部不买；已有成员完成不重购；不同kit互不绑定。若某成员因pack_size导致盈余超站点上限而无法满足，则该kit整组不可行，整组不采购，不得只买部分成员。\n\n四、运费与预算\n1) 运费按每个供应商本轮购物车收一次；仅本轮商品金额>=free_at_cents才免邮（等于也免）。\n2) 已成交订单金额不计本轮门槛；不同供应商不能合并凑门槛。\n3) 累计预算=已成交实付+本轮商品+本轮运费，须<=budget。\n\n五、审批与承诺\n1) 历史已购承诺只作累计事实与对账证据，不能授权当前追加量。\n2) 当前revision的每个新追加或变更行必须产生新的审批请求，reuse_prior_approval=false；无变化的历史承诺不生成重复订单。\n3) 审批处于pending不构成违反预算或硬约束，不得以此为由拒绝执行或改判不可行。\n\n六、输出一致性检查点\n1) allocation中的quote_id必须来自source_selection且为有效正式版本。\n2) freight_cents的键应与本轮实际采购供应商一致，未采购供应商不记运费。\n3) 解释中的成本、盈余、门槛判断须与allocation、freight_cents数值自洽；若解释结论与字段矛盾，以规则重算并修正字段。\n4) 无失败对照时，不臆断失败原因；环境或格式问题不归因于业务规则。",
+    "scope": "planning"
+  },
+  "training_sha256": "58649ae7ea5749abfc74524b02470e3ee45f9bbc2c3b64c4018a83dc6daab2a6",
+  "pre_training_commit": "9f2ea2e"
+}

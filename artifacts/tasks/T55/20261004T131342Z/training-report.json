@@ -1,0 +1,1113 @@
+{
+  "groups": {
+    "curated-v1": {
+      "attempts": 5,
+      "all_correct": 2,
+      "mean_score": 0.76,
+      "model_calls": 5,
+      "reserved_upper_cny": 0.175923
+    },
+    "retrieval-v1": {
+      "attempts": 5,
+      "all_correct": 2,
+      "mean_score": 0.76,
+      "model_calls": 5,
+      "reserved_upper_cny": 0.552033
+    }
+  },
+  "rows": [
+    {
+      "started_at": 1791118246.412246,
+      "reservation_id": "78cfa4bdc8154036a87478b450e5bda1",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 9843,
+        "output_tokens": 532,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.102951,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.102951,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:46.457835+00:00",
+            "reserved_upper_cny": 0.444105,
+            "request_sha256": "44a8f9e868a3b478a3e3fbfbaadd0a758e2499ebc8b442993d73056fc4577317",
+            "finished_at": "2026-10-04T12:50:48.563035+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 9843,
+              "completion_tokens": 532,
+              "total_tokens": 10375,
+              "prompt_tokens_details": {
+                "cached_tokens": 128
+              },
+              "prompt_cache_hit_tokens": 128,
+              "prompt_cache_miss_tokens": 9715
+            },
+            "settled_upper_estimate_cny": 0.102951
+          }
+        ]
+      },
+      "finished_at": 1791118249.0035694,
+      "group": "retrieval-v1",
+      "task_id": "test-01",
+      "grade": {
+        "score": 0.8666666666666667,
+        "points": {
+          "test-01-disposition": true,
+          "test-01-source_selection": true,
+          "test-01-allocation": true,
+          "test-01-freight_cents": false,
+          "test-01-commitment_ledger": true,
+          "test-01-approval_request": true
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118249.0769732,
+      "reservation_id": "727290f0cb3b4468aeedb8b81904906d",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 9958,
+        "output_tokens": 1078,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.118728,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.118728,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:49.124389+00:00",
+            "reserved_upper_cny": 0.447039,
+            "request_sha256": "8ae3aa7b62b568300286971eba4fae92fd36df095e3cc1ffc25a7a91ff7d51e4",
+            "finished_at": "2026-10-04T12:50:53.889052+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 9958,
+              "completion_tokens": 1078,
+              "total_tokens": 11036,
+              "prompt_tokens_details": {
+                "cached_tokens": 8832
+              },
+              "prompt_cache_hit_tokens": 8832,
+              "prompt_cache_miss_tokens": 1126
+            },
+            "settled_upper_estimate_cny": 0.118728
+          }
+        ]
+      },
+      "finished_at": 1791118254.1760378,
+      "group": "retrieval-v1",
+      "task_id": "test-02",
+      "grade": {
+        "score": 0.4666666666666667,
+        "points": {
+          "test-02-disposition": true,
+          "test-02-source_selection": true,
+          "test-02-allocation": false,
+          "test-02-freight_cents": false,
+          "test-02-commitment_ledger": true,
+          "test-02-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118254.2613118,
+      "reservation_id": "857115f63bd649b8a7be637c8a1ba29f",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 9900,
+        "output_tokens": 640,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.10638,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.10638,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:54.307620+00:00",
+            "reserved_upper_cny": 0.445932,
+            "request_sha256": "227a97b7a64a373fda14abd7be283c721275c802b3d0f536d11a1bca2bf81c21",
+            "finished_at": "2026-10-04T12:50:55.448960+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 9900,
+              "completion_tokens": 640,
+              "total_tokens": 10540,
+              "prompt_tokens_details": {
+                "cached_tokens": 8832
+              },
+              "prompt_cache_hit_tokens": 8832,
+              "prompt_cache_miss_tokens": 1068
+            },
+            "settled_upper_estimate_cny": 0.10638
+          }
+        ]
+      },
+      "finished_at": 1791118255.83512,
+      "group": "retrieval-v1",
+      "task_id": "test-03",
+      "grade": {
+        "score": 1.0,
+        "points": {
+          "test-03-disposition": true,
+          "test-03-source_selection": true,
+          "test-03-allocation": true,
+          "test-03-freight_cents": true,
+          "test-03-commitment_ledger": true,
+          "test-03-approval_request": true
+        },
+        "business_success": true
+      }
+    },
+    {
+      "started_at": 1791118255.9081707,
+      "reservation_id": "95a30f1c517646b39fa902accfb4599c",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 9859,
+        "output_tokens": 702,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.107685,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.107685,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:55.955323+00:00",
+            "reserved_upper_cny": 0.444582,
+            "request_sha256": "695c5cadb82acc1eb7079ae44b3e1039eac755bc4558c01a9afef0eb978e8673",
+            "finished_at": "2026-10-04T12:50:58.413000+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 9859,
+              "completion_tokens": 702,
+              "total_tokens": 10561,
+              "prompt_tokens_details": {
+                "cached_tokens": 8832
+              },
+              "prompt_cache_hit_tokens": 8832,
+              "prompt_cache_miss_tokens": 1027
+            },
+            "settled_upper_estimate_cny": 0.107685
+          }
+        ]
+      },
+      "finished_at": 1791118258.498889,
+      "group": "retrieval-v1",
+      "task_id": "test-04",
+      "grade": {
+        "score": 1.0,
+        "points": {
+          "test-04-disposition": true,
+          "test-04-source_selection": true,
+          "test-04-allocation": true,
+          "test-04-freight_cents": true,
+          "test-04-commitment_ledger": true,
+          "test-04-approval_request": true
+        },
+        "business_success": true
+      }
+    },
+    {
+      "started_at": 1791118258.5764554,
+      "reservation_id": "f20d252c2d20403493f2680c41a4b26c",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 10296,
+        "output_tokens": 875,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.116289,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.116289,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:58.621199+00:00",
+            "reserved_upper_cny": 0.455967,
+            "request_sha256": "e54448e9d821add38e67df02be34688d57a26df1b7926b6ef10debaf6d0dfd5f",
+            "finished_at": "2026-10-04T12:51:02.522660+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 10296,
+              "completion_tokens": 875,
+              "total_tokens": 11171,
+              "prompt_tokens_details": {
+                "cached_tokens": 8832
+              },
+              "prompt_cache_hit_tokens": 8832,
+              "prompt_cache_miss_tokens": 1464
+            },
+            "settled_upper_estimate_cny": 0.116289
+          }
+        ]
+      },
+      "finished_at": 1791118262.6713302,
+      "group": "retrieval-v1",
+      "task_id": "test-05",
+      "grade": {
+        "score": 0.4666666666666667,
+        "points": {
+          "test-05-disposition": true,
+          "test-05-source_selection": true,
+          "test-05-allocation": false,
+          "test-05-freight_cents": false,
+          "test-05-commitment_ledger": true,
+          "test-05-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118262.7596803,
+      "reservation_id": "bea867d18faf4dde8c08245850c5a57d",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1776,
+        "output_tokens": 545,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.030699,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.030699,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:51:02.810228+00:00",
+            "reserved_upper_cny": 0.206847,
+            "request_sha256": "8a38c3db74ac012d2d25870c3826a70f75b2e51b8bb8bc5dc7ccba322dc3b306",
+            "finished_at": "2026-10-04T12:51:05.543650+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1776,
+              "completion_tokens": 545,
+              "total_tokens": 2321,
+              "prompt_tokens_details": {
+                "cached_tokens": 128
+              },
+              "prompt_cache_hit_tokens": 128,
+              "prompt_cache_miss_tokens": 1648
+            },
+            "settled_upper_estimate_cny": 0.030699
+          }
+        ]
+      },
+      "finished_at": 1791118265.8554082,
+      "group": "curated-v1",
+      "task_id": "test-01",
+      "grade": {
+        "score": 0.8666666666666667,
+        "points": {
+          "test-01-disposition": true,
+          "test-01-source_selection": true,
+          "test-01-allocation": true,
+          "test-01-freight_cents": false,
+          "test-01-commitment_ledger": true,
+          "test-01-approval_request": true
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118265.9381282,
+      "reservation_id": "e58111baea6b4a008046eca8d679811a",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1891,
+        "output_tokens": 723,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.03654,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.03654,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:51:05.989045+00:00",
+            "reserved_upper_cny": 0.209781,
+            "request_sha256": "5d537c68c93664ff8072d96da0058abae9787bb1343410930dd86ba4da7afad3",
+            "finished_at": "2026-10-04T12:51:08.848623+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1891,
+              "completion_tokens": 723,
+              "total_tokens": 2614,
+              "prompt_tokens_details": {
+                "cached_tokens": 768
+              },
+              "prompt_cache_hit_tokens": 768,
+              "prompt_cache_miss_tokens": 1123
+            },
+            "settled_upper_estimate_cny": 0.03654
+          }
+        ]
+      },
+      "finished_at": 1791118269.0610023,
+      "group": "curated-v1",
+      "task_id": "test-02",
+      "grade": {
+        "score": 0.4666666666666667,
+        "points": {
+          "test-02-disposition": true,
+          "test-02-source_selection": true,
+          "test-02-allocation": false,
+          "test-02-freight_cents": false,
+          "test-02-commitment_ledger": true,
+          "test-02-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118269.1441112,
+      "reservation_id": "9a421414884841d396a729a7aa857167",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1833,
+        "output_tokens": 483,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.029538,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.029538,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:51:09.191453+00:00",
+            "reserved_upper_cny": 0.208674,
+            "request_sha256": "6f2198bfb38b89a1b570d4f57233daf4be673d3d0a5bd04f5b800f0c01886c08",
+            "finished_at": "2026-10-04T12:51:11.330917+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1833,
+              "completion_tokens": 483,
+              "total_tokens": 2316,
+              "prompt_tokens_details": {
+                "cached_tokens": 768
+              },
+              "prompt_cache_hit_tokens": 768,
+              "prompt_cache_miss_tokens": 1065
+            },
+            "settled_upper_estimate_cny": 0.029538
+          }
+        ]
+      },
+      "finished_at": 1791118271.7404895,
+      "group": "curated-v1",
+      "task_id": "test-03",
+      "grade": {
+        "score": 1.0,
+        "points": {
+          "test-03-disposition": true,
+          "test-03-source_selection": true,
+          "test-03-allocation": true,
+          "test-03-freight_cents": true,
+          "test-03-commitment_ledger": true,
+          "test-03-approval_request": true
+        },
+        "business_success": true
+      }
+    },
+    {
+      "started_at": 1791118271.8253222,
+      "reservation_id": "37b2e140f51e4dc4a863e5d80fba13d5",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1792,
+        "output_tokens": 618,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.032814,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.032814,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:51:11.877099+00:00",
+            "reserved_upper_cny": 0.207324,
+            "request_sha256": "ff94119730e2051545ee91d7be631ac81cb7305bd9b17c55c2a7482eb78baf28",
+            "finished_at": "2026-10-04T12:51:14.579992+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1792,
+              "completion_tokens": 618,
+              "total_tokens": 2410,
+              "prompt_tokens_details": {
+                "cached_tokens": 768
+              },
+              "prompt_cache_hit_tokens": 768,
+              "prompt_cache_miss_tokens": 1024
+            },
+            "settled_upper_estimate_cny": 0.032814
+          }
+        ]
+      },
+      "finished_at": 1791118274.935822,
+      "group": "curated-v1",
+      "task_id": "test-04",
+      "grade": {
+        "score": 1.0,
+        "points": {
+          "test-04-disposition": true,
+          "test-04-source_selection": true,
+          "test-04-allocation": true,
+          "test-04-freight_cents": true,
+          "test-04-commitment_ledger": true,
+          "test-04-approval_request": true
+        },
+        "business_success": true
+      }
+    },
+    {
+      "started_at": 1791118275.0149035,
+      "reservation_id": "d744a46ec94f423da9379ada1cc63d06",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 2229,
+        "output_tokens": 973,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.046332,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.046332,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:51:15.061877+00:00",
+            "reserved_upper_cny": 0.218709,
+            "request_sha256": "097cf2e2e620053a7098dfef762901b6197733ec7599dd990bfde7f1d5500048",
+            "finished_at": "2026-10-04T12:51:19.375249+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 2229,
+              "completion_tokens": 973,
+              "total_tokens": 3202,
+              "prompt_tokens_details": {
+                "cached_tokens": 768
+              },
+              "prompt_cache_hit_tokens": 768,
+              "prompt_cache_miss_tokens": 1461
+            },
+            "settled_upper_estimate_cny": 0.046332
+          }
+        ]
+      },
+      "finished_at": 1791118279.682785,
+      "group": "curated-v1",
+      "task_id": "test-05",
+      "grade": {
+        "score": 0.4666666666666667,
+        "points": {
+          "test-05-disposition": true,
+          "test-05-source_selection": true,
+          "test-05-allocation": false,
+          "test-05-freight_cents": false,
+          "test-05-commitment_ledger": true,
+          "test-05-approval_request": false
+        },
+        "business_success": false
+      }
+    }
+  ],
+  "baseline_groups": {
+    "base": {
+      "attempts": 5,
+      "all_correct": 2,
+      "mean_score": 0.76,
+      "model_calls": 5,
+      "reserved_upper_cny": 0.141012
+    },
+    "policy-visible": {
+      "attempts": 5,
+      "all_correct": 2,
+      "mean_score": 0.76,
+      "model_calls": 5,
+      "reserved_upper_cny": 0.166302
+    }
+  },
+  "curator": {
+    "started_at": 1791118241.684354,
+    "reservation_id": "9a427015bd494d718666e6cb66cadfa5",
+    "status": "returned",
+    "errors": [],
+    "http_status": 200,
+    "observed_model": "deepseek-flash",
+    "finish_reason": "stop",
+    "metrics": {
+      "model_calls": 1,
+      "denied_model_requests": 0,
+      "input_tokens": 8858,
+      "output_tokens": 714,
+      "usage_complete": true,
+      "cost_estimate_cny": 0.099,
+      "actual_cost_cny": null,
+      "reserved_upper_cny": 0.099,
+      "pricing_kind": "conservative estimate, not provider bill",
+      "calls": [
+        {
+          "call": 1,
+          "started_at": "2026-10-04T12:50:41.726750+00:00",
+          "reserved_upper_cny": 0.4167,
+          "request_sha256": "b9bf3f464556ce113a76b3cb16e8d9de97bbdc011a0e6a247f04a299aa67f2ff",
+          "finished_at": "2026-10-04T12:50:45.892929+00:00",
+          "http_status": 200,
+          "observed_model": "deepseek-flash",
+          "usage": {
+            "prompt_tokens": 8858,
+            "completion_tokens": 714,
+            "total_tokens": 9572,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 8858
+          },
+          "settled_upper_estimate_cny": 0.099
+        }
+      ]
+    },
+    "finished_at": 1791118246.3369288
+  },
+  "training_rows": [
+    {
+      "started_at": 1791118221.692226,
+      "reservation_id": "9194f5e097044c11b7ab41ca7b843de9",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1274,
+        "output_tokens": 435,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.023211,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.023211,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:22.203143+00:00",
+            "reserved_upper_cny": 0.190629,
+            "request_sha256": "f6305a09e57045e66005a23264a11206aae52fe820cac7e12f177f8ff7d54129",
+            "finished_at": "2026-10-04T12:50:24.572792+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1274,
+              "completion_tokens": 435,
+              "total_tokens": 1709,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 1274
+            },
+            "settled_upper_estimate_cny": 0.023211
+          }
+        ]
+      },
+      "finished_at": 1791118224.7520068,
+      "group": "train",
+      "task_id": "train-01",
+      "grade": {
+        "score": 0.26666666666666666,
+        "points": {
+          "train-01-disposition": false,
+          "train-01-source_selection": true,
+          "train-01-allocation": false,
+          "train-01-freight_cents": false,
+          "train-01-commitment_ledger": true,
+          "train-01-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118224.8426156,
+      "reservation_id": "bd7572598b2641f7a5199a1464a9479e",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1776,
+        "output_tokens": 437,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.027783,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.027783,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:24.892562+00:00",
+            "reserved_upper_cny": 0.206685,
+            "request_sha256": "c8ca722ddda8974b02c8abba951e1cf4558540fcc86395eec337293eb098d829",
+            "finished_at": "2026-10-04T12:50:27.244715+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1776,
+              "completion_tokens": 437,
+              "total_tokens": 2213,
+              "prompt_tokens_details": {
+                "cached_tokens": 1536
+              },
+              "prompt_cache_hit_tokens": 1536,
+              "prompt_cache_miss_tokens": 240
+            },
+            "settled_upper_estimate_cny": 0.027783
+          }
+        ]
+      },
+      "finished_at": 1791118227.443946,
+      "group": "train",
+      "task_id": "train-01",
+      "grade": {
+        "score": 0.26666666666666666,
+        "points": {
+          "train-01-disposition": false,
+          "train-01-source_selection": true,
+          "train-01-allocation": false,
+          "train-01-freight_cents": false,
+          "train-01-commitment_ledger": true,
+          "train-01-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118227.5468764,
+      "reservation_id": "1bda9da623614d6c8d76c4d106c020ef",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1256,
+        "output_tokens": 460,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.023724,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.023724,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:27.592486+00:00",
+            "reserved_upper_cny": 0.189009,
+            "request_sha256": "3772c804144f4634e5ca545ed60651462eabc0086d92d4add1a4420ca2ded33b",
+            "finished_at": "2026-10-04T12:50:28.508579+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1256,
+              "completion_tokens": 460,
+              "total_tokens": 1716,
+              "prompt_tokens_details": {
+                "cached_tokens": 128
+              },
+              "prompt_cache_hit_tokens": 128,
+              "prompt_cache_miss_tokens": 1128
+            },
+            "settled_upper_estimate_cny": 0.023724
+          }
+        ]
+      },
+      "finished_at": 1791118228.5826027,
+      "group": "train",
+      "task_id": "train-02",
+      "grade": {
+        "score": 1.0,
+        "points": {
+          "train-02-disposition": true,
+          "train-02-source_selection": true,
+          "train-02-allocation": true,
+          "train-02-freight_cents": true,
+          "train-02-commitment_ledger": true,
+          "train-02-approval_request": true
+        },
+        "business_success": true
+      }
+    },
+    {
+      "started_at": 1791118228.6953225,
+      "reservation_id": "4c33ed9114ef49a5a50cbe184df5f2dd",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1471,
+        "output_tokens": 382,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.023553,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.023553,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:28.748781+00:00",
+            "reserved_upper_cny": 0.197604,
+            "request_sha256": "40e4672f67dcd7c4ed887d7f17f5d75f985b0ed2a95abef6f8717feb92dbd903",
+            "finished_at": "2026-10-04T12:50:30.843517+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1471,
+              "completion_tokens": 382,
+              "total_tokens": 1853,
+              "prompt_tokens_details": {
+                "cached_tokens": 128
+              },
+              "prompt_cache_hit_tokens": 128,
+              "prompt_cache_miss_tokens": 1343
+            },
+            "settled_upper_estimate_cny": 0.023553
+          }
+        ]
+      },
+      "finished_at": 1791118231.2943063,
+      "group": "train",
+      "task_id": "train-03",
+      "grade": {
+        "score": 1.0,
+        "points": {
+          "train-03-disposition": true,
+          "train-03-source_selection": true,
+          "train-03-allocation": true,
+          "train-03-freight_cents": true,
+          "train-03-commitment_ledger": true,
+          "train-03-approval_request": true
+        },
+        "business_success": true
+      }
+    },
+    {
+      "started_at": 1791118231.3955398,
+      "reservation_id": "9e273cfe9a2e46bcbee2e592f65c96ea",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1301,
+        "output_tokens": 500,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.025209,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.025209,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:31.441513+00:00",
+            "reserved_upper_cny": 0.190305,
+            "request_sha256": "8423e18b4d1c82157052efaf5178f198b6862854646cb98aa58f9d08faf441ee",
+            "finished_at": "2026-10-04T12:50:33.440447+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1301,
+              "completion_tokens": 500,
+              "total_tokens": 1801,
+              "prompt_tokens_details": {
+                "cached_tokens": 128
+              },
+              "prompt_cache_hit_tokens": 128,
+              "prompt_cache_miss_tokens": 1173
+            },
+            "settled_upper_estimate_cny": 0.025209
+          }
+        ]
+      },
+      "finished_at": 1791118233.488215,
+      "group": "train",
+      "task_id": "train-04",
+      "grade": {
+        "score": 0.4666666666666667,
+        "points": {
+          "train-04-disposition": true,
+          "train-04-source_selection": true,
+          "train-04-allocation": false,
+          "train-04-freight_cents": false,
+          "train-04-commitment_ledger": true,
+          "train-04-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118233.5723257,
+      "reservation_id": "6a2539e358314c9d94aae0a112986292",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1864,
+        "output_tokens": 608,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.033192,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.033192,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:33.623029+00:00",
+            "reserved_upper_cny": 0.208359,
+            "request_sha256": "b7bcf74bb78397fae2b81507d0437bcd6c7b1a4bb44f448cb3ae2ddf24677400",
+            "finished_at": "2026-10-04T12:50:36.362369+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1864,
+              "completion_tokens": 608,
+              "total_tokens": 2472,
+              "prompt_tokens_details": {
+                "cached_tokens": 1664
+              },
+              "prompt_cache_hit_tokens": 1664,
+              "prompt_cache_miss_tokens": 200
+            },
+            "settled_upper_estimate_cny": 0.033192
+          }
+        ]
+      },
+      "finished_at": 1791118236.6908994,
+      "group": "train",
+      "task_id": "train-04",
+      "grade": {
+        "score": 0.4666666666666667,
+        "points": {
+          "train-04-disposition": true,
+          "train-04-source_selection": true,
+          "train-04-allocation": false,
+          "train-04-freight_cents": false,
+          "train-04-commitment_ledger": true,
+          "train-04-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118236.8054981,
+      "reservation_id": "a856c805d1a94d43989026ff9c6ce71a",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1242,
+        "output_tokens": 388,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.021654,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.021654,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:36.858320+00:00",
+            "reserved_upper_cny": 0.188712,
+            "request_sha256": "0e0d76fe44c61481f232965d3425598f4cd87a162061717899985b4b1b6f9e34",
+            "finished_at": "2026-10-04T12:50:38.659197+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1242,
+              "completion_tokens": 388,
+              "total_tokens": 1630,
+              "prompt_tokens_details": {
+                "cached_tokens": 256
+              },
+              "prompt_cache_hit_tokens": 256,
+              "prompt_cache_miss_tokens": 986
+            },
+            "settled_upper_estimate_cny": 0.021654
+          }
+        ]
+      },
+      "finished_at": 1791118238.9051607,
+      "group": "train",
+      "task_id": "train-05",
+      "grade": {
+        "score": 0.4666666666666667,
+        "points": {
+          "train-05-disposition": true,
+          "train-05-source_selection": true,
+          "train-05-allocation": false,
+          "train-05-freight_cents": false,
+          "train-05-commitment_ledger": true,
+          "train-05-approval_request": false
+        },
+        "business_success": false
+      }
+    },
+    {
+      "started_at": 1791118238.994524,
+      "reservation_id": "3e1b72a1bf2b4420b9963f34216635df",
+      "status": "scored",
+      "errors": [],
+      "http_status": 200,
+      "observed_model": "deepseek-flash",
+      "finish_reason": "stop",
+      "metrics": {
+        "model_calls": 1,
+        "denied_model_requests": 0,
+        "input_tokens": 1693,
+        "output_tokens": 371,
+        "usage_complete": true,
+        "cost_estimate_cny": 0.025254,
+        "actual_cost_cny": null,
+        "reserved_upper_cny": 0.025254,
+        "pricing_kind": "conservative estimate, not provider bill",
+        "calls": [
+          {
+            "call": 1,
+            "started_at": "2026-10-04T12:50:39.040793+00:00",
+            "reserved_upper_cny": 0.202914,
+            "request_sha256": "27969dd134d03e766c2f03bf0587e7b5e3f687cf496335708d4f692e74649739",
+            "finished_at": "2026-10-04T12:50:41.170938+00:00",
+            "http_status": 200,
+            "observed_model": "deepseek-flash",
+            "usage": {
+              "prompt_tokens": 1693,
+              "completion_tokens": 371,
+              "total_tokens": 2064,
+              "prompt_tokens_details": {
+                "cached_tokens": 1536
+              },
+              "prompt_cache_hit_tokens": 1536,
+              "prompt_cache_miss_tokens": 157
+            },
+            "settled_upper_estimate_cny": 0.025254
+          }
+        ]
+      },
+      "finished_at": 1791118241.5884063,
+      "group": "train",
+      "task_id": "train-05",
+      "grade": {
+        "score": 1.0,
+        "points": {
+          "train-05-disposition": true,
+          "train-05-source_selection": true,
+          "train-05-allocation": true,
+          "train-05-freight_cents": true,
+          "train-05-commitment_ledger": true,
+          "train-05-approval_request": true
+        },
+        "business_success": true
+      }
+    }
+  ],
+  "claims": {
+    "production_actor_run": false,
+    "single_repeat": true,
+    "sealed_test": false,
+    "learning_gain_proven": false
+  }
+}

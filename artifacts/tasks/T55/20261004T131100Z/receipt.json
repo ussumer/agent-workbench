@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "task_id": "T55",
+  "title": "GDPevo真实文字技能训练与固定消融",
+  "status": "blocked",
+  "started_at": "2026-10-04T13:11:00Z",
+  "finished_at": "2026-10-04T13:11:00Z",
+  "source_revision": {
+    "vcs": "git",
+    "head": "9f2ea2ead99c2a4512c382ebe3f2d373985752d7",
+    "dirty_files": 7,
+    "worktree_digest": "6bb83502039e6e9e55657c686240057d92049409843993d92332d097de04fb90",
+    "source_manifest_digest": "1e9ca808aa41008f6dd91c975cb45a33a047135aec724d1169d2ee911cb8ff85"
+  },
+  "capabilities_required": [
+    "model"
+  ],
+  "checks": [
+    {
+      "id": "training-unit",
+      "mode": "unit",
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "tests/acceptance/test_t55.py",
+        "-q",
+        "--junitxml=artifacts/tasks/T55/20261004T131100Z/training-unit.xml"
+      ],
+      "cwd": ".",
+      "status": "blocked",
+      "exit_code": null,
+      "started_at": "2026-10-04T13:11:00Z",
+      "finished_at": "2026-10-04T13:11:00Z",
+      "duration_seconds": 0.0,
+      "log": "artifacts/tasks/T55/20261004T131100Z/training-unit.log",
+      "log_sha256": "14aeee09e1717b5284a2357118c1cfadbe7545b144a2994d184d1d50aad36ba0",
+      "report": "artifacts/tasks/T55/20261004T131100Z/training-unit.xml",
+      "reason": "missing configuration: 真实模型凭据（MODEL_* 或 OPENAI_*）: missing MODEL_API_KEY / OPENAI_API_KEY / DASHSCOPE_API_KEY; MODEL_BASE_URL / OPENAI_BASE_URL; MODEL_ID / MODEL_NAME"
+    },
+    {
+      "id": "training-evidence",
+      "mode": "live",
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "scripts/planning/gdpevo_training.py",
+        "verify",
+        "--output",
+        "artifacts/tasks/T55/20261004T131100Z/training-report.json"
+      ],
+      "cwd": ".",
+      "status": "blocked",
+      "exit_code": null,
+      "started_at": "2026-10-04T13:11:00Z",
+      "finished_at": "2026-10-04T13:11:00Z",
+      "duration_seconds": 0.0,
+      "log": "artifacts/tasks/T55/20261004T131100Z/training-evidence.log",
+      "log_sha256": "14aeee09e1717b5284a2357118c1cfadbe7545b144a2994d184d1d50aad36ba0",
+      "reason": "missing configuration: 真实模型凭据（MODEL_* 或 OPENAI_*）: missing MODEL_API_KEY / OPENAI_API_KEY / DASHSCOPE_API_KEY; MODEL_BASE_URL / OPENAI_BASE_URL; MODEL_ID / MODEL_NAME"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/tasks/T55/20261004T131100Z/training-evidence.log",
+      "sha256": "14aeee09e1717b5284a2357118c1cfadbe7545b144a2994d184d1d50aad36ba0",
+      "size": 215
+    },
+    {
+      "path": "artifacts/tasks/T55/20261004T131100Z/training-unit.log",
+      "sha256": "14aeee09e1717b5284a2357118c1cfadbe7545b144a2994d184d1d50aad36ba0",
+      "size": 215
+    }
+  ]
+}

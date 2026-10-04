@@ -1,0 +1,9 @@
+$ /home/ussumer/.local/bin/uv run --frozen pytest tests/acceptance/test_t55.py -q --junitxml=artifacts/tasks/T55/20261004T131342Z/training-unit.xml
+[cwd] ***REDACTED***
+[manifest argv] uv run --frozen pytest tests/acceptance/test_t55.py -q --junitxml=artifacts/tasks/T55/20261004T131342Z/training-unit.xml
+
+......                                                                   [100%]
+- generated xml file: ***REDACTED***/artifacts/tasks/T55/20261004T131342Z/training-unit.xml -
+6 passed in 0.72s
+
+[gate] status=passed reason=all tests passed

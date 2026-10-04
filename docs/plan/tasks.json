@@ -2907,6 +2907,60 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T55",
+      "title": "GDPevo真实文字技能训练与固定消融",
+      "file": "docs/plan/tasks/T55.md",
+      "depends_on": [
+        "T53"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v2.md",
+        "docs/plan/execution.md",
+        "docs/plan/HANDOFF.md",
+        "scripts/planning/gdpevo_training.py"
+      ],
+      "checks": [
+        {
+          "id": "training-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t55.py",
+            "-q",
+            "--junitxml={evidence_dir}/training-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/training-unit.xml"
+        },
+        {
+          "id": "training-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_training.py",
+            "verify",
+            "--output",
+            "{evidence_dir}/training-report.json"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }
