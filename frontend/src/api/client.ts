@@ -109,6 +109,7 @@ export interface PlanningProblem {
 
 export interface PlanningGoalState {
   problem: PlanningProblem
+  revision_change?: { affected_parts: string[]; global_allocation_changed: boolean } | null
   orders: Array<{ interrupt_id: string; revision: number; result: {
     ok: boolean
     data: { order_id: string; supplier_id?: string; total_amount?: string }
@@ -125,6 +126,14 @@ export const api = {
 
   planningGoal(threadId: string) {
     return request<PlanningGoalState>(`/planning/${encodeURIComponent(threadId)}/goal`)
+  },
+
+  revisePlanningGoal(threadId: string, body: {
+    expected_revision: number; budget: string; demands: PlanningDemand[]; refresh_part_ids: string[]
+  }) {
+    return request<Omit<PlanningGoalState, 'execution_state'>>(`/planning/${encodeURIComponent(threadId)}/goal`, {
+      method: 'PATCH', body: JSON.stringify(body),
+    })
   },
 
   session(userId: string) {

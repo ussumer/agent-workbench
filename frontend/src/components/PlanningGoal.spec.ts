@@ -11,6 +11,75 @@ const state: PlanningGoalState = { problem, orders: [], execution_state: null }
 beforeEach(() => {
   vi.spyOn(api, 'createPlanningGoal').mockResolvedValue(problem)
   vi.spyOn(api, 'planningGoal').mockResolvedValue(state)
+  vi.spyOn(api, 'revisePlanningGoal').mockResolvedValue({ ...state,
+    problem: { ...problem, revision: 2, budget: '2200.00' },
+    revision_change: { affected_parts: ['P001'], global_allocation_changed: true },
+  })
+})
+
+describe('same-thread goal revision', () => {
+  async function revisionForm() {
+    const wrapper = mount(PlanningGoal, { props: { threadId: 'planning-test', busy: false, refresh: 0 } })
+    await flushPromises()
+    await wrapper.findAll('button').find(b => b.text() === '修改当前目标')!.trigger('click')
+    return wrapper
+  }
+
+  it('sends current revision, changed constraints and only selected source parts', async () => {
+    const wrapper = await revisionForm()
+    expect(wrapper.get('[aria-label="物料编号 1"]').attributes('disabled')).toBeDefined()
+    await wrapper.get('[aria-label="采购预算"]').setValue('2200.00')
+    await wrapper.get('[aria-label="最长交期 1"]').setValue(4)
+    await wrapper.get('[aria-label="刷新来源 P001"]').setValue(true)
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(api.revisePlanningGoal).toHaveBeenCalledWith('planning-test', {
+      expected_revision: 1, budget: '2200.00', refresh_part_ids: ['P001'],
+      demands: [{ ...problem.demands[0], max_lead_days: 4 }],
+    })
+    expect(api.createPlanningGoal).not.toHaveBeenCalled()
+    expect(wrapper.emitted('revised')).toEqual([['planning-test']])
+    expect(wrapper.text()).toContain('第 2 版')
+    expect(wrapper.text()).toContain('需重新检查：P001')
+    await wrapper.findAll('button').find(b => b.text() === '继续规划')!.trigger('click')
+    expect(wrapper.emitted('continue')).toEqual([['planning-test']])
+  })
+
+  it('preserves committed orders and leaves unchanged sources unrequested', async () => {
+    vi.mocked(api.revisePlanningGoal).mockResolvedValue({ ...state,
+      problem: { ...problem, revision: 2 }, orders: [
+        { interrupt_id: 'committed', revision: 1, result: { ok: true, data: { order_id: 'O-existing' } } },
+      ],
+    })
+    const wrapper = await revisionForm()
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(vi.mocked(api.revisePlanningGoal).mock.calls[0]![1].refresh_part_ids).toEqual([])
+    expect(wrapper.text()).toContain('O-existing')
+  })
+
+  it('preserves edit inputs on conflict, without retry or announcing success', async () => {
+    vi.mocked(api.revisePlanningGoal).mockRejectedValue(new Error('REVISION_CONFLICT: reload the current goal'))
+    const wrapper = await revisionForm()
+    await wrapper.get('[aria-label="采购预算"]').setValue('2200.00')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(api.revisePlanningGoal).toHaveBeenCalledTimes(1)
+    expect(wrapper.get('[aria-label="采购预算"]').element).toHaveProperty('value', '2200.00')
+    expect(wrapper.emitted('revised')).toBeUndefined()
+    expect(wrapper.text()).toContain('第 1 版')
+    expect(wrapper.get('[role="alert"]').text()).toContain('REVISION_CONFLICT')
+  })
+
+  it.each(['inflight', 'uncertain'])('disables revision while execution is %s', async phase => {
+    vi.mocked(api.planningGoal).mockResolvedValue({ ...state, execution_state: phase })
+    const wrapper = mount(PlanningGoal, { props: { threadId: 'planning-test', busy: false, refresh: 0 } })
+    await flushPromises()
+    const button = wrapper.findAll('button').find(b => b.text() === '修改当前目标')!
+    expect(button.attributes('disabled')).toBeDefined()
+    await button.trigger('click')
+    expect(wrapper.find('form').exists()).toBe(false)
+  })
 })
 afterEach(() => vi.restoreAllMocks())
 

@@ -32,6 +32,21 @@ function planningCreated(threadId: string): void {
   void refreshThreads()
 }
 
+function planningRevised(threadId: string): void {
+  if (machine.value.threadId !== threadId) return
+  machine.value.interrupt = null
+  machine.value.error = null
+  machine.value.status = 'idle'
+  draft.value = '请按修订后的目标继续规划。读取当前版本与受影响物料，复用已保存的计算数据，只重算受影响部分；已创建订单计入预算且不要重复采购，新候选逐单等待审批。'
+  notice.value = '目标已修改，旧审批已失效。点击继续规划生成新候选。'
+}
+
+async function continuePlanning(threadId: string): Promise<void> {
+  if (busy.value || machine.value.threadId !== threadId) return
+  planningRevised(threadId)
+  await send()
+}
+
 const canSend = computed(() => !busy.value && draft.value.trim().length > 0)
 
 onMounted(async () => {
@@ -315,7 +330,7 @@ function messageOf(failure: unknown): string {
       />
 
       <section class="chat">
-        <PlanningGoal :key="currentUser" :thread-id="machine.threadId" :busy="busy" :refresh="planningRefresh" @created="planningCreated" />
+        <PlanningGoal :key="currentUser" :thread-id="machine.threadId" :busy="busy" :refresh="planningRefresh" @created="planningCreated" @revised="planningRevised" @continue="continuePlanning" />
         <Conversation :snapshot="snapshot" />
 
         <AsyncTasks :thread-id="machine.threadId" />

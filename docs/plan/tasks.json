@@ -2612,6 +2612,78 @@
       "status": "done",
       "receipt": "artifacts/tasks/T48/20261004T074542Z/receipt.json",
       "notes": "真实 T48 已完成：gate artifacts/tasks/T48/20261004T074542Z/receipt.json，14 项组件测试+只读 live 核验通过。真实实验目录 /mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-decision-pilot-152921：复用 fixed 不可行反例，真实 Curator 1 call（4543/255 tokens，保守 ¥0.047772），curated 不可行 1/1；来源缺失 needs_information 1/1、零 ERP 写入；完整来源控制 feasible/optimal 1/1、两单总额 2196。保留真实 computation 成功/失败对照、原响应与遮蔽视图、bank/source/evidence hash；仅证明描述性条件行为和管线，不宣称学习增益或 TRACE 统计提升。"
+    },
+    {
+      "id": "T49",
+      "title": "Vue持续目标修订与重新审批入口",
+      "file": "docs/plan/tasks/T49.md",
+      "depends_on": [
+        "T48",
+        "T43",
+        "T42"
+      ],
+      "requirements": [
+        "R29"
+      ],
+      "reads": [
+        "docs/plan/contracts/planning.md"
+      ],
+      "checks": [
+        {
+          "id": "replanning-ui",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "npm",
+            "test",
+            "--",
+            "src/components/PlanningGoal.spec.ts",
+            "tests/planning-integration.spec.ts",
+            "tests/replanning-integration.spec.ts",
+            "--reporter=junit",
+            "--outputFile=../{evidence_dir}/replanning-ui.xml"
+          ],
+          "cwd": "frontend",
+          "report": "{evidence_dir}/replanning-ui.xml"
+        },
+        {
+          "id": "frontend-build",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "npm",
+            "run",
+            "build"
+          ],
+          "cwd": "frontend"
+        },
+        {
+          "id": "revision-api",
+          "mode": "integration",
+          "kind": "test",
+          "required": true,
+          "min_tests": 3,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t43.py",
+            "-q",
+            "-k",
+            "public_patch_refreshes_only_named_parts or formal_stale_approval_can_replan or actual_erp_modification_refuses",
+            "--junitxml={evidence_dir}/revision-api.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/revision-api.xml"
+        }
+      ],
+      "status": "done",
+      "receipt": "artifacts/tasks/T49/20261004T083808Z/receipt.json",
+      "notes": "T49 已完成：Vue持续目标修订入口。gate artifacts/tasks/T49/20261004T083808Z/receipt.json：20项前端交互测试、生产构建、3项真实Mongo/Java/MCP revision API回归全部通过。界面支持同线程修改预算/交期/需求、勾选物料刷新来源；保存后显示受影响物料，保留既有订单，旧审批不复用，继续规划沿原stream生成新候选。未新增付费模型调用。"
     }
   ]
 }

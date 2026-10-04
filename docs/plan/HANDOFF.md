@@ -1,5 +1,17 @@
 # 当前交接
 
+## 当前主线：T49
+
+同线程Vue目标修订与继续规划，复用T43后端；不重跑T47/T48付费实验。
+
+## **用户固定执行要求（强制）**
+
+主线有效产出优先：先交付能运行、能演示、能改变业务结果的工作；已通过的检查不重复跑，除非本次改动直接影响它。\
+同一问题两次有依据的修复尝试仍失败，或连续约 20 分钟没有实质进展，就停止该问题上的尝试，向用户说明卡点、尝试、影响和取舍，等待讨论。\
+优先复用现有实现并控制改动规模，不为假设风险堆复杂机制，不用测试数量或形式化状态替代业务成果。失败保留、结果如实说明；组件通过不等于完整目标完成。用户明确 resume 后再继续。
+
+完整规则见仓库 [AGENTS.md](../../AGENTS.md)。2026-10-04 用户恢复目标；按上述规则推进主线。
+
 ## 2026-10-04 简历版推进决定
 
 用户明确要求加速产出，T46 按已有真实证据收尾，不再循环补做冻结后独立2500双单冷跑或整体 deadline/取消专项；两项延期限制已写入 T46 任务说明和 state。T46 gate `artifacts/tasks/T46/20261004T025447Z/receipt.json` 为 106 passed/0 failed/0 skipped。下一任务登记 T47，优先运行真实 TRACE 小样本与 fixed/raw/curated 三组消融，记录真实调用、费用、源码 commit、bank hash 和独立 judge；不伪造提升。
@@ -691,3 +703,6 @@ WSL/Linux 原先误用了 Windows `.venv-agent-protocol`，导致 Agent Protocol
 ## 2026-10-04 T48 完成
 
 T48 gate `artifacts/tasks/T48/20261004T074542Z/receipt.json`：14 项组件测试与只读 live 核验通过，0 failed/0 skipped。真实实验目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-decision-pilot-152921`：复用已完成 fixed 不可行反例，真实 Curator 1 call（deepseek-flash；4543 输入/255 输出 token；保守估算 0.047772 CNY），没有重复 T47 六条消融。Curated 不可行案例正确记录 `infeasible` 且 ERP 零订单；来源遮蔽案例正确记录 `needs_information`、独立 judge `unresolved` 且零订单；完整来源控制通过独立 judge `feasible/optimal`，逐单审批后两单合计 2196。`contrastive-operations.json` 保留 attempt-7 真实 computation 成功/失败输入、stdout/stderr 摘要与 hash；Curator 输入为脱敏操作/状态摘要。报告只支持描述性条件行为和真实管线，不支持学习增益或统计显著。下一步按用户决定进入简历演示或后续动态重规划，不再重复本轮付费运行。
+## 2026-10-04 T49 完成
+
+T49 gate `artifacts/tasks/T49/20261004T083808Z/receipt.json`：20 项 Vue 交互测试、生产构建、3 项真实 Mongo/Java/MCP revision API 回归全部通过。新增同线程目标修订入口：可修改预算/交期/数量，按物料选择刷新报价与交期；保存后显示受影响物料，保留已有订单，旧审批不复用，继续规划沿原 chat stream 生成新候选。前端依赖仅修复了缺失的 Rolldown 可选绑定；未新增付费模型调用。
