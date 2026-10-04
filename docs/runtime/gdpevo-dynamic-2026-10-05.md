@@ -27,3 +27,5 @@
 环境零调用失败a/b/c已保留：dotenv缺失、Protocol路径、课程Agent图表工具装配。`planning_only`只让规划实验免于装配无关课程Agent；服务仍是真Java/Mongo/MCP/OpenSandbox/DeepAgents，不提供固定planner。设置失败现在也进入try/finally，结清预留并归档；a历史2元预留已根据零调用证据结清。服务均已退出。
 
 下一轮先讨论操作级拆分与同协议执行预算，之后才新增模型实验；不重复T57/T58 train，不恢复T51/T38，不倒用test选技能。
+
+2026-10-05 runner 修复：已保存的 SSE 错误先于最终 proposal 读取，`primary_failure` 保留规划流的错误 code/message，不再由空 proposal 的 TypeError 遮盖。`--actor-turn-allowance=16` 现在对非空 bank 计入 selector 的 16 个请求，记录总上限 32；空 bank 为 16。摘要、重试同样消耗总额度，2 元硬限额仍可能提前终止。这是执行机会预算，不能冒充等总成本实验。未新增付费运行，不能据此改变上述 failed 结果或登记完整验收成功。

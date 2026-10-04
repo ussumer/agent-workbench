@@ -141,3 +141,89 @@ def test_unfinished_real_actor_cannot_pass_evidence_gate():
     assert report['completed_turn_protocol_verified'] is True
     assert report['runtime_completed'] is False and report['model_calls'] == 16
     assert report['learning_gain_proven'] is False
+
+
+def test_archived_budget_failure_keeps_stream_cause_without_proposal():
+    from scripts.planning.gdpevo_dynamic_evidence import ATTEMPT
+    from scripts.planning.live_baseline import finalize_planning_result
+
+    historical = json.loads((ATTEMPT / 'actor/result.json').read_text())
+    attempt = {'frames': historical['frames'], 'errors': [], 'terminal_status': 'failed'}
+    assert historical['final_goal']['proposal'] is None
+    with pytest.raises(RuntimeError, match='OPENAIRATELIMITERROR'):
+        finalize_planning_result(attempt, historical['final_goal'])
+    assert attempt['primary_failure']['origin'] == 'planning_stream'
+    assert 'configured model budget exhausted' in attempt['errors'][0]['message']
+    assert attempt['final_goal'] == historical['final_goal']
+    assert 'final_judge' not in attempt
+
+
+def test_completed_stream_without_proposal_is_still_failure():
+    from scripts.planning.live_baseline import finalize_planning_result
+
+    attempt = {'frames': [[{'event': 'done', 'envelope': {'payload': {'status': 'completed'}}}]],
+               'errors': []}
+    with pytest.raises(RuntimeError, match='without a final proposal'):
+        finalize_planning_result(attempt, None)
+    assert attempt.get('terminal_status') != 'completed'
+
+
+@pytest.mark.parametrize('selector', (False, True))
+def test_request_budget_allows_full_planned_actor_turns_and_then_stops(selector):
+    from io import StringIO
+    from procurement_eval.budget_proxy import Budget
+    from scripts.planning.live_baseline import request_budget
+
+    spec = request_budget(actor_turn_allowance=16, selector_enabled=selector,
+                          prepare=False, total_cny=50, per_attempt_cny=2)
+    budget = Budget(spec, StringIO())
+    usage = b'{"usage":{"prompt_tokens":1,"completion_tokens":1}}'
+    for turn in range(16):
+        if selector:
+            budget.finish(budget.reserve(1), usage, 200)
+        budget.finish(budget.reserve(1), usage, 200)
+    assert budget.calls == (32 if selector else 16)
+    with pytest.raises(ValueError, match='budget exhausted'):
+        budget.reserve(1)
+    assert budget.summary()['denied_model_requests'] == 1
+
+
+def test_unknown_usage_retains_reservations_and_can_stop_before_turn_allowance():
+    from io import StringIO
+    from procurement_eval.budget_proxy import Budget
+    from scripts.planning.live_baseline import request_budget
+
+    spec = request_budget(actor_turn_allowance=16, selector_enabled=True,
+                          prepare=False, total_cny=50, per_attempt_cny=2)
+    budget = Budget(spec, StringIO())
+    for _ in range(21):
+        budget.reserve(1)
+    with pytest.raises(ValueError, match='budget exhausted'):
+        budget.reserve(1)
+    assert budget.calls < spec['max_model_calls']
+    assert budget.summary()['usage_complete'] is False
+    assert budget.summary()['reserved_upper_cny'] <= 2
+
+
+def test_extra_selector_allowance_preserves_money_limit_and_prepare_no_calls():
+    from io import StringIO
+    from procurement_eval.budget_proxy import Budget
+    from scripts.planning.live_baseline import request_budget
+
+    spec = request_budget(actor_turn_allowance=16, selector_enabled=True,
+                          prepare=False, total_cny=50, per_attempt_cny=0.01)
+    with pytest.raises(ValueError, match='budget exhausted'):
+        Budget(spec, StringIO()).reserve(1)
+    spec = request_budget(actor_turn_allowance=16, selector_enabled=True,
+                          prepare=True, total_cny=50, per_attempt_cny=2)
+    with pytest.raises(ValueError, match='budget exhausted'):
+        Budget(spec, StringIO()).reserve(1)
+
+
+@pytest.mark.parametrize('value', (0, -1, True, 1.5))
+def test_invalid_actor_allowance_is_rejected_before_execution(value):
+    from scripts.planning.live_baseline import request_budget
+
+    with pytest.raises(ValueError, match='positive integer'):
+        request_budget(actor_turn_allowance=value, selector_enabled=True,
+                       prepare=False, total_cny=50, per_attempt_cny=2)

@@ -58,6 +58,60 @@ def terminal(frames: list[dict[str, Any]]) -> dict[str, Any] | None:
     return done[0]
 
 
+def request_budget(
+    *, actor_turn_allowance: int, selector_enabled: bool, prepare: bool,
+    total_cny: float, per_attempt_cny: float,
+) -> dict[str, Any]:
+    """Reserve a selector request for each planned Actor turn, within the money cap.
+
+    The gateway enforces the shared request/money limits. Summaries and retries
+    also consume them; this allowance does not promise a number of completed turns.
+    """
+    if type(actor_turn_allowance) is not int or actor_turn_allowance < 1:
+        raise ValueError("actor turn allowance must be a positive integer")
+    return {
+        "total_cny": total_cny,
+        "per_attempt_cny": per_attempt_cny,
+        "actor_turn_allowance": actor_turn_allowance,
+        "selector_enabled": selector_enabled,
+        "max_model_calls": 0 if prepare else actor_turn_allowance * (2 if selector_enabled else 1),
+        "max_output_tokens": 2048,
+        "max_request_bytes": 131072,
+        "timeout_seconds": 240,
+        "input_cny_per_million": 9.0,
+        "output_cny_per_million": 27.0,
+        "pricing_kind": "conservative DeepSeek estimate",
+        "pricing_source": "configured evaluation policy",
+        "accounting": "selector, Actor, summaries and retries share request and money limits",
+    }
+
+
+def finalize_planning_result(attempt: dict[str, Any], final_row: dict | None) -> None:
+    """Keep a failed stream's cause before inspecting an optional final proposal."""
+    attempt["final_goal"] = final_row
+    final_frames = attempt["frames"][-1] if attempt["frames"] else []
+    final_status = terminal(final_frames) if final_frames else None
+    if final_status and final_status["status"] == "failed":
+        errors = [frame["envelope"]["payload"] for frame in final_frames if frame["event"] == "error"]
+        for error in errors:
+            attempt["errors"].append({"type": "PlanningStreamError", "code": error.get("code"),
+                                      "message": error.get("message", "planning stream failed"),
+                                      "origin": "planning_stream"})
+        cause = errors[0] if errors else {"code": "PLANNING_STREAM_FAILED"}
+        attempt["primary_failure"] = {"origin": "planning_stream", **cause}
+        raise RuntimeError("planning stream failed: " + str(cause.get("code", "unknown")))
+    if not final_status or final_status["status"] not in {"completed", "interrupted"}:
+        raise RuntimeError("planning stream did not reach a valid terminal event")
+    proposal = final_row.get("proposal") if final_row else None
+    if not proposal or not proposal.get("plan"):
+        raise RuntimeError("planning stream ended without a final proposal")
+    final_problem = PlanningProblem.model_validate(final_row["problem"])
+    attempt["final_judge"] = dataclasses.asdict(
+        grade(final_problem, Plan.model_validate(proposal["plan"]))
+    )
+    attempt["terminal_status"] = "completed" if final_status["status"] == "completed" else "failed"
+
+
 @contextmanager
 def locked_ledger(ledger_path: Path, total: float):
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
@@ -252,7 +306,13 @@ def run(
     goal_data: dict[str, Any] | None = None,
     case_id: str | None = None,
     mask_source_part: str | None = None,
+    actor_turn_allowance: int = 16,
 ) -> int:
+    proxy_spec = request_budget(
+        actor_turn_allowance=actor_turn_allowance,
+        selector_enabled=skill_file is not None or skill_bank_file is not None,
+        prepare=prepare, total_cny=total_cny, per_attempt_cny=per_attempt_cny,
+    )
     output.mkdir(parents=True, exist_ok=False)
     owner = "demo-a"
     thread = "planning-live-" + uuid.uuid4().hex[:12]
@@ -277,23 +337,12 @@ def run(
         "protocol_version": "procurement-evolution-v2",
         "experiment_group": experiment_group,
         "case_id": case_id,
+        "request_budget": proxy_spec,
     }
     (output / "started.json").write_text(json.dumps(attempt, indent=2) + "\n", encoding="utf-8")
 
     env: dict[str, str] = {}
     model_log = (output / "model_calls.jsonl").open("x", encoding="utf-8")
-    proxy_spec = {
-        "total_cny": total_cny,
-        "per_attempt_cny": per_attempt_cny,
-        "max_model_calls": 0 if prepare else 16,
-        "max_output_tokens": 2048,
-        "max_request_bytes": 131072,
-        "timeout_seconds": 240,
-        "input_cny_per_million": 9.0,
-        "output_cny_per_million": 27.0,
-        "pricing_kind": "conservative DeepSeek estimate",
-        "pricing_source": "configured evaluation policy",
-    }
     try:
         env_path = Path("/mnt/c/dev/rush-harness/.env")
         env = load_env(path=env_path) if env_path.is_file() else load_env()
@@ -553,21 +602,9 @@ def run(
                     final_row = stack.database.planning_goals.find_one(
                         {"owner_user_id": owner, "thread_id": thread}, {"_id": 0}
                     )
-                    attempt["final_goal"] = final_row
-                    final_problem = PlanningProblem.model_validate(final_row["problem"])
-                    attempt["final_judge"] = dataclasses.asdict(
-                        grade(final_problem, Plan.model_validate(final_row["proposal"]["plan"]))
-                    )
+                    finalize_planning_result(attempt, final_row)
                     if fingerprint(ROOT)["files"] != attempt["source_revision"]["files"]:
                         raise RuntimeError("source changed during execution")
-            final_status = terminal(attempt["frames"][-1]) if attempt["frames"] else None
-            if final_status and final_status.get("status") == "failed":
-                raise RuntimeError("planning stream failed after revision")
-            if not final_status or final_status.get("status") not in {"completed", "interrupted"}:
-                raise RuntimeError("planning stream did not reach a valid terminal event")
-            attempt["terminal_status"] = (
-                "completed" if final_status.get("status") == "completed" else "failed"
-            )
             attempt["metrics"] = budget.summary()
             attempt["model_calls"] = budget.calls
     except Exception as failure:  # retain structured failure; caller/gate decides pass
@@ -581,6 +618,11 @@ def run(
         attempt["model_calls"] = attempt["metrics"].get("model_calls", 0)
     finally:
         model_log.close()
+        if "primary_failure" in attempt:
+            attempt["primary_failure"] = json.loads(redact(
+                json.dumps(attempt["primary_failure"], ensure_ascii=False), secret_values(env)))
+        for error in attempt["errors"]:
+            error["message"] = redact(str(error.get("message", "")), secret_values(env))[:1000]
         try:
             settle_attempt(ledger_path, reservation["reservation_id"], attempt.get("metrics", {}), total_cny)
         except Exception as settlement_error:
@@ -611,6 +653,7 @@ def main() -> int:
     parser.add_argument("--experiment-group", choices=["fixed-v1", "retrieval-v1", "curated-v1"], default="fixed-v1")
     parser.add_argument("--skill-file", type=Path)
     parser.add_argument("--skill-bank", type=Path)
+    parser.add_argument("--actor-turn-allowance", type=int, default=16)
     args = parser.parse_args()
     return run(
         args.output,
@@ -621,6 +664,7 @@ def main() -> int:
         experiment_group=args.experiment_group,
         skill_file=args.skill_file,
         skill_bank_file=args.skill_bank,
+        actor_turn_allowance=args.actor_turn_allowance,
     )
 
 

@@ -1,5 +1,11 @@
 # 当前交接
 
+## T59 runner 修复已 Git 保存；旧真实失败保留，转向独立训练视图修复
+
+原接线与论文复核 checkpoint commit `1c874b4`。已修复最终proposal为空时遮盖stream主因；失败结果记录primary_failure，旧429预算失败在只读重放中保留。actor-turn-allowance默认16，非空bank总请求32、空bank16，摘要与重试共享；费用仍50总/2每次，不代表等成本对照或保证完成16回合。gate `artifacts/tasks/T59/20261004T183910Z/receipt.json`：22unit通过，旧真实evidence blocked，无新增模型调用。首轮runner-repair.xml 20pass/1failed（测试未模拟usage结算）保留；没有改货币上限。T59改blocked、receipt null，不宣称完成或学习收益。
+
+用户再次要求对照论文并恢复“开修!记得git好”目标；目标仍active。下一任务可独立修复Curator原题/反馈丢失，依赖T58，不能覆盖旧技能/尝试或用test倒选；各组保留全部资料只37–52KB。旧T59不重跑；T38/T51不恢复。详细诊断 `docs/runtime/paper-method-diagnosis-2026-10-05.md`。
+
 ## T59 实际接线已提交，完整验收未完成；停止新增试跑等待讨论
 
 四个 T58 真实 scoped skills 已整体载入实验 bank，`live_baseline --skill-bank` 与 `gdpevo_dynamic.py` 复用现有 `PlanningTraceMiddleware`，没有新造selector。12项协议检查通过；最终`artifacts/tasks/T59/final-failure-boundary.xml`单条通过，证明失败业务运行不能通过验收。真实 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005d`：8完整Actor回合、9 selector尝试、2次OpenSandbox completed，首单真实批准2091.00；随后16请求上限耗尽，修订后整体目标失败。8次选择全为packages，动态调用机制真实运行但尚无状态切换收益。16调用保守1.065591CNY，生产assignment未变；不宣称学习增益。

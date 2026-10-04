@@ -49,6 +49,7 @@ def main() -> int:
     parser.add_argument('command', choices=('export', 'run'))
     parser.add_argument('--source', type=Path, default=SCOPED)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--actor-turn-allowance', type=int, default=16)
     args = parser.parse_args()
     if args.command == 'export':
         export_bank(args.source, args.output)
@@ -59,7 +60,7 @@ def main() -> int:
     # The production goal is deliberately distinct from synthetic v3 scoring.
     # This pilot proves state-conditioned selection + real computation wiring only.
     return run(args.output / 'actor', skill_bank_file=bank_path,
-               experiment_group='curated-v1')
+               experiment_group='curated-v1', actor_turn_allowance=args.actor_turn_allowance)
 
 
 if __name__ == '__main__':
