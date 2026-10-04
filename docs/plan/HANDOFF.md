@@ -8,7 +8,7 @@
 
 费用授权仍新增累计50CNY/单attempt2CNY。全部新增调用保守计入5.118624CNY（剩44.881376），包括未知usage预留；actual_cost仍null，用户指出其观察账单0.02元，不把保守估算称实际费用。权威会话账本 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/budget-ledger.json`；已将旧尝试按evidence/hash导入。driver新增独立lock文件+fsync/rename写入，损坏拒绝而非清空、固定会话路径、限制50/2、usage未知保留、并发预留/结算检查。23零模型unit通过。
 
-T46保持in_progress：现有gate receipt通过仅说明已实现断言通过，尚不足以完成全部task说明。仍需补齐：执行JAR与实际依赖的事前冻结/完整模型身份preflight证据；完整baseline双单独立场景与ERP内容/无额外订单严格比对；revision复用前后JSON/hash/同Episode与bank绑定强断言；prepare zero-generation验收；attempt整体deadline、取消并确认实际计算停止；外部评测器源码版本/hash绑定。不能以当前较弱live断言或结构checker把上述要求降掉。累计账本改动后尚无新增付费attempt，不要为补已有证据盲目再跑模型。下一次先做零调用补齐与现有attempt只读核验，再决定是否需要唯一新attempt，仍在既有50/2授权内。
+T46保持in_progress：最新gate `artifacts/tasks/T46/20261004T021644Z/receipt.json` 23+68+3通过，仅说明已实现断言通过，尚不足以完成全部task说明。Git检查点88f205e曾错误登记done，本次纠正状态并保留提交历史。仍需补齐：执行JAR与实际依赖的事前冻结/完整模型身份preflight证据；完整baseline双单独立场景与ERP内容/无额外订单严格比对；revision复用前后JSON/hash/同Episode与bank绑定强断言；prepare zero-generation验收；attempt整体deadline、取消并确认实际计算停止；外部评测器源码版本/hash绑定。不能以当前较弱live断言或结构checker把上述要求降掉。累计账本改动后尚无新增付费attempt，不要为补已有证据盲目再跑模型。下一次先做零调用补齐与现有attempt只读核验，再决定是否需要唯一新attempt，仍在既有50/2授权内。
 
 ## 2026-10-04 训练前 Git 基线已提交
 
