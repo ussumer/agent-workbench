@@ -357,10 +357,10 @@
       "notes": "四组各一次真实Curator，复用T57历史train/fixed controls；scoped train8/20 mean.853846 vs fixed4/20 .796154；test1/20 mean.761538 vs fixed0/20 .607692。quotes-train-04/kits-train-03逐题退化，拒绝实验晋升，生产assignment false。gate6unit+真实证据只读重算通过。44新calls，本轮保守2.123559 CNY，累计36.926127/50。仅group scope静态加载；动态per-turn选择、OpenSandbox v3 Actor和三重复监督比较仍待后续，非完整TRACE复现。"
     },
     "T59": {
-      "status": "blocked",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "2026-10-05 runner修复已通过22项零模型回归；新真实 attempt /mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005e 保留19次真实请求、OpenSandbox/服务轨迹和 primary_failure。第20次请求被评测网关以 429 configured model budget exhausted 拒绝；保守费用1.466586 CNY，未超过本attempt 2 CNY，但本轮不能完成T59。旧失败与新失败均保留，production assignment=false，learning_gain_proven=false；不再增加额度或重复试跑。"
+      "receipt": "artifacts/tasks/T59/20261005T045819Z/receipt.json",
+      "notes": "零模型22/22与真实证据核验通过。新 attempt /mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005f 完成19个selector/Actor回合、38次模型调用、5次OpenSandbox computation；首轮与预算修订后的最终规划均通过独立judge并产生2个订单。保守费用4.524831 CNY，production_assignment_changed=false，learning_gain_proven=false，v3_business_adapter_verified=false。此前2元预算失败attempt保留为历史，不覆盖。"
     },
     "T60": {
       "status": "done",

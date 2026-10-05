@@ -1,5 +1,16 @@
 # 当前交接
 
+## T59完成：动态逐回合选择与真实计算 runtime
+
+Gate `artifacts/tasks/T59/20261005T045819Z/receipt.json`：22 个单元测试与真实证据核验通过。
+新 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005f`
+在用户撤销此前 2 CNY/attempt 限制后，以 `total=100`、`per-attempt=10`、`actor-turn-allowance=48` 完成 19 个 Actor 回合、
+38 次模型调用和 5 次 OpenSandbox computation；保守费用 `4.524831 CNY`，无预算拒绝。
+
+selector 每回合均调用，共 19 次；第 14 回合由 `planning_packages_strategy` 切到 `planning_revisions_strategy`。
+首轮与预算修订后的最终规划均通过独立 judge，最终产生 2 个订单。生产 assignment 未变，`learning_gain_proven=false`，
+`v3_business_adapter_verified=false`。此前 2 元上限导致的失败 attempt `...20261005e` 保留为历史，不覆盖。
+
 ## T59 新真实 attempt：保留失败并停止
 
 零模型 `test_t59.py` 当前 22/22 通过。随后只做了一次新签名真实试跑：

@@ -1,5 +1,20 @@
 # 四技能 bank 接入真实逐回合 Actor：T59 检查点
 
+## 2026-10-05 放宽预算后的完整 runtime
+
+用户撤销此前每 attempt 2 CNY 的人工限制后，runner 支持显式记录更高的 `--total-cny`、`--per-attempt-cny` 和
+`--actor-turn-allowance`。新 attempt
+`/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005f`
+使用 `total=100`、`per-attempt=10`、`actor-turn-allowance=48`，完成 19 个 Actor 回合和 38 次模型调用，保守费用
+`4.524831 CNY`，无预算拒绝。
+
+T59 证据核验与 gate 均通过：selector 每回合调用一次，共 19 次；共 5 次 OpenSandbox computation completed；
+第 14 回合从 `planning_packages_strategy` 切换到 `planning_revisions_strategy`，不是固定单技能序列。首轮和预算修订后的
+最终规划都通过独立 judge，最终产生 2 个订单。Gate 收据为
+`artifacts/tasks/T59/20261005T045819Z/receipt.json`。
+
+这证明动态逐回合选择和真实工具执行 runtime 已接通；不证明学习增益，也不证明 v3 业务字段已适配生产规划合同。
+
 ## 2026-10-05 新 attempt 结论
 
 在零模型回归 22/22 通过后，使用新的 attempt

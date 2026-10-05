@@ -3222,7 +3222,7 @@
             "--output",
             "{evidence_dir}/dynamic-report.json",
             "--attempt",
-            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005d"
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005f"
           ],
           "cwd": "."
         }
