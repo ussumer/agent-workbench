@@ -150,10 +150,22 @@ def parse_response(response: dict | None) -> dict | None:
     return value
 
 
+def fresh_call_directory(directory: Path) -> Path:
+    """Keep an incomplete resumed call while allocating a new evidence path."""
+    if not directory.exists():
+        return directory
+    for retry in range(1, 1000):
+        candidate = directory.parent / f"{directory.name}-retry-{retry}"
+        if not candidate.exists():
+            return candidate
+    raise RuntimeError(f"too many incomplete call attempts under {directory}")
+
+
 def call_actor(caller: UnlimitedCalls, directory: Path, public: dict, training: dict, task: dict, control: dict,
                arm: str, *, skills=None, examples=None, selected=None, messages=None) -> dict:
     messages = messages or actor_messages(public, training, task, arm, skills=skills, examples=examples, selected=selected)
-    response, call = caller.call(directory, messages, label=arm)
+    call_directory = fresh_call_directory(directory)
+    response, call = caller.call(call_directory, messages, label=arm)
     row: dict[str, Any] = {"task_id": task["task_id"], "group_id": task["group_id"], "split": task["split"],
                            "arm": arm, "status": "environment_failed" if response is None else "returned",
                            "metrics": call.get("metrics", {"input_tokens": 0, "output_tokens": 0}),
@@ -163,13 +175,13 @@ def call_actor(caller: UnlimitedCalls, directory: Path, public: dict, training: 
         row["decision"] = value
         row["grade"] = grade_task(task, value, control["rubrics"][task["task_id"]])
         row["status"] = "scored"
-        write(directory / "submission.json", value)
+        write(call_directory / "submission.json", value)
         row["feedback"] = feedback(task, value, row["grade"])
     except (ValueError, KeyError, TypeError, IndexError, json.JSONDecodeError) as exc:
         row["status"] = "format_failed" if response is not None else "environment_failed"
         row["errors"] = [type(exc).__name__, str(exc)[:300]]
         row["feedback"] = feedback(task, None, row["grade"])
-    write(directory / "result.json", row)
+    write(call_directory / "result.json", row)
     return row
 
 
@@ -250,7 +262,8 @@ def select_skills(caller: UnlimitedCalls, directory: Path, task: dict, skills: l
     catalog = [{"skill_id": s["skill_id"], "description": s["description"]} for s in skills]
     messages = [{"role": "system", "content": "按当前任务选择相关技能的有序ID列表；允许空列表。只输出JSON对象 {\"selected\":[\"skill_id\"]}，不回答任务。"},
                 {"role": "user", "content": json.dumps({"task": task, "catalog": catalog}, ensure_ascii=False)}]
-    response, call = caller.call(directory, messages, label="selector")
+    call_directory = fresh_call_directory(directory)
+    response, call = caller.call(call_directory, messages, label="selector")
     if response is None:
         raise RuntimeError("selector environment failure")
     selected_value = json.loads(response["choices"][0]["message"]["content"])
@@ -258,7 +271,7 @@ def select_skills(caller: UnlimitedCalls, directory: Path, task: dict, skills: l
     by_id = {s["skill_id"]: s for s in skills}
     if not isinstance(selected_ids, list) or len(set(selected_ids)) != len(selected_ids) or any(x not in by_id for x in selected_ids):
         raise ValueError("selector must return known unique skill IDs")
-    write(directory / "selection.json", {"selected": selected_ids, "metrics": call.get("metrics", {})})
+    write(call_directory / "selection.json", {"selected": selected_ids, "metrics": call.get("metrics", {})})
     return [by_id[x] for x in selected_ids]
 
 
