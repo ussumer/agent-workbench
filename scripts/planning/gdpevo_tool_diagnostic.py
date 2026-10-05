@@ -149,20 +149,20 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
         with log_path.open('x') as log:
             with gateway(model_config, proxy_spec, log, {'thinking': {'type': 'disabled'}}) as (url, budget):
                 configured_model = dataclasses.replace(model_config, base_url=url, api_key='evaluation-proxy', max_tokens=4096)
-                model = configured_model.create_chat_model().bind(response_format={'type': 'json_object'})
+                chat_model = configured_model.create_chat_model().bind(response_format={'type': 'json_object'})
                 with sandbox_control(ROOT, run_dir / 'sandbox-control', configuration['sandbox_port']):
-                    with running_stack(model_config=model, run_dir=run_dir / 'stack', database_name='v3-tool-diagnostic',
+                    with running_stack(model_config=configured_model, run_dir=run_dir / 'stack', database_name='v3-tool-diagnostic',
                                        preserve_data=True, warm_pool_size=0, planning_only=True) as stack:
                         for task in selected:
                             task_view = actor_view(public, training, task['task_id'], 'train')
                             for arm in ('text', 'compute'):
                                 row = {'task_id': task['task_id'], 'arm': arm, 'model_calls_before': budget.calls}
                                 if arm == 'text':
-                                    response = model.invoke(_messages(public, training, task, compute=False))
+                                    response = chat_model.invoke(_messages(public, training, task, compute=False))
                                     decision = _parse(response.content)
                                     row['messages'] = _messages(public, training, task, compute=False)
                                 else:
-                                    decision, trace = _compute_actor(stack, model, task_view, output / f'{task["task_id"]}-{arm}')
+                                    decision, trace = _compute_actor(stack, chat_model, task_view, output / f'{task["task_id"]}-{arm}')
                                     row['trace'] = trace
                                     row['messages'] = _messages(public, training, task, compute=True)
                                 row['decision'] = decision
