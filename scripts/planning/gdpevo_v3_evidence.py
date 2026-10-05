@@ -92,7 +92,7 @@ def verify():
         check_row(BASE/'validation/fixed-train'/row['task_id'],row,tasks[row['task_id']],control['rubrics'][row['task_id']],actor_messages(public,training,tasks[row['task_id']],'fixed-v3'))
     for row in check_arm(trials,'candidate-train',tasks,'train'):
         check_row(SESSION/'validation'/row['task_id'],row,tasks[row['task_id']],control['rubrics'][row['task_id']],actor_messages(public,training,tasks[row['task_id']],'curated-v3',skill))
-    selection=select_candidate(fixed,trials)
+    selection=select_candidate(fixed,trials,policy=read(SESSION/'selection.json').get('policy','per-task-v1'))
     report=read(SESSION/'report.json')
     if selection!=report['selection'] or selection!=read(SESSION/'selection.json'): raise ValueError('selection drift')
     baseline_test=check_arm(report['rows'],'fixed-closed-test',tasks,'test')

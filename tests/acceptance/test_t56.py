@@ -124,17 +124,17 @@ def test_candidate_promoted_for_real_training_improvement():
     assert selection["promote"] and selection["reason"] == "performance"
 
 
-def test_aggregate_gain_cannot_hide_per_case_regression():
+def test_historical_policy_replays_per_case_veto():
     before = [trial(1), trial(.2, "train-02")]
     after = [trial(.8), trial(1, "train-02")]
-    selection = select_candidate(before, after)
+    selection = select_candidate(before, after, policy="per-task-v1")
     assert not selection["promote"] and selection["regressions"] == ["train-01"]
 
 
 def test_t64_aggregate_policy_allows_local_tradeoff():
     before = [trial(1), trial(.2, "train-02")]
     after = [trial(.8), trial(1, "train-02")]
-    selection = select_candidate(before, after, policy="aggregate-v2")
+    selection = select_candidate(before, after)
     assert selection["promote"] and selection["per_task_veto"] is False
 
 
@@ -152,3 +152,14 @@ def test_selection_never_uses_test_or_incomplete_trials():
     failed = trial(1)
     failed["status"] = "format_failed"
     assert not select_candidate([trial(.4)], [failed])["promote"]
+
+
+def test_aggregate_selection_pools_all_repeats():
+    before = [dict(trial(.6), repeat=r) for r in (1, 2, 3)]
+    after = [dict(trial(score), repeat=r) for r, score in enumerate((1, .5, .6), 1)]
+    selected = select_candidate(before, after)
+    assert selected["promote"] and selected["repeat_count"] == 3
+    assert selected["candidate_mean"] == pytest.approx(.7)
+    assert selected["regressions"] == ["train-01"]
+    with pytest.raises(ValueError, match="mismatched"):
+        select_candidate(before, [after[0], after[0], after[2]])

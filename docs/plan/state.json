@@ -387,10 +387,10 @@
       "notes": "真实四阶段Curator初始化、动态B0轨迹按实际技能选择回流、一次B1修订与同协议train验证通过。28个单元/协议测试通过；49次真实模型调用，fixed/B0/B1各两道train均有完整Episode与5次OpenSandbox computation。B0成功2/2、均分1.0；B1成功1/2、均分0.8846153846，packages-train-04退化，候选拒绝且未晋升。production_assignment_changed=false，learning_gain_proven=false。"
     },
     "T64": {
-      "status": "pending",
+      "status": "in_progress",
       "review": "not_reviewed",
       "receipt": null,
-      "notes": "全量v3训练任务已登记；尚未执行真实调用。必须使用20 train/20 test、few-shot、reflect-3和每个test arm三次重复，不能缩小为T63两题机制闭环。"
+      "notes": "文本中间实验 j 已完成；k 复用证据按用户取消逐题否决后的 aggregate-v2 选择，三组 train validation 候选通过。全量计算 Actor 与新封存验证仍未完成，未登记 done。"
     }
   }
 }

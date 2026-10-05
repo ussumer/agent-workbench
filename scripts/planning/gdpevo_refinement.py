@@ -319,7 +319,8 @@ def verify():
         if len(arm) != len(train_ids) or {r["task_id"] for r in arm} != train_ids:
             raise ValueError("incomplete training validation arm")
     selection = select_candidate([r for r in trials if r["group"] == "fixed-v2"],
-                                 [r for r in trials if r["group"] == "curated-v2"])
+                                 [r for r in trials if r["group"] == "curated-v2"],
+                                 policy=report["selection"].get("policy", "per-task-v1"))
     if selection != report["selection"] or selection != json.loads((SESSION / "selection.json").read_text()):
         raise ValueError("selection drift")
     bank = json.loads((SESSION / "bank.json").read_text())

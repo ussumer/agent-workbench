@@ -365,7 +365,8 @@ def verify(output: Path) -> dict:
     if expected_groups != json.loads((output/'skill-groups.json').read_text()):
         raise ValueError('skill attribution mismatch')
     before, after = ([r for r in result['rows'] if r['arm']==arm] for arm in ('b0','b1'))
-    if select_candidate(selection_rows(before),selection_rows(after)) != result['selection']:
+    if select_candidate(selection_rows(before),selection_rows(after),
+                        policy=result['selection'].get('policy', 'per-task-v1')) != result['selection']:
         raise ValueError('selection mismatch')
     return {'status':'passed','model_calls':result['metrics']['model_calls'],
             'groups': {arm: {'success':sum(r['grade']['business_success'] for r in result['rows'] if r['arm']==arm),

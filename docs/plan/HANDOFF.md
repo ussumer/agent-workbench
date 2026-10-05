@@ -1,12 +1,16 @@
 # 当前交接
 
+## 2026-10-06：聚合选择恢复结果
+
+`attempt-gdpevo-v4-faithful-20261005k` 从 j 复用完成证据，candidate-selection.json 的 fewshot/skills/dynamic 均 promote=true；仅使用 20 道 train validation、repeat_count=1，未安装生产技能。k 是事后按新政策重算，不能冒称新的一轮训练或新的独立测试。三轮 reflect 是一次训练内的迭代，三次 test 是同一冻结 bank 的重复，不是三次独立训练。原 v3 test 已用于开发评测，尚无新封存测试结论。
+
 ## T64 faithful v4：多轮训练已有明确 held-out 提升，仍缺全臂计算 Actor
 
 最新 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v4-faithful-20261005j` 已通过独立 verify：20 train validation × 4 arm，20 held-out × 4 arm × 3 repeats。fixed held-out 0/60、均分 0.592308；few-shot 10/60、0.734615；reflect-3 skills 10/60、0.796154；dynamic selector 5/60、0.770513。skills 相对 fixed +0.203846，三次重复逐次 +0.203846/+0.207692/+0.200000；这是当前最强的同任务集、多轮、重复真实提升信号。
 
-用户已明确取消逐题零退化否决。T64 runner 的 `aggregate-v2` 只在 train validation 总体均分/成功数不下降且至少一项提升时接受候选；逐题退化完整保留为诊断，test 不参与选择。旧 T56/T63 选择逻辑保留 `per-task-v1`，历史证据不改写。规则变更和测试覆盖已提交训练分支。
+用户已明确取消逐题零退化否决。T64 runner 的 `aggregate-v2` 只在 train validation 总体均分/成功数不下降且至少一项提升时接受候选；逐题退化完整保留为诊断，test 不参与选择。所有新训练默认使用 `aggregate-v2`；旧证据核验按记录中的 policy 重放，无版本的历史记录使用 `per-task-v1`，历史证据不改写。规则变更和测试覆盖已提交训练分支。
 
-实现/测试 commits：`f085a83`（faithful selector/reflect/few-shot）、`0b2f237`（恢复目录合并）、`5a847af`（失败 evidence 的 retry 目录）、`344153e`（恢复路径测试），当前文档/聚合策略改动尚未提交。失败 attempt `h/i` 保留，不能删除或覆盖。
+实现/测试 commits：`f085a83`（faithful selector/reflect/few-shot）、`0b2f237`（恢复目录合并）、`5a847af`（失败 evidence 的 retry 目录）、`344153e`（恢复路径测试），聚合策略已提交 `4b953e2`。失败 attempt `h/i` 保留，不能删除或覆盖。
 
 边界：`j` 四臂仍是文本 Actor；T61/T63 已有小样本真实 DeepAgents/OpenSandbox computation 证据，但尚未完成同一 faithful bank 的 20 题四臂计算对照。下一动作是接入同一计算 Actor 做等协议复验，不回到逐题零退化门槛。
 

@@ -44,7 +44,7 @@ def verify():
         t=tasks[row['task_id']];check_row(BASE/'fixed-closed-test'/t['task_id'],row,t,control['rubrics'][t['task_id']],actor_messages(public,training,t,'fixed-v3'))
     for row in check_arm(report['rows'],'scoped-test',tasks,'test'):
         t=tasks[row['task_id']];check_row(SESSION/'test'/t['task_id'],row,t,control['rubrics'][t['task_id']],actor_messages(public,training,t,'curated-v3',skills[t['group_id']]))
-    selection=select_candidate(fixed,trials)
+    selection=select_candidate(fixed,trials,policy=read(SESSION/'selection.json').get('policy','per-task-v1'))
     if selection!=report['selection'] or selection!=read(SESSION/'selection.json'):raise ValueError('selection drift')
     if summarize(report['rows'])!=report['groups']:raise ValueError('summary drift')
     bank=read(SESSION/'bank.json')

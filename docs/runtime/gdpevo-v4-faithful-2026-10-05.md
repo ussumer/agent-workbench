@@ -1,4 +1,6 @@
-# T64 faithful v4：多轮技能提炼与重复消融
+# T64 faithful v4：文本 Actor 中间实验（intermediate）
+
+2026-10-06 补充：k 复用 j 的原始结果，按新政策仅从 train validation 得到 fewshot/skills/dynamic 三组 promote=true。这是事后选择重算，不是新增训练。原 v3 test 已被此前实验使用，属于开发评测集，不能声称全新封存泛化。
 
 本次结果来自同一份 v3 任务集、同一 `deepseek-flash` 配置和同一独立评分器。20 道 train 只用于 fixed、三轮真实 rollout→诊断→Curator 修订、gold-answer few-shot 技能提炼和 train validation；20 道 held-out test 没有回流反馈、重修或倒选，每个 arm 重复三次。
 
@@ -22,7 +24,7 @@ verify 通过，矩阵完整：validation 20×4，held-out 20×4×3；所有调�
 | reflect-3 技能 | 6/20 | 0.861538 | 10/60 | 0.796154 |
 | dynamic selector | 5/20 | 0.857692 | 5/60 | 0.770513 |
 
-reflect-3 技能相对 fixed 的 held-out 加权均分提升 `+0.203846`，三次重复分别为 `+0.203846`、`+0.207692`、`+0.200000`；整题成功从 `0/60` 提升到 `10/60`。few-shot 提升 `+0.142308`，dynamic 提升 `+0.178205`。提升在三次重复中方向一致，说明这次不是单次偶然通过。
+reflect-3 技能相对 fixed 的 held-out 加权均分提升 `+0.203846`，三次重复分别为 `+0.203846`、`+0.207692`、`+0.200000`；整题成功从 `0/60` 提升到 `10/60`。few-shot 提升 `+0.142308`，dynamic 提升 `+0.178205`。提升在三次重复中方向一致，表明同一冻结 bank 在这三次重复中均有提升；这不等于三次独立训练，也不证明统计显著性。
 
 逐题退化仍在 validation/test 中完整保留，用于定位技能误导和任务组差异。用户已明确取消“逐题零退化即否决”规则；T64 当前按匹配 train validation 的总体表现选择候选，test 只做冻结后的泛化报告，不能参与选择。此次结果达到工程层面的总体提升信号，但不宣称统计显著性，也不把单次 validation 当作稳定保证。
 

@@ -5,7 +5,7 @@ from typing import Any
 
 
 def select_candidate(baseline: list[dict[str, Any]], candidate: list[dict[str, Any]],
-                     *, policy: str = "per-task-v1") -> dict[str, Any]:
+                     *, policy: str = "aggregate-v2") -> dict[str, Any]:
     # per-task-v1 is only for replaying immutable historical experiment decisions.
     if policy not in {"aggregate-v2", "per-task-v1"}:
         raise ValueError("unknown selection policy")
