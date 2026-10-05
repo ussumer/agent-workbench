@@ -42,6 +42,11 @@ def test_parse_rejects_non_object_decisions(payload):
         _parse(payload)
 
 
+def test_parse_accepts_json_fence_without_changing_decision_fields():
+    value = _parse('```json\n{"disposition":"execute"}\n```')
+    assert value == {'disposition': 'execute'}
+
+
 def test_compute_prompt_requires_explicit_persistent_load_and_agent_code():
     public, training, _ = datasets()
     task = next(t for t in public['tasks'] if t['task_id'] == 'packages-train-04')

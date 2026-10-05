@@ -95,6 +95,14 @@ def _parse(content: Any) -> dict:
         content = ''.join(str(part.get('text', part)) if isinstance(part, dict) else str(part) for part in content)
     if not isinstance(content, str):
         raise ValueError('model output is not text')
+    content = content.strip()
+    if content.startswith('```'):
+        lines = content.splitlines()
+        if lines and lines[0].lstrip().startswith('```'):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == '```':
+            lines = lines[:-1]
+        content = '\n'.join(lines).strip()
     value = json.loads(content)
     if not isinstance(value, dict):
         raise ValueError('decision must be an object')
@@ -106,7 +114,7 @@ def _seed(service: ComputationService, owner: str, thread: str, task: dict) -> d
     return service.execute(owner, thread, code, operation_id=uuid.uuid4().hex)
 
 
-def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path) -> tuple[dict, dict]:
+def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path, system_prompt: str) -> tuple[dict, dict]:
     output.mkdir(parents=True, exist_ok=True)
     thread = 'v3-compute-' + uuid.uuid4().hex[:12]
     ApplicationRepository(stack.database).ensure_thread(owner_user_id=OWNER, thread_id=thread,
@@ -121,7 +129,7 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path) -> tup
         checkpointer=stack.resources.checkpointer,
         store=UserScopedStore(stack.store, OWNER),
         system_prompt=(
-            '你是采购计算诊断Actor。遵守系统提示，只用公开task和computation工具。'
+            system_prompt + '\n\n你是采购计算诊断Actor，只用公开task和computation工具。'
             '工具回合完成后必须在最后一条消息直接输出完整JSON决策对象，不要只留下工具调用。'
         ),
     )
@@ -145,6 +153,8 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path) -> tup
                     'profile_key': profile_key}
         if result is not None:
             evidence['final_content'] = result['messages'][-1].content
+            if 'decision' in locals():
+                evidence['decision'] = decision
         write(output / 'compute-trace.json', evidence)
 
 
@@ -207,7 +217,11 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
                                     decision = _parse(response.content)
                                     row['messages'] = _messages(public, training, task, compute=False)
                                 else:
-                                    decision, trace = _compute_actor(stack, chat_model, task_view, output / f'{task["task_id"]}-{arm}')
+                                    decision, trace = _compute_actor(
+                                        stack, chat_model, task_view,
+                                        output / f'{task["task_id"]}-{arm}',
+                                        _messages(public, training, task, compute=True)[0]['content'],
+                                    )
                                     row['trace'] = trace
                                     row['messages'] = _messages(public, training, task, compute=True)
                                 row['decision'] = decision
