@@ -3334,6 +3334,59 @@
         }
       ],
       "file": "docs/plan/tasks/T61.md"
+    },
+    {
+      "id": "T62",
+      "title": "操作级TRACE反馈与Curator输入",
+      "depends_on": [
+        "T61"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v3.md",
+        "docs/runtime/paper-method-diagnosis-2026-10-05.md",
+        "docs/papers/rsi/trace/2608.22793v2.txt"
+      ],
+      "checks": [
+        {
+          "id": "trace-feedback-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t62.py",
+            "-q",
+            "--junitxml={evidence_dir}/trace-feedback-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/trace-feedback-unit.xml"
+        },
+        {
+          "id": "trace-feedback-evidence",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_trace_feedback.py",
+            "prepare",
+            "--output",
+            "{evidence_dir}/trace-feedback-input"
+          ],
+          "cwd": "."
+        }
+      ],
+      "file": "docs/plan/tasks/T62.md"
     }
   ]
 }

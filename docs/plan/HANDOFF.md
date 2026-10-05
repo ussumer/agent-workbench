@@ -1,5 +1,11 @@
 # 当前交接
 
+## T62完成：操作级 TRACE 反馈与 Curator 输入边界
+
+Gate `artifacts/tasks/T62/20261005T035239Z/receipt.json`：8 个零模型测试与反馈准备命令通过。入口 [gdpevo_trace_feedback.py](../../scripts/planning/gdpevo_trace_feedback.py) 只读 T61 最终 attempt 的公开冻结任务、四行 Actor 输出、独立评分字段和两条 computation trace；逐操作核对 completed、`read_names=["task"]`、连续版本和代码 hash。text 行没有伪造 operations，compute 行保留全部状态/读写声明。
+
+Curator 输入只包含 train 公开资料、Actor 输出、失败字段和 typed execution trace；私有 rubric/answers/gold/manual_checks marker 会拒绝，manifest 可重放，重复 prepare 不覆盖，`model_calls=0`、`learning_gain_proven=false`。该包补上 TRACE 的操作级反馈边界，仍不等于 Curator 真实训练或生产技能晋升。
+
 ## T61完成：同题文字/持久计算 OpenSandbox 对照闭环
 
 最终 gate `artifacts/tasks/T61/20261005T033858Z/receipt.json`：11 个零模型协议测试与真实证据核验通过。主目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-v3-tool-diagnostic-20261005` 保存四行请求/响应 usage、冻结输入、源码/runtime身份、两臂完整 Actor 消息和 manifest；早期环境、接线和预算失败 attempt 全部以不同目录保留。

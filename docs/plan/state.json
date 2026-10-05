@@ -373,6 +373,12 @@
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T61/20261005T033858Z/receipt.json",
       "notes": "最终真实对照通过：unit 11 passed；4行text/compute均完成。packages text 0.7692307692、compute 0.7692307692；kits text 0.7692307692、compute 1.0。compute两臂分别5/6次OpenSandbox执行completed，显式read_names=[task]加载持久task；总13次模型调用，保守费用0.843489 CNY；生产bank/ERP未变。learning_gain_proven=false，结果为工具执行能力描述性对照，不是训练收益。"
+    },
+    "T62": {
+      "status": "done",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T62/20261005T035239Z/receipt.json",
+      "notes": "零模型操作级TRACE反馈通过：8 tests；T61四行text/compute完整保留，compute两臂操作全部completed且持久task读取、版本连续，text无工具轨迹；Curator输入无rubric/answers/gold/manual_checks，model_calls=0，learning_gain_proven=false。"
     }
   }
 }
