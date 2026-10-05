@@ -220,7 +220,8 @@ def curator_prompt(group: str, phase: str) -> str:
 def parse_skill_list(response: dict | None, forbidden: set[str]) -> list[dict]:
     if response is None:
         raise RuntimeError("Curator returned no response")
-    value = json.loads(response["choices"][0]["message"]["content"])
+    content = response["choices"][0]["message"]["content"] if "choices" in response else response.get("content")
+    value = json.loads(content)
     if set(value) != {"skills"} or not 1 <= len(value["skills"]) <= 4:
         raise ValueError("Curator skill list bounds invalid")
     result = []
@@ -312,8 +313,15 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
     for group in GROUPS:
         material = group_curator_view(public, training, records, group)
         write(output / "curator-input" / f"{group}.json", material)
-        response, call = caller.call(output / "curator" / group / "initial", [{"role": "system", "content": curator_prompt(group, "initial" )}, {"role": "user", "content": json.dumps(material, ensure_ascii=False)}], label=f"curator-{group}")
-        curator_calls.append(call)
+        reused = resume_from / "curator" / group / "initial" if resume_from else None
+        if reused is not None and (reused / "response.txt").is_file():
+            response = json.loads((reused / "response.txt").read_text())
+            destination = output / "curator" / group / "initial"
+            shutil.copytree(reused, destination)
+            curator_calls.append(json.loads((reused / "call-result.json").read_text()))
+        else:
+            response, call = caller.call(output / "curator" / group / "initial", [{"role": "system", "content": curator_prompt(group, "initial" )}, {"role": "user", "content": json.dumps(material, ensure_ascii=False)}], label=f"curator-{group}")
+            curator_calls.append(call)
         current = parse_skill_list(response, forbidden)
         write(output / "curator" / group / "initial-skills.json", current)
         for round_id in range(1, 4):
