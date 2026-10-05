@@ -338,7 +338,10 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
         for name in ("curator", "curator-input", "reflect", "fewshot-curator", "fewshot-curator-input"):
             source = resume_from / name
             if source.is_dir():
-                shutil.copytree(source, output / name)
+                # run() creates curator-input before this branch so the resume
+                # copy must merge into that empty destination instead of
+                # failing before any new model work starts.
+                shutil.copytree(source, output / name, dirs_exist_ok=True)
         shutil.copy2(resume_from / "skills.json", output / "skills.json")
         shutil.copy2(resume_from / "fewshot-skills.json", output / "fewshot-skills.json")
     else:
