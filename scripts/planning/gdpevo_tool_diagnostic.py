@@ -18,7 +18,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 EVAL = Path('/mnt/c/dev/rsi-eval')
-for folder in (ROOT, ROOT / 'src', EVAL):
+for folder in (ROOT, ROOT / 'src', ROOT / 'tests', EVAL):
     if str(folder) not in sys.path:
         sys.path.insert(0, str(folder))
 
