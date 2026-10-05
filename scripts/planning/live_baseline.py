@@ -120,8 +120,13 @@ def locked_ledger(ledger_path: Path, total: float):
         # Corruption fails closed. Only absence creates an empty ledger.
         ledger = json.loads(ledger_path.read_text()) if ledger_path.exists() else {
             "schema_version": 1, "authorized_total_cny": total, "reservations": []}
-        if total != ledger["authorized_total_cny"]:
-            raise ValueError("authorization differs from the existing budget session")
+        configured_total = float(ledger["authorized_total_cny"])
+        if total < configured_total:
+            raise ValueError("cannot lower the existing budget session authorization")
+        # A later explicit user authorization may increase the session ceiling;
+        # retain all prior reservations and record the new ceiling atomically.
+        if total > configured_total:
+            ledger["authorized_total_cny"] = total
         yield ledger
         staging = ledger_path.with_suffix(".tmp")
         with staging.open("w", encoding="utf-8") as destination:
@@ -137,8 +142,8 @@ def locked_ledger(ledger_path: Path, total: float):
 
 
 def reserve_attempt(ledger_path: Path, amount: float, total: float) -> dict[str, Any]:
-    if not math.isfinite(amount) or not math.isfinite(total) or not 0 < amount <= 2 or not 0 < total <= 50:
-        raise ValueError("outside the authorized 50 CNY / 2 CNY limits")
+    if not math.isfinite(amount) or not math.isfinite(total) or not 0 < amount <= total or not total > 0:
+        raise ValueError("outside the explicitly authorized budget limits")
     with locked_ledger(ledger_path, total) as ledger:
         used = sum(float(row["reserved_cny"]) for row in ledger["reservations"])
         if used + amount > total + 1e-9:
