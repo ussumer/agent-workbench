@@ -59,7 +59,8 @@ def test_actual_selection_groups_success_and_failure_without_fabricating_usage()
     assert len(grouped['by_skill']['used']['failure']) == 1
     assert len(grouped['by_skill']['used']['success']) == 1
     assert grouped['by_skill']['unused'] == {'success':[],'failure':[]}
-    assert 'not causal' in grouped['by_skill']['used']['failure'][0]['outcome_level']
+    failed_id = grouped['by_skill']['used']['failure'][0]
+    assert 'not causal' in grouped['trajectories'][failed_id]['outcome_level']
 
 
 def test_empty_or_unknown_selection_retained_for_missing_capabilities():

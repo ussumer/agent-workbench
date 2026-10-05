@@ -148,7 +148,8 @@ def instance_ids(payload) -> set[str]:
 def group_by_skill(rows: list[dict], skills: list) -> dict:
     groups = {s.skill_id: {'success': [], 'failure': []} for s in skills}
     uncovered = []
-    for row in rows:
+    trajectories = {}
+    for index, row in enumerate(rows):
         if row.get('split') != 'train':
             raise ValueError('test cannot enter skill evolution')
         trace = row['trace']
@@ -171,20 +172,22 @@ def group_by_skill(rows: list[dict], skills: list) -> dict:
             serialized = json.dumps(event['payload'], ensure_ascii=False)
             observations.append({'sha256': hashlib.sha256(serialized.encode()).hexdigest(),
                 'excerpt': serialized[:3500], 'truncated': len(serialized) > 3500})
-        material = {'task_id': row['task_id'], 'task': row['public_view'],
+        trajectory_id = f"{row.get('arm', 'actor')}:{row['task_id']}:{index}"
+        material = {'trajectory_id': trajectory_id, 'task_id': row['task_id'], 'task': row['public_view'],
                     'decision': row.get('decision'), 'feedback': row['grade'],
                     'outcome_level': 'task; not causal credit for individual operations',
                     'actor_final_output': {'sha256': hashlib.sha256(final_output.encode()).hexdigest(),
                                            'excerpt': final_output[:5000], 'truncated': len(final_output) > 5000},
                     'turns': turns, 'visible_systems': systems,
                     'tool_observations': observations}
+        trajectories[trajectory_id] = material
         outcome = 'success' if row['grade']['business_success'] else 'failure'
         for skill_id in selected & set(groups):
-            groups[skill_id][outcome].append(material)
+            groups[skill_id][outcome].append(trajectory_id)
         empty_turns = [turn for turn in turns if not turn['selection'] or any(s not in groups for s in turn['selection'])]
         if empty_turns:
-            uncovered.append({**material, 'turns': empty_turns})
-    return {'by_skill': groups, 'uncovered': uncovered,
+            uncovered.append(trajectory_id)
+    return {'trajectories': trajectories, 'by_skill': groups, 'uncovered': uncovered,
             'feedback_visibility': 'independent score fields, no private expected solution'}
 
 
