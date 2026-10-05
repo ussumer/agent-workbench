@@ -131,6 +131,13 @@ def test_aggregate_gain_cannot_hide_per_case_regression():
     assert not selection["promote"] and selection["regressions"] == ["train-01"]
 
 
+def test_t64_aggregate_policy_allows_local_tradeoff():
+    before = [trial(1), trial(.2, "train-02")]
+    after = [trial(.8), trial(1, "train-02")]
+    selection = select_candidate(before, after, policy="aggregate-v2")
+    assert selection["promote"] and selection["per_task_veto"] is False
+
+
 def test_tied_verbosity_is_not_gain_but_measured_efficiency_can_be():
     assert not select_candidate([trial(1)], [trial(1)])["promote"]
     selection = select_candidate([trial(1, tokens=200)], [trial(1, tokens=100)])

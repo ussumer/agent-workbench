@@ -1,5 +1,15 @@
 # 当前交接
 
+## T64 faithful v4：多轮训练已有明确 held-out 提升，仍缺全臂计算 Actor
+
+最新 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v4-faithful-20261005j` 已通过独立 verify：20 train validation × 4 arm，20 held-out × 4 arm × 3 repeats。fixed held-out 0/60、均分 0.592308；few-shot 10/60、0.734615；reflect-3 skills 10/60、0.796154；dynamic selector 5/60、0.770513。skills 相对 fixed +0.203846，三次重复逐次 +0.203846/+0.207692/+0.200000；这是当前最强的同任务集、多轮、重复真实提升信号。
+
+用户已明确取消逐题零退化否决。T64 runner 的 `aggregate-v2` 只在 train validation 总体均分/成功数不下降且至少一项提升时接受候选；逐题退化完整保留为诊断，test 不参与选择。旧 T56/T63 选择逻辑保留 `per-task-v1`，历史证据不改写。规则变更和测试覆盖已提交训练分支。
+
+实现/测试 commits：`f085a83`（faithful selector/reflect/few-shot）、`0b2f237`（恢复目录合并）、`5a847af`（失败 evidence 的 retry 目录）、`344153e`（恢复路径测试），当前文档/聚合策略改动尚未提交。失败 attempt `h/i` 保留，不能删除或覆盖。
+
+边界：`j` 四臂仍是文本 Actor；T61/T63 已有小样本真实 DeepAgents/OpenSandbox computation 证据，但尚未完成同一 faithful bank 的 20 题四臂计算对照。下一动作是接入同一计算 Actor 做等协议复验，不回到逐题零退化门槛。
+
 ## T64中间证据：全量v3文本技能对照（未完成）
 
 中间 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v4-full-20261005f` 已完成 20 train、20 held-out test、四个文本 arm、每 arm 三次重复；只读 verify 通过。fixed held-out 0/60、均分 .597436；few-shot 3/60、.747436；skills 9/60、.801282；dynamic 1/60、.658974。skills 相对 fixed 提升 .203846，但 train validation 在两题退化，按零回归门槛候选应拒绝。

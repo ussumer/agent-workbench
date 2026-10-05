@@ -33,6 +33,7 @@ from scripts.planning.gdpevo_expansion_judge import grade_task  # noqa: E402
 from scripts.planning.gdpevo_feedback import arithmetic_audit, diagnose_submission  # noqa: E402
 from scripts.planning.gdpevo_refinement import summarize  # noqa: E402
 from agent.config import ModelConfig  # noqa: E402
+from agent.evolution.refinement import select_candidate  # noqa: E402
 from agent.env_utils import load_env, redact, secret_values  # noqa: E402
 
 PUBLIC = ROOT / "fixtures/planning/gdpevo-procurement-v3.json"
@@ -296,6 +297,15 @@ def write_manifest(output: Path) -> None:
     write(output / "manifest.json", {str(p.relative_to(output)): digest(p) for p in output.rglob("*") if p.is_file() and p.name != "manifest.json"})
 
 
+def select_validation_candidates(rows: list[dict]) -> dict:
+    """Select from train validation before test; local regressions are diagnostic."""
+    if any(row.get("split") != "train" or row.get("arm") not in ARMS for row in rows):
+        raise ValueError("selection requires train validation arms only")
+    fixed = [row for row in rows if row["arm"] == "fixed"]
+    return {arm: select_candidate(fixed, [row for row in rows if row["arm"] == arm], policy="aggregate-v2")
+            for arm in ARMS if arm != "fixed"}
+
+
 def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | None = None) -> dict:
     if output.exists():
         raise FileExistsError(output)
@@ -435,12 +445,12 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
                                      skill_for_task(skills, task) if arm == "skills" else None))
             validation.append(row)
         # dynamic selector is train-only and its selected skill is persisted before the actor call.
-        selected = select_skills(caller, output / "validation" / "dynamic" / task["task_id"] / "selector",
-                                 actor_view(public, training, task["task_id"], "train"), skill_for_task(skills, task))
-        (output / "validation" / "dynamic" / task["task_id"]).mkdir(parents=True, exist_ok=True)
         if ("dynamic", task["task_id"]) in reused_validation:
             validation.append(reused_validation[("dynamic", task["task_id"])])
             continue
+        selected = select_skills(caller, output / "validation" / "dynamic" / task["task_id"] / "selector",
+                                 actor_view(public, training, task["task_id"], "train"), skill_for_task(skills, task))
+        (output / "validation" / "dynamic" / task["task_id"]).mkdir(parents=True, exist_ok=True)
         write(output / "validation" / "dynamic" / task["task_id"] / "selector.json", {"task_id": task["task_id"], "selected": [s["skill_id"] for s in selected], "source": "group-scoped selector"})
         validation.append(call_actor(caller, output / "validation" / "dynamic" / task["task_id"] / "actor", public, training, task, control, "dynamic", selected=selected))
         write(output / "validation.json", validation)
@@ -449,6 +459,8 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
         return {arm: {"count": len([r for r in rows if r["arm"] == arm]), "mean_score": sum(r["grade"]["score"] for r in rows if r["arm"] == arm) / max(1, len([r for r in rows if r["arm"] == arm])), "business_success": sum(bool(r["grade"]["business_success"]) for r in rows if r["arm"] == arm)} for arm in ARMS}
     validation_summary = scores(validation)
     write(output / "validation-summary.json", validation_summary)
+    # Freeze the decision before opening any held-out results.
+    write(output / "candidate-selection.json", select_validation_candidates(validation))
 
     test_rows: list[dict] = []
     reused_test: set[tuple[int, str, str]] = set()
@@ -510,6 +522,9 @@ def verify(output: Path = SESSION) -> dict:
         raise ValueError("train validation matrix incomplete")
     if any(r.get("feedback", {}).get("feedback_kind") != "public-constraint-diagnostic-no-gold" for r in validation):
         raise ValueError("validation feedback boundary changed")
+    expected_selection = select_validation_candidates(validation)
+    if json.loads((output / "candidate-selection.json").read_text()) != expected_selection:
+        raise ValueError("candidate selection drift")
     return {"status": "passed", "summary": report["summary"], "claims": report["claims"]}
 
 
