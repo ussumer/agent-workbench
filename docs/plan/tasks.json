@@ -3442,6 +3442,60 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T64",
+      "title": "全量v3进化训练与独立重复消融",
+      "file": "docs/plan/tasks/T64.md",
+      "depends_on": [
+        "T63"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/paper-method-diagnosis-2026-10-05.md",
+        "docs/runtime/gdpevo-procurement-taskset-v3.md",
+        "docs/papers/rsi/gdpevo/2608.03764v1.txt",
+        "docs/papers/rsi/trace/2608.22793v2.txt"
+      ],
+      "checks": [
+        {
+          "id": "full-evolution-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t64.py",
+            "-q",
+            "--junitxml={evidence_dir}/full-evolution-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/full-evolution-unit.xml"
+        },
+        {
+          "id": "full-evolution-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_v4_training.py",
+            "verify",
+            "--output",
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v4-full-20261005"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }
