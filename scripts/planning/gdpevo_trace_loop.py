@@ -155,15 +155,29 @@ def group_by_skill(rows: list[dict], skills: list) -> dict:
         events = trace['episode_export']['events']
         grounds = [e['payload'] for e in events if e['kind'] == 'turn_grounded']
         selected = {s for turn in grounds for s in turn['selection']}
-        systems = {hashlib.sha256(json.dumps(turn['visible_system'],ensure_ascii=False).encode()).hexdigest():
-                   turn['visible_system'] for turn in grounds}
+        systems = []
+        for turn in grounds:
+            serialized = json.dumps(turn['visible_system'], ensure_ascii=False)
+            systems.append({'turn_id': turn['turn_id'],
+                'sha256': hashlib.sha256(serialized.encode()).hexdigest(),
+                'excerpt': serialized[:2500], 'truncated': len(serialized) > 2500})
         turns = [{k:turn[k] for k in ('turn_id','selection','read_bodies')} for turn in grounds]
+        final_message = trace.get('actor_messages', [])[-1:]
+        final_output = json.dumps(final_message, ensure_ascii=False)
+        observations = []
+        for event in events:
+            if event['kind'] != 'tool_observed':
+                continue
+            serialized = json.dumps(event['payload'], ensure_ascii=False)
+            observations.append({'sha256': hashlib.sha256(serialized.encode()).hexdigest(),
+                'excerpt': serialized[:3500], 'truncated': len(serialized) > 3500})
         material = {'task_id': row['task_id'], 'task': row['public_view'],
                     'decision': row.get('decision'), 'feedback': row['grade'],
                     'outcome_level': 'task; not causal credit for individual operations',
-                    'actor_messages': trace['actor_messages'],
-                    'turns': turns, 'actor_systems': systems,
-                    'tool_observations': [e['payload'] for e in events if e['kind'] == 'tool_observed']}
+                    'actor_final_output': {'sha256': hashlib.sha256(final_output.encode()).hexdigest(),
+                                           'excerpt': final_output[:5000], 'truncated': len(final_output) > 5000},
+                    'turns': turns, 'visible_systems': systems,
+                    'tool_observations': observations}
         outcome = 'success' if row['grade']['business_success'] else 'failure'
         for skill_id in selected & set(groups):
             groups[skill_id][outcome].append(material)
