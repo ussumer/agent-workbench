@@ -1,5 +1,11 @@
 # 当前交接
 
+## T64中间证据：全量v3文本技能对照（未完成）
+
+中间 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v4-full-20261005f` 已完成 20 train、20 held-out test、四个文本 arm、每 arm 三次重复；只读 verify 通过。fixed held-out 0/60、均分 .597436；few-shot 3/60、.747436；skills 9/60、.801282；dynamic 1/60、.658974。skills 相对 fixed 提升 .203846，但 train validation 在两题退化，按零回归门槛候选应拒绝。
+
+该 attempt 只证明全量 v3 文本对照的中间信号，不能登记 T64 done：few-shot 尚未先提炼 gold 技能，reflect-3 尚未每轮重新 rollout，dynamic 尚非逐回合真实 selector，四臂尚未接同一 OpenSandbox 计算 Actor。完整 T64 必须补齐这些语义并保留该 attempt，不覆盖它。
+
 ## T63完成：TRACE四阶段初始化与真实失败学习闭环
 
 Gate `artifacts/tasks/T63/20261005T073237Z/receipt.json`：28个单元/协议测试和真实证据核验通过。
