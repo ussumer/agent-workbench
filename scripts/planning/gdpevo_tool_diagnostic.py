@@ -22,7 +22,12 @@ for folder in (ROOT, ROOT / 'src', ROOT / 'tests', EVAL):
     if str(folder) not in sys.path:
         sys.path.insert(0, str(folder))
 
-from deepagents import create_deep_agent  # noqa: E402
+from deepagents import (  # noqa: E402
+    GeneralPurposeSubagentProfile,
+    HarnessProfile,
+    create_deep_agent,
+    register_harness_profile,
+)
 from deepagents.backends import StateBackend  # noqa: E402
 from langchain_core.messages import HumanMessage  # noqa: E402
 
@@ -48,6 +53,30 @@ TRAINING = ROOT / 'fixtures/planning/gdpevo-procurement-v3-training.json'
 CONTROL = ROOT / 'fixtures/planning/private/gdpevo-procurement-v3-control.json'
 DEFAULT_OUTPUT = EVAL / 'procurement_eval/runs/planning-session-20261005/attempt-v3-tool-diagnostic-20261005'
 OWNER = 'diagnostic-v3'
+COMPUTE_ONLY_EXCLUDED_TOOLS = frozenset({
+    'ls', 'read_file', 'write_file', 'edit_file', 'delete', 'glob', 'grep', 'execute', 'task',
+})
+
+
+def _register_compute_profile(model: Any) -> str:
+    """Limit the diagnostic Actor to the computation tools under test.
+
+    DeepAgents adds filesystem and general-purpose subagent tools by default.  Leaving
+    those visible makes a purported OpenSandbox comparison ambiguous and lets the model
+    finish by writing an arbitrary file instead of returning a decision.
+    """
+    model_name = getattr(model, 'model_name', None)
+    if not isinstance(model_name, str) or not model_name:
+        raise ValueError('compute diagnostic model has no model_name')
+    key = f'openai:{model_name}'
+    register_harness_profile(
+        key,
+        HarnessProfile(
+            excluded_tools=COMPUTE_ONLY_EXCLUDED_TOOLS,
+            general_purpose_subagent=GeneralPurposeSubagentProfile(enabled=False),
+        ),
+    )
+    return key
 
 
 def _messages(public: dict, training: dict, task: dict, *, compute: bool) -> list[dict[str, str]]:
@@ -84,27 +113,39 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path) -> tup
                                                        title='v3 computation diagnostic')
     service = ComputationService(stack.database, stack.manager.get_or_create)
     seed = _seed(service, OWNER, thread, task_view)
+    profile_key = _register_compute_profile(model)
     graph = create_deep_agent(
         model=model,
         tools=build_computation_tools(service),
         backend=StateBackend(),
         checkpointer=stack.resources.checkpointer,
         store=UserScopedStore(stack.store, OWNER),
-        system_prompt='你是采购计算诊断Actor。遵守系统提示，只用公开task和计算工具。',
+        system_prompt=(
+            '你是采购计算诊断Actor。遵守系统提示，只用公开task和computation工具。'
+            '工具回合完成后必须在最后一条消息直接输出完整JSON决策对象，不要只留下工具调用。'
+        ),
     )
     config = {'configurable': {'thread_id': thread, 'owner_user_id': OWNER}}
-    result = graph.invoke({'messages': [HumanMessage(content=json.dumps(task_view, ensure_ascii=False))]}, config=config)
-    content = result['messages'][-1].content
-    decision = _parse(content)
     executions = list(stack.database.planning_kernel_executions.find(
         {'owner_user_id': OWNER, 'thread_id': thread}, {'_id': 0}))
-    evidence = {'thread_id': thread, 'seed': seed, 'executions': executions,
-                'actor_messages': [m.model_dump(mode='json') if hasattr(m, 'model_dump') else m
-                                   for m in result['messages']],
-                'decision': decision}
-    write(output / 'compute-trace.json', evidence)
-    return decision, {'thread_id': thread, 'seed': seed, 'executions': executions,
-                      'message_count': len(result['messages'])}
+    result = None
+    try:
+        result = graph.invoke({'messages': [HumanMessage(content=json.dumps(task_view, ensure_ascii=False))]}, config=config)
+        content = result['messages'][-1].content
+        decision = _parse(content)
+        return decision, {'thread_id': thread, 'seed': seed, 'executions': executions,
+                          'message_count': len(result['messages']), 'profile_key': profile_key}
+    finally:
+        executions = list(stack.database.planning_kernel_executions.find(
+            {'owner_user_id': OWNER, 'thread_id': thread}, {'_id': 0}))
+        messages = [] if result is None else result.get('messages', [])
+        evidence = {'thread_id': thread, 'seed': seed, 'executions': executions,
+                    'actor_messages': [m.model_dump(mode='json') if hasattr(m, 'model_dump') else m
+                                       for m in messages],
+                    'profile_key': profile_key}
+        if result is not None:
+            evidence['final_content'] = result['messages'][-1].content
+        write(output / 'compute-trace.json', evidence)
 
 
 def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages-train-04', 'kits-train-03')) -> dict:

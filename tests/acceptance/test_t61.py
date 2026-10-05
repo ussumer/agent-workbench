@@ -4,7 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from scripts.planning.gdpevo_tool_diagnostic import CONTROL, PUBLIC, TRAINING, _messages, _parse
+from scripts.planning.gdpevo_tool_diagnostic import (
+    COMPUTE_ONLY_EXCLUDED_TOOLS,
+    CONTROL,
+    PUBLIC,
+    TRAINING,
+    _messages,
+    _parse,
+)
 from scripts.planning.gdpevo_expansion import actor_view
 
 
@@ -42,6 +49,12 @@ def test_compute_prompt_requires_explicit_persistent_load_and_agent_code():
     assert 'read_names=["task"]' in system
     assert '自己编写Python' in system
     assert '固定planner' in system
+
+
+def test_compute_arm_excludes_default_filesystem_and_subagent_tools():
+    assert COMPUTE_ONLY_EXCLUDED_TOOLS == {
+        'ls', 'read_file', 'write_file', 'edit_file', 'delete', 'glob', 'grep', 'execute', 'task',
+    }
 
 
 def test_taskset_and_control_are_frozen_inputs_not_runtime_answers():
