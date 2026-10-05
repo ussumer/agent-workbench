@@ -142,7 +142,10 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
         configuration = json.loads((EVAL / 'config.t46.json').read_text())
         sandbox_service.CONTROL_PORT = configuration['sandbox_port']
         run_dir = output / 'services'
-        proxy_spec = {'total_cny': 50.0, 'per_attempt_cny': 2.0, 'max_model_calls': 4,
+        # A text arm uses one request; a computation arm may need several model/tool
+        # turns before returning its final JSON. Keep the same per-attempt currency
+        # cap while allowing those turns to complete.
+        proxy_spec = {'total_cny': 50.0, 'per_attempt_cny': 2.0, 'max_model_calls': 8,
                       'max_output_tokens': 4096, 'max_request_bytes': 131072, 'timeout_seconds': 240,
                       'input_cny_per_million': 9.0, 'output_cny_per_million': 27.0,
                       'pricing_kind': 'conservative DeepSeek estimate', 'pricing_source': 'configured evaluation policy'}
