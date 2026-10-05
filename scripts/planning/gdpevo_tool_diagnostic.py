@@ -96,13 +96,15 @@ def _parse(content: Any) -> dict:
     if not isinstance(content, str):
         raise ValueError('model output is not text')
     content = content.strip()
-    if content.startswith('```'):
-        lines = content.splitlines()
-        if lines and lines[0].lstrip().startswith('```'):
-            lines = lines[1:]
-        if lines and lines[-1].strip() == '```':
-            lines = lines[:-1]
-        content = '\n'.join(lines).strip()
+    if '```' in content:
+        start = content.find('```')
+        end = content.find('```', start + 3)
+        if end < 0:
+            raise ValueError('unterminated JSON fence')
+        fenced = content[start + 3:end].lstrip()
+        if fenced.startswith('json'):
+            fenced = fenced[4:].lstrip()
+        content = fenced
     value = json.loads(content)
     if not isinstance(value, dict):
         raise ValueError('decision must be an object')
@@ -134,13 +136,13 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path, system
         ),
     )
     config = {'configurable': {'thread_id': thread, 'owner_user_id': OWNER}}
-    executions = list(stack.database.planning_kernel_executions.find(
-        {'owner_user_id': OWNER, 'thread_id': thread}, {'_id': 0}))
     result = None
     try:
         result = graph.invoke({'messages': [HumanMessage(content=json.dumps(task_view, ensure_ascii=False))]}, config=config)
         content = result['messages'][-1].content
         decision = _parse(content)
+        executions = list(service.executions.find(
+            {'owner_user_id': OWNER, 'thread_id': thread}, {'_id': 0}))
         return decision, {'thread_id': thread, 'seed': seed, 'executions': executions,
                           'message_count': len(result['messages']), 'profile_key': profile_key}
     finally:
@@ -248,12 +250,53 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
     return attempt
 
 
-def verify(attempt: Path) -> dict:
-    result = json.loads((attempt / 'result.json').read_text())
+def _check_manifest(attempt: Path) -> None:
     manifest = json.loads((attempt / 'manifest.json').read_text())
     for relative, expected in manifest.items():
         if digest(attempt / relative) != expected:
             raise ValueError('evidence hash mismatch: ' + relative)
+
+
+def replay(attempt: Path) -> dict:
+    """Score preserved terminal output without a new model call or changing the attempt.
+
+    This report is post-processing evidence; an interrupted four-arm experiment
+    remains interrupted even when one saved terminal message can now be parsed.
+    """
+    _check_manifest(attempt)
+    public = json.loads((attempt / 'frozen' / PUBLIC.name).read_text())
+    control = json.loads((attempt / 'frozen' / CONTROL.name).read_text())
+    result = json.loads((attempt / 'result.json').read_text())
+    tasks = {task['task_id']: task for task in public['tasks']}
+    rows = []
+    for path in sorted(attempt.glob('*-compute/compute-trace.json')):
+        trace = json.loads(path.read_text())
+        task_id = path.parent.name.removesuffix('-compute')
+        if task_id not in tasks or tasks[task_id]['split'] != 'train':
+            raise ValueError('replay requires an identified train task')
+        executions = trace['executions']
+        seed_id = trace['seed']['operation_id']
+        actor_executions = [x for x in executions if x['operation_id'] != seed_id]
+        row = {'task_id': task_id, 'arm': 'compute', 'trace_sha256': digest(path),
+               'actor_executions': len(actor_executions),
+               'completed_actor_executions': sum(x['status'] == 'completed' for x in actor_executions),
+               'persistent_task_loaded': any(x['status'] == 'completed' and 'task' in x.get('read_names', [])
+                                            and 'load_state' in x.get('code', '') for x in actor_executions)}
+        try:
+            decision = _parse(trace['final_content'])
+            row.update(status='scored', decision=decision,
+                       grade=grade_task(tasks[task_id], decision, control['rubrics'][task_id]))
+        except (ValueError, KeyError, TypeError) as failure:
+            row.update(status='format_failed', error=type(failure).__name__)
+        rows.append(row)
+    return {'kind': 'read-only-terminal-replay', 'original_status': result['status'],
+            'original_model_calls': result['model_calls'], 'new_model_calls': 0,
+            'complete_four_arm_comparison': False, 'learning_gain_proven': False, 'rows': rows}
+
+
+def verify(attempt: Path) -> dict:
+    result = json.loads((attempt / 'result.json').read_text())
+    _check_manifest(attempt)
     if result['status'] != 'completed' or len(result['rows']) != 4:
         return {'status': 'blocked', 'reason': 'diagnostic incomplete', 'model_calls': result.get('model_calls', 0),
                 'learning_gain_proven': False}
@@ -271,10 +314,10 @@ def verify(attempt: Path) -> dict:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', choices=('run', 'verify'))
+    parser.add_argument('command', choices=('run', 'verify', 'replay'))
     parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
-    result = run(args.output) if args.command == 'run' else verify(args.output)
+    result = {'run': run, 'verify': verify, 'replay': replay}[args.command](args.output)
     print(json.dumps(result, ensure_ascii=False))
     if args.command == 'verify' and result.get('status') != 'passed':
         raise SystemExit(2)
