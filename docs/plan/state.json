@@ -379,6 +379,12 @@
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T62/20261005T035239Z/receipt.json",
       "notes": "零模型操作级TRACE反馈通过：8 tests；T61四行text/compute完整保留，compute两臂操作全部completed且持久task读取、版本连续，text无工具轨迹；Curator输入无rubric/answers/gold/manual_checks，model_calls=0，learning_gain_proven=false。"
+    },
+    "T63": {
+      "status": "pending",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": "真实四阶段Curator初始化、动态B0轨迹按实际技能选择回流、一次B1修订与同协议train验证；无金额拒绝，保留usage与执行上限。"
     }
   }
 }

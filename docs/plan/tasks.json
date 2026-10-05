@@ -3387,6 +3387,61 @@
         }
       ],
       "file": "docs/plan/tasks/T62.md"
+    },
+    {
+      "id": "T63",
+      "title": "TRACE四阶段初始化与真实技能归因进化闭环",
+      "file": "docs/plan/tasks/T63.md",
+      "depends_on": [
+        "T62",
+        "T59"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/paper-method-diagnosis-2026-10-05.md",
+        "docs/runtime/gdpevo-procurement-taskset-v3.md",
+        "docs/papers/rsi/trace/2608.22793v2.txt"
+      ],
+      "checks": [
+        {
+          "id": "trace-loop-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t63.py",
+            "tests/acceptance/test_t61.py",
+            "-q",
+            "--junitxml={evidence_dir}/trace-loop-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/trace-loop-unit.xml"
+        },
+        {
+          "id": "trace-loop-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_trace_loop.py",
+            "verify",
+            "--output",
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-trace-loop-20261005"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }
