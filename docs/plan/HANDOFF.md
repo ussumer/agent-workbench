@@ -1,12 +1,12 @@
 # 当前交接
 
-## T61 已停止并标记 blocked：计算臂真实对照未形成可评分结果
+## T61完成：同题文字/持久计算 OpenSandbox 对照闭环
 
-T61 的零模型协议测试通过：8 passed。最终 gate `artifacts/tasks/T61/20261005T022012Z/receipt.json`：unit 8 passed；live verify 按真实失败返回 blocked。真实主目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-v3-tool-diagnostic-20261005` 保留完整请求、响应 usage、服务日志、冻结输入和 manifest；先前环境/接线失败分别归档为 `*-jdk-missing`、`*-jdk-protocol-missing`、`*-model-object`、`*-chat-config`、`*-deepagent-model`、`*-request-cap`。累计本诊断最终 attempt 7 次模型调用，保守费用 0.52695 CNY；历史失败均为 0 调用或已计入独立 attempt，预算无未结预留。
+最终 gate `artifacts/tasks/T61/20261005T033858Z/receipt.json`：11 个零模型协议测试与真实证据核验通过。主目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-v3-tool-diagnostic-20261005` 保存四行请求/响应 usage、冻结输入、源码/runtime身份、两臂完整 Actor 消息和 manifest；早期环境、接线和预算失败 attempt 全部以不同目录保留。
 
-文字臂 `packages-train-04` 已完成并评分 0.7692307692，采购点失败，其余审计点通过。计算臂真实启动 OpenSandbox 并经历多步模型/工具回合，但最终输出为空或非 JSON，未形成可评分 compute 行；因此不能宣称计算能力提升、学习增益或 T61 完成。生产 bank、ERP 订单和旧 T59/T38/T51 均未改动。为诚实验收，`gdpevo_tool_diagnostic.py verify` 对不完整结果退出码 2；T61 状态为 `blocked`，不再重跑付费实验。
+两道同题 train：文字臂均分 0.7692307692、业务成功 0/2；计算臂均分 0.8846153846、业务成功 1/2。packages 计算决策采购点仍失败，kits 计算全分通过；这是真实工具执行对照，不是训练或学习增益。两个 compute trace 分别有 5/6 次 OpenSandbox execution completed，均声明并读取 `read_names=["task"]` 的 Mongo 持久 JSON；最终输出按与文字臂相同的 v3 合同评分。总 13 次模型调用，保守费用 0.843489 CNY；production_assignment_changed=false，ERP订单未写入，`learning_gain_proven=false`。
 
-代码提交：`a984275`、`b1fb8ee`、`296ee7c`、`7b28f1c`、`8ad02fe`、`1fe5409`、`d33c2e1`、`5fa7240`。最后一条提交只修正验收退出码；训练工作区仍有两个既有 `.langgraph_api/*.pckl` 用户运行时修改，未纳入提交。
+实现补全包括：计算 Actor 关闭 DeepAgents 默认文件系统/子 Agent 工具；沿用公开文字 Actor 输出合同；允许分析文字后的 JSON fence；异常始终保存计算轨迹；新增零调用 terminal replay，不能把失败运行改写成成功。代码提交 `a984275`、`b1fb8ee`、`296ee7c`、`7b28f1c`、`8ad02fe`、`1fe5409`、`d33c2e1`、`5fa7240`、`bdc67a6`、`32f2dc6`、`5b1a22c`、`022b19e`；训练工作区两个既有 `.langgraph_api/*.pckl` 运行时修改未纳入提交。
 
 ## T60完成：Curator原题与完整诊断已恢复，整体修复目标仍active
 
