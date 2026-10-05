@@ -381,10 +381,10 @@
       "notes": "零模型操作级TRACE反馈通过：8 tests；T61四行text/compute完整保留，compute两臂操作全部completed且持久task读取、版本连续，text无工具轨迹；Curator输入无rubric/answers/gold/manual_checks，model_calls=0，learning_gain_proven=false。"
     },
     "T63": {
-      "status": "pending",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "真实四阶段Curator初始化、动态B0轨迹按实际技能选择回流、一次B1修订与同协议train验证；无金额拒绝，保留usage与执行上限。"
+      "receipt": "artifacts/tasks/T63/20261005T073237Z/receipt.json",
+      "notes": "真实四阶段Curator初始化、动态B0轨迹按实际技能选择回流、一次B1修订与同协议train验证通过。28个单元/协议测试通过；49次真实模型调用，fixed/B0/B1各两道train均有完整Episode与5次OpenSandbox computation。B0成功2/2、均分1.0；B1成功1/2、均分0.8846153846，packages-train-04退化，候选拒绝且未晋升。production_assignment_changed=false，learning_gain_proven=false。"
     }
   }
 }

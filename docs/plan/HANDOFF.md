@@ -1,5 +1,15 @@
 # 当前交接
 
+## T63完成：TRACE四阶段初始化与真实失败学习闭环
+
+Gate `artifacts/tasks/T63/20261005T073237Z/receipt.json`：28个单元/协议测试和真实证据核验通过。
+真实 attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-trace-loop-20261005e` 完成按任务、按类型、按操作、聚焦拆分四阶段，
+并以真实计算 Actor 运行 fixed、B0、B1 三臂；49次模型调用，所有费用仅记录，生产 assignment 未变。
+
+B0 两题成功2/2、均分1.0；B1 修订后成功1/2、均分0.8846153846，`packages-train-04` 退化，选择器拒绝候选，未晋升。
+Episode 保存每回合选择、正文 hash、工具观察和5次 completed OpenSandbox computation；空/未知选择进入 uncovered，按实际选择归组，没有伪造技能归因。
+这证明了 TRACE 风格的初始化、轨迹回流、失败对照和候选拒绝，但不证明学习增益或封存泛化。实现提交 `3c3fbc5`、`9d9a777`、`5cb470d`、`b0fdcb6`、`51b2394`。
+
 ## T59完成：动态逐回合选择与真实计算 runtime
 
 Gate `artifacts/tasks/T59/20261005T045819Z/receipt.json`：22 个单元测试与真实证据核验通过。

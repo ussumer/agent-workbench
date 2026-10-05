@@ -3437,7 +3437,7 @@
             "scripts/planning/gdpevo_trace_loop.py",
             "verify",
             "--output",
-            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-trace-loop-20261005"
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-trace-loop-20261005e"
           ],
           "cwd": "."
         }
