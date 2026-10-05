@@ -3282,6 +3282,58 @@
         }
       ],
       "file": "docs/plan/tasks/T60.md"
+    },
+    {
+      "id": "T61",
+      "title": "v3同题OpenSandbox计算能力对照",
+      "depends_on": [
+        "T60"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/paper-method-diagnosis-2026-10-05.md",
+        "docs/runtime/gdpevo-procurement-taskset-v3.md"
+      ],
+      "checks": [
+        {
+          "id": "tool-diagnostic-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 6,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t61.py",
+            "-q",
+            "--junitxml={evidence_dir}/tool-diagnostic-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/tool-diagnostic-unit.xml"
+        },
+        {
+          "id": "tool-diagnostic-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_tool_diagnostic.py",
+            "verify",
+            "--output",
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-v3-tool-diagnostic-20261005"
+          ],
+          "cwd": "."
+        }
+      ],
+      "file": "docs/plan/tasks/T61.md"
     }
   ]
 }
