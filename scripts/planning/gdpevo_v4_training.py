@@ -340,14 +340,31 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
     write(output / "skills.json", skills)
 
     validation = []
+    reused_validation: dict[tuple[str, str], dict] = {}
+    if resume_from is not None and (resume_from / "validation").is_dir():
+        shutil.copytree(resume_from / "validation", output / "validation")
+        for arm in ARMS:
+            for task in train:
+                result_path = output / "validation" / arm / task["task_id"] / "result.json"
+                if arm == "dynamic":
+                    result_path = output / "validation" / arm / task["task_id"] / "actor" / "result.json"
+                if result_path.is_file():
+                    reused_validation[(arm, task["task_id"])] = json.loads(result_path.read_text())
     for task in train:
         for arm in ("fixed", "fewshot", "skills"):
+            if (arm, task["task_id"]) in reused_validation:
+                validation.append(reused_validation[(arm, task["task_id"])])
+                continue
             examples = example_bank(answers, train, exclude=task["task_id"]) if arm == "fewshot" else None
             row = call_actor(caller, output / "validation" / arm / task["task_id"], public, training, task, control, arm,
                              skills=skill_for_task(skills, task) if arm == "skills" else None, examples=examples)
             validation.append(row)
         # dynamic selector is train-only and its selected skill is persisted before the actor call.
         selected = skill_for_task(skills, task)[:1]
+        (output / "validation" / "dynamic" / task["task_id"]).mkdir(parents=True, exist_ok=True)
+        if ("dynamic", task["task_id"]) in reused_validation:
+            validation.append(reused_validation[("dynamic", task["task_id"])])
+            continue
         write(output / "validation" / "dynamic" / task["task_id"] / "selector.json", {"task_id": task["task_id"], "selected": [s["skill_id"] for s in selected], "source": "group-scoped selector"})
         validation.append(call_actor(caller, output / "validation" / "dynamic" / task["task_id"] / "actor", public, training, task, control, "dynamic", selected=selected))
         write(output / "validation.json", validation)
@@ -362,6 +379,7 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
         examples = example_bank(answers, train) if arm == "fewshot" else None
         if arm == "dynamic":
             selected = skill_for_task(skills, task)[:1]
+            (output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"]).mkdir(parents=True, exist_ok=True)
             write(output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"] / "selector.json", {"task_id": task["task_id"], "selected": [s["skill_id"] for s in selected], "source": "group-scoped selector"})
             return call_actor(caller, output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"] / "actor", public, training, task, control, arm, selected=selected)
         return call_actor(caller, output / "test" / f"repeat-{repeat}" / arm / task["task_id"], public, training, task, control, arm, skills=skill_for_task(skills, task) if arm == "skills" else None, examples=examples)
