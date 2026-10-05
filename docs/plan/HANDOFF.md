@@ -1,5 +1,13 @@
 # 当前交接
 
+## T61 已停止并标记 blocked：计算臂真实对照未形成可评分结果
+
+T61 的零模型协议测试通过：8 passed。最终 gate `artifacts/tasks/T61/20261005T022012Z/receipt.json`：unit 8 passed；live verify 按真实失败返回 blocked。真实主目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-v3-tool-diagnostic-20261005` 保留完整请求、响应 usage、服务日志、冻结输入和 manifest；先前环境/接线失败分别归档为 `*-jdk-missing`、`*-jdk-protocol-missing`、`*-model-object`、`*-chat-config`、`*-deepagent-model`、`*-request-cap`。累计本诊断最终 attempt 7 次模型调用，保守费用 0.52695 CNY；历史失败均为 0 调用或已计入独立 attempt，预算无未结预留。
+
+文字臂 `packages-train-04` 已完成并评分 0.7692307692，采购点失败，其余审计点通过。计算臂真实启动 OpenSandbox 并经历多步模型/工具回合，但最终输出为空或非 JSON，未形成可评分 compute 行；因此不能宣称计算能力提升、学习增益或 T61 完成。生产 bank、ERP 订单和旧 T59/T38/T51 均未改动。为诚实验收，`gdpevo_tool_diagnostic.py verify` 对不完整结果退出码 2；T61 状态为 `blocked`，不再重跑付费实验。
+
+代码提交：`a984275`、`b1fb8ee`、`296ee7c`、`7b28f1c`、`8ad02fe`、`1fe5409`、`d33c2e1`、`5fa7240`。最后一条提交只修正验收退出码；训练工作区仍有两个既有 `.langgraph_api/*.pckl` 用户运行时修改，未纳入提交。
+
 ## T60完成：Curator原题与完整诊断已恢复，整体修复目标仍active
 
 T59修复commit `03299e4`，旧真实失败保持blocked。T60 gate `artifacts/tasks/T60/20261004T184707Z/receipt.json`：25unit（新协议+受影响T57/T58）与一次历史材料prepare通过；四组包共20train/35attempt，保留公开task、原Actor system/environment、完整feedback，bytes45065/59168/61716/51282，零新增模型调用。输出在同attempt的curator-inputs目录。scoped默认v2；旧T58 evidence verifier显式version=1，历史输入可精确重建，不覆盖旧bank。

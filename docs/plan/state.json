@@ -369,10 +369,10 @@
       "notes": "Curator默认v2保留20道原始公开task、35真实尝试及完整反馈；四组prepare请求45065/59168/61716/51282bytes，真实Actor system/environment、初次响应及repair反馈逐项核对。历史T58 verifier显式v1精确重建。25unit及prepare command通过，首轮缺原始中止attempt总manifest失败保留，修复为实际per-call wire SHA校验，不补造旧manifest。零新增模型调用/无技能晋升；同题OpenSandbox能力对照、操作级进化和生产adapter尚未完成。"
     },
     "T61": {
-      "status": "in_progress",
+      "status": "blocked",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "相同v3 train text/compute四attempt能力诊断，先零模型协议；不重跑旧实验、不改裁判、不恢复T38/T51。"
+      "receipt": "artifacts/tasks/T61/20261005T022012Z/receipt.json",
+      "notes": "协议检查8项通过；真实对照已运行并保留四次失败归档与主attempt。文字臂packages-train-04得分0.7692307692、采购点失败；计算臂完成多步模型/计算尝试但最终空/非JSON，未形成可评分compute行。7次模型调用，保守费用0.52695 CNY，生产bank/ERP未变。按止损规则停止，不重跑。"
     }
   }
 }
