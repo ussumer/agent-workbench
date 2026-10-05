@@ -6,7 +6,7 @@ import json
 import pytest
 
 from scripts.planning.gdpevo_trace_loop import (
-    execution_policy, group_by_skill, instance_ids, stage_prompt, validate_stage,
+    execution_policy, group_by_skill, instance_ids, normalize_stage_sources, stage_prompt, validate_stage,
 )
 from agent.evolution.episodes import TextSkill
 from procurement_eval.budget_proxy import Budget
@@ -108,3 +108,12 @@ def test_four_stages_and_refinement_have_distinct_real_curator_protocols():
     assert '跨任务类型按操作' in stage_prompt('operation')
     assert '单一聚焦能力' in stage_prompt('decompose')
     assert '实际技能选择归组' in stage_prompt('refine')
+
+
+def test_stage_leaf_source_is_canonicalized_only_through_recorded_alias():
+    value = stage()
+    value['items'][0]['sources'] = ['leaf-task']
+    normalized = normalize_stage_sources(value, {'type-item'}, {'leaf-task':['type-item']})
+    assert normalized['items'][0]['sources'] == ['type-item']
+    with pytest.raises(ValueError):
+        normalize_stage_sources(value, {'type-item'}, {'other':['type-item']})

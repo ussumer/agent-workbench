@@ -101,6 +101,25 @@ def validate_stage(value: dict, source_ids: set[str], *, final: bool = False,
     return skills
 
 
+def normalize_stage_sources(value: dict, source_ids: set[str], aliases: dict[str, list[str]]) -> dict:
+    """Canonicalize a Curator's leaf references to the immediately prior stage.
+
+    Curators often preserve a leaf task reference while merging stages. That is
+    valid lineage when the prior stage already maps the leaf to a current item;
+    unknown references remain rejected rather than being guessed.
+    """
+    normalized = json.loads(json.dumps(value, ensure_ascii=False))
+    for item in normalized.get('items', []):
+        sources = []
+        for source in item.get('sources', []):
+            mapped = [source] if source in source_ids else aliases.get(source)
+            if not mapped:
+                raise ValueError('unknown or duplicate stage source')
+            sources.extend(mapped)
+        item['sources'] = list(dict.fromkeys(sources))
+    return normalized
+
+
 def instance_ids(payload) -> set[str]:
     found = set()
     if isinstance(payload, dict):
@@ -189,7 +208,7 @@ def run(output: Path) -> dict:
                 model = configured.create_chat_model()
                 curator = model.bind(response_format={'type': 'json_object'})
 
-                def curate(stage, material, sources, final=False):
+                def curate(stage, material, sources, aliases=None, final=False):
                     folder = output / 'curator' / stage
                     folder.mkdir(parents=True)
                     messages = [{'role': 'system', 'content': stage_prompt(stage)},
@@ -198,6 +217,7 @@ def run(output: Path) -> dict:
                     response = curator.invoke(messages)
                     write(folder / 'response.json', response.model_dump(mode='json'))
                     value = json.loads(response.content)
+                    value = normalize_stage_sources(value, sources, aliases or {})
                     skills = validate_stage(value, sources, final=final, forbidden=forbidden)
                     write(folder / 'stage.json', value)
                     result['stages'].append(stage)
@@ -206,8 +226,18 @@ def run(output: Path) -> dict:
 
                 material = {'records': records, 'visibility': package['curator_visibility']}
                 sources = {r['record_id'] for r in records}
+                aliases = {}
                 for stage in STAGES:
-                    material, skills = curate(stage, material, sources, final=stage == 'decompose')
+                    material, skills = curate(stage, material, sources, aliases, final=stage == 'decompose')
+                    next_aliases = {}
+                    for item in material['items']:
+                        next_aliases[item['id']] = [item['id']]
+                        for source in item['sources']:
+                            next_aliases[source] = [item['id']]
+                            for leaf, prior_targets in aliases.items():
+                                if source in prior_targets:
+                                    next_aliases[leaf] = [item['id']]
+                    aliases = next_aliases
                     sources = {item['id'] for item in material['items']}
                 b0 = skills
                 write(output / 'bank-b0.json', [s.model_dump(mode='json') for s in b0])
@@ -248,7 +278,7 @@ def run(output: Path) -> dict:
                         grouped = group_by_skill(before, b0)
                         write(output / 'skill-groups.json', grouped)
                         material, b1 = curate('refine', {'bank': [s.model_dump(mode='json') for s in b0],
-                            'grouped_trajectories': grouped}, {s.skill_id for s in b0} | {'uncovered'}, final=True)
+                            'grouped_trajectories': grouped}, {s.skill_id for s in b0} | {'uncovered'}, {}, final=True)
                         write(output / 'bank-b1.json', [s.model_dump(mode='json') for s in b1])
                         after = evaluate('b1', b1)
                         result['selection'] = select_candidate(selection_rows(before), selection_rows(after))
