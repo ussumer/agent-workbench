@@ -248,12 +248,13 @@ def fewshot_prompt(group: str) -> str:
 
 def select_skills(caller: UnlimitedCalls, directory: Path, task: dict, skills: list[dict]) -> list[dict]:
     catalog = [{"skill_id": s["skill_id"], "description": s["description"]} for s in skills]
-    messages = [{"role": "system", "content": "按当前任务选择相关技能的有序ID数组，允许空数组；只输出JSON数组，不回答任务。"},
+    messages = [{"role": "system", "content": "按当前任务选择相关技能的有序ID列表；允许空列表。只输出JSON对象 {\"selected\":[\"skill_id\"]}，不回答任务。"},
                 {"role": "user", "content": json.dumps({"task": task, "catalog": catalog}, ensure_ascii=False)}]
     response, call = caller.call(directory, messages, label="selector")
     if response is None:
         raise RuntimeError("selector environment failure")
-    selected_ids = json.loads(response["choices"][0]["message"]["content"])
+    selected_value = json.loads(response["choices"][0]["message"]["content"])
+    selected_ids = selected_value.get("selected") if isinstance(selected_value, dict) else selected_value
     by_id = {s["skill_id"]: s for s in skills}
     if not isinstance(selected_ids, list) or len(set(selected_ids)) != len(selected_ids) or any(x not in by_id for x in selected_ids):
         raise ValueError("selector must return known unique skill IDs")
@@ -329,59 +330,71 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
             write(output / "training-records.json", records)
     write(output / "training-records.json", records)
 
-    skills: dict[str, list[dict]] = {}
-    fewshot_skills: dict[str, list[dict]] = {}
-    curator_calls = []
-    for group in GROUPS:
-        material = group_curator_view(public, training, records, group)
-        write(output / "curator-input" / f"{group}.json", material)
-        source_protocol = json.loads((resume_from / "protocol.json").read_text()) if resume_from and (resume_from / "protocol.json").is_file() else {}
-        reuse_compatible = bool(source_protocol.get("faithful_supervision"))
-        reused = resume_from / "curator" / group / "initial" if resume_from and reuse_compatible else None
-        if reused is not None and (reused / "response.txt").is_file():
-            response = json.loads((reused / "response.txt").read_text())
-            destination = output / "curator" / group / "initial"
-            shutil.copytree(reused, destination)
-            curator_calls.append(json.loads((reused / "call-result.json").read_text()))
-        else:
-            response, call = caller.call(output / "curator" / group / "initial", [{"role": "system", "content": curator_prompt(group, "initial" )}, {"role": "user", "content": json.dumps(material, ensure_ascii=False)}], label=f"curator-{group}")
-            curator_calls.append(call)
-        current = parse_skill_list(response, forbidden)
-        write(output / "curator" / group / "initial-skills.json", current)
-        for round_id in range(1, 4):
-            round_rows = []
-            for task in train:
-                if task["group_id"] != group:
-                    continue
-                round_rows.append(call_actor(caller, output / "reflect" / f"round-{round_id}" / task["task_id"],
-                                             public, training, task, control, f"reflect-{round_id}", skills=current))
-            write(output / "reflect" / f"round-{round_id}" / f"{group}-rollouts.json", round_rows)
-            reflect_view = {"group_id": group, "policies": material["policies"],
-                            "current_skills": current,
-                            "rollouts": [{"task_id": r["task_id"], "decision": r.get("decision"),
-                                          "grade": r["grade"], "feedback": r.get("feedback")} for r in round_rows]}
-            response, call = caller.call(output / "curator" / group / f"reflect-{round_id}",
-                                         [{"role": "system", "content": reflect_prompt(group)},
-                                          {"role": "user", "content": json.dumps(reflect_view, ensure_ascii=False)}],
-                                         label=f"reflect-{group}-{round_id}")
-            curator_calls.append(call)
+    reuse_learning = bool(resume_from and (resume_from / "skills.json").is_file() and (resume_from / "fewshot-skills.json").is_file())
+    if reuse_learning:
+        skills = json.loads((resume_from / "skills.json").read_text())
+        fewshot_skills = json.loads((resume_from / "fewshot-skills.json").read_text())
+        curator_calls = []
+        for name in ("curator", "curator-input", "reflect", "fewshot-curator", "fewshot-curator-input"):
+            source = resume_from / name
+            if source.is_dir():
+                shutil.copytree(source, output / name)
+        shutil.copy2(resume_from / "skills.json", output / "skills.json")
+        shutil.copy2(resume_from / "fewshot-skills.json", output / "fewshot-skills.json")
+    else:
+        skills: dict[str, list[dict]] = {}
+        fewshot_skills: dict[str, list[dict]] = {}
+        curator_calls = []
+        for group in GROUPS:
+            material = group_curator_view(public, training, records, group)
+            write(output / "curator-input" / f"{group}.json", material)
+            source_protocol = json.loads((resume_from / "protocol.json").read_text()) if resume_from and (resume_from / "protocol.json").is_file() else {}
+            reuse_compatible = bool(source_protocol.get("faithful_supervision"))
+            reused = resume_from / "curator" / group / "initial" if resume_from and reuse_compatible else None
+            if reused is not None and (reused / "response.txt").is_file():
+                response = json.loads((reused / "response.txt").read_text())
+                destination = output / "curator" / group / "initial"
+                shutil.copytree(reused, destination)
+                curator_calls.append(json.loads((reused / "call-result.json").read_text()))
+            else:
+                response, call = caller.call(output / "curator" / group / "initial", [{"role": "system", "content": curator_prompt(group, "initial" )}, {"role": "user", "content": json.dumps(material, ensure_ascii=False)}], label=f"curator-{group}")
+                curator_calls.append(call)
             current = parse_skill_list(response, forbidden)
-            write(output / "curator" / group / f"reflect-{round_id}.json", current)
-        skills[group] = current
-        gold_material = {"group_id": group, "train": [{"task_id": task["task_id"], "request": task["request"],
-                         "input": task["input"], "correct_answer": answers["tasks"][task["task_id"]][0]}
-                         for task in train if task["group_id"] == group]}
-        (output / "fewshot-curator-input").mkdir(parents=True, exist_ok=True)
-        write(output / "fewshot-curator-input" / f"{group}.json", gold_material)
-        response, call = caller.call(output / "fewshot-curator" / group,
-                                     [{"role": "system", "content": fewshot_prompt(group)},
-                                      {"role": "user", "content": json.dumps(gold_material, ensure_ascii=False)}],
-                                     label=f"fewshot-curator-{group}")
-        curator_calls.append(call)
-        fewshot_skills[group] = parse_skill_list(response, forbidden)
-        write(output / "fewshot-curator" / f"{group}-skills.json", fewshot_skills[group])
-    write(output / "skills.json", skills)
-    write(output / "fewshot-skills.json", fewshot_skills)
+            write(output / "curator" / group / "initial-skills.json", current)
+            for round_id in range(1, 4):
+                round_rows = []
+                for task in train:
+                    if task["group_id"] != group:
+                        continue
+                    round_rows.append(call_actor(caller, output / "reflect" / f"round-{round_id}" / task["task_id"],
+                                                 public, training, task, control, f"reflect-{round_id}", skills=current))
+                write(output / "reflect" / f"round-{round_id}" / f"{group}-rollouts.json", round_rows)
+                reflect_view = {"group_id": group, "policies": material["policies"],
+                                "current_skills": current,
+                                "rollouts": [{"task_id": r["task_id"], "decision": r.get("decision"),
+                                              "grade": r["grade"], "feedback": r.get("feedback")} for r in round_rows]}
+                response, call = caller.call(output / "curator" / group / f"reflect-{round_id}",
+                                             [{"role": "system", "content": reflect_prompt(group)},
+                                              {"role": "user", "content": json.dumps(reflect_view, ensure_ascii=False)}],
+                                             label=f"reflect-{group}-{round_id}")
+                curator_calls.append(call)
+                current = parse_skill_list(response, forbidden)
+                write(output / "curator" / group / f"reflect-{round_id}.json", current)
+            skills[group] = current
+            gold_material = {"group_id": group, "train": [{"task_id": task["task_id"], "request": task["request"],
+                             "input": task["input"], "correct_answer": answers["tasks"][task["task_id"]][0]}
+                             for task in train if task["group_id"] == group]}
+            (output / "fewshot-curator-input").mkdir(parents=True, exist_ok=True)
+            write(output / "fewshot-curator-input" / f"{group}.json", gold_material)
+            response, call = caller.call(output / "fewshot-curator" / group,
+                                         [{"role": "system", "content": fewshot_prompt(group)},
+                                          {"role": "user", "content": json.dumps(gold_material, ensure_ascii=False)}],
+                                         label=f"fewshot-curator-{group}")
+            curator_calls.append(call)
+            fewshot_skills[group] = parse_skill_list(response, forbidden)
+            write(output / "fewshot-curator" / f"{group}-skills.json", fewshot_skills[group])
+        write(output / "skills.json", skills)
+        write(output / "fewshot-skills.json", fewshot_skills)
 
     validation = []
     reused_validation: dict[tuple[str, str], dict] = {}
