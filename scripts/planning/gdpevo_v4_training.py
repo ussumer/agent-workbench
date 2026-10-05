@@ -222,7 +222,7 @@ def parse_skill_list(response: dict | None, forbidden: set[str]) -> list[dict]:
         raise RuntimeError("Curator returned no response")
     content = response["choices"][0]["message"]["content"] if "choices" in response else response.get("content")
     value = json.loads(content)
-    if set(value) != {"skills"} or not 1 <= len(value["skills"]) <= 4:
+    if set(value) != {"skills"} or not 1 <= len(value["skills"]) <= 8:
         raise ValueError("Curator skill list bounds invalid")
     result = []
     for skill in value["skills"]:
@@ -325,8 +325,15 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
         current = parse_skill_list(response, forbidden)
         write(output / "curator" / group / "initial-skills.json", current)
         for round_id in range(1, 4):
-            response, call = caller.call(output / "curator" / group / f"reflect-{round_id}", [{"role": "system", "content": reflect_prompt(group)}, {"role": "user", "content": json.dumps({"current_skills": current, "train": material}, ensure_ascii=False)}], label=f"reflect-{group}-{round_id}")
-            curator_calls.append(call)
+            reused_reflect = resume_from / "curator" / group / f"reflect-{round_id}" if resume_from else None
+            if reused_reflect is not None and (reused_reflect / "response.txt").is_file():
+                response = json.loads((reused_reflect / "response.txt").read_text())
+                destination = output / "curator" / group / f"reflect-{round_id}"
+                shutil.copytree(reused_reflect, destination)
+                curator_calls.append(json.loads((reused_reflect / "call-result.json").read_text()))
+            else:
+                response, call = caller.call(output / "curator" / group / f"reflect-{round_id}", [{"role": "system", "content": reflect_prompt(group)}, {"role": "user", "content": json.dumps({"current_skills": current, "train": material}, ensure_ascii=False)}], label=f"reflect-{group}-{round_id}")
+                curator_calls.append(call)
             current = parse_skill_list(response, forbidden)
             write(output / "curator" / group / f"reflect-{round_id}.json", current)
         skills[group] = current
