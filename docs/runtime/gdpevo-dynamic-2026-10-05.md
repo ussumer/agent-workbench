@@ -1,5 +1,17 @@
 # 四技能 bank 接入真实逐回合 Actor：T59 检查点
 
+## 2026-10-05 新 attempt 结论
+
+在零模型回归 22/22 通过后，使用新的 attempt
+`/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005e`
+和 24 个 Actor-turn allowance 做了一次真实试跑。环境冻结、Java ERP、MongoDB、MCP、OpenSandbox、Agent Protocol
+均启动并留下证据；真实模型调用 19 次，保守费用 `1.466586 CNY`。第 20 次请求由评测网关返回不可重试的
+`429 configured model budget exhausted`，runner 保留了 SSE 的 `primary_failure`，没有再被空 proposal 的异常遮盖。
+
+该 attempt 仍是 `terminal_status=failed`，不能作为 T59 完成证据；生产 assignment 未改变，`learning_gain_proven=false`。
+旧 attempt 与本次 attempt 都保留，按止损规则不再增加额度或重复同一真实试跑。验证器对本 attempt 的 417 文件 manifest
+在 60 秒内未结束，未将超时当作通过。
+
 四个由 T58 Curator 生成的 scoped skills 已能完整加载到隔离 Mongo bank，原生产 `PlanningTraceMiddleware` 在每个模型动作前根据当前历史选择有序技能，再注入精确正文。没有修改生产assignment，也没有声称v3报价/包装等字段已接入真实ERP规划合同。
 
 真实结果 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005d/actor/result.json`：

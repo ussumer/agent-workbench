@@ -360,7 +360,7 @@
       "status": "blocked",
       "review": "not_reviewed",
       "receipt": null,
-      "notes": "2026-10-05 runner修复已通过22项零模型回归；gate artifacts/tasks/T59/20261004T183910Z/receipt.json 为blocked：旧真实attempt仍failed，无新付费调用。先保留stream主因再读proposal；16计划Actor回合动态计入selector为32请求，摘要重试共享上限，单次2元/累计50元不变。旧runner-repair.xml 20pass/1failed为测试未模拟usage结算，后续真实Budget结算与未知usage测试均通过。真实业务未完成，不登记done、不重跑旧attempt；后续独立修复Curator视图，再设计同题计算实验。"
+      "notes": "2026-10-05 runner修复已通过22项零模型回归；新真实 attempt /mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005e 保留19次真实请求、OpenSandbox/服务轨迹和 primary_failure。第20次请求被评测网关以 429 configured model budget exhausted 拒绝；保守费用1.466586 CNY，未超过本attempt 2 CNY，但本轮不能完成T59。旧失败与新失败均保留，production assignment=false，learning_gain_proven=false；不再增加额度或重复试跑。"
     },
     "T60": {
       "status": "done",

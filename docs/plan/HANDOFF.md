@@ -1,5 +1,17 @@
 # 当前交接
 
+## T59 新真实 attempt：保留失败并停止
+
+零模型 `test_t59.py` 当前 22/22 通过。随后只做了一次新签名真实试跑：
+`/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-dynamic-tool-20261005e`，使用 24 个 Actor-turn allowance。
+Java ERP、MongoDB、MCP、OpenSandbox、Agent Protocol 均启动；真实模型调用 19 次，保守费用 `1.466586 CNY`。
+第 20 次请求由评测网关返回不可重试的 `429 configured model budget exhausted`，runner 已保留 `primary_failure`，
+没有再被空 proposal 的 TypeError 遮盖。`terminal_status=failed`，生产 assignment 未变，`learning_gain_proven=false`。
+
+该失败不是继续加 allowance 能在本轮解决的代码问题；旧 attempt 与本次 attempt 都保留，不再增加额度或重复试跑。
+验证器对新 attempt 的 417 文件 manifest 在 60 秒内未结束，也未将超时当作通过。T59 仍 blocked、receipt 为 null；若要恢复，
+需要用户明确新的模型预算/评测网关配额，并先决定是否接受只做动态接线演示而不宣称完整 runtime。
+
 ## T62完成：操作级 TRACE 反馈与 Curator 输入边界
 
 Gate `artifacts/tasks/T62/20261005T035239Z/receipt.json`：8 个零模型测试与反馈准备命令通过。入口 [gdpevo_trace_feedback.py](../../scripts/planning/gdpevo_trace_feedback.py) 只读 T61 最终 attempt 的公开冻结任务、四行 Actor 输出、独立评分字段和两条 computation trace；逐操作核对 completed、`read_names=["task"]`、连续版本和代码 hash。text 行没有伪造 operations，compute 行保留全部状态/读写声明。
