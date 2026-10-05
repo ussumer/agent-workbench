@@ -148,7 +148,8 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
                       'pricing_kind': 'conservative DeepSeek estimate', 'pricing_source': 'configured evaluation policy'}
         with log_path.open('x') as log:
             with gateway(model_config, proxy_spec, log, {'thinking': {'type': 'disabled'}}) as (url, budget):
-                model = dataclasses.replace(model_config, base_url=url, api_key='evaluation-proxy', max_tokens=4096)
+                configured_model = dataclasses.replace(model_config, base_url=url, api_key='evaluation-proxy', max_tokens=4096)
+                model = configured_model.create_chat_model().bind(response_format={'type': 'json_object'})
                 with sandbox_control(ROOT, run_dir / 'sandbox-control', configuration['sandbox_port']):
                     with running_stack(model_config=model, run_dir=run_dir / 'stack', database_name='v3-tool-diagnostic',
                                        preserve_data=True, warm_pool_size=0, planning_only=True) as stack:
