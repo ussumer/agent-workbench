@@ -375,6 +375,18 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
     write(output / "validation-summary.json", validation_summary)
 
     test_rows: list[dict] = []
+    reused_test: set[tuple[int, str, str]] = set()
+    if resume_from is not None and (resume_from / "test").is_dir():
+        shutil.copytree(resume_from / "test", output / "test")
+        for result_path in (output / "test").rglob("result.json"):
+            row = json.loads(result_path.read_text())
+            if "arm" not in row or "task_id" not in row:
+                continue
+            repeat_match = re.search(r"repeat-(\d+)", str(result_path))
+            if repeat_match:
+                key = (int(repeat_match.group(1)), row["arm"], row["task_id"])
+                reused_test.add(key)
+                test_rows.append(row | {"repeat": key[0]})
     def one_test(repeat: int, arm: str, task: dict) -> dict:
         examples = example_bank(answers, train) if arm == "fewshot" else None
         if arm == "dynamic":
@@ -384,7 +396,10 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
             return call_actor(caller, output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"] / "actor", public, training, task, control, arm, selected=selected)
         return call_actor(caller, output / "test" / f"repeat-{repeat}" / arm / task["task_id"], public, training, task, control, arm, skills=skill_for_task(skills, task) if arm == "skills" else None, examples=examples)
     for repeat in range(1, test_repeats + 1):
-        jobs = [(arm, task) for arm in ARMS for task in test]
+        jobs = [(arm, task) for arm in ARMS for task in test
+                if (repeat, arm, task["task_id"]) not in reused_test]
+        if not jobs:
+            continue
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
             futures = [pool.submit(one_test, repeat, arm, task) for arm, task in jobs]
             for future in futures:
