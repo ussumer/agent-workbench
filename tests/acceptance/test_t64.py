@@ -11,6 +11,7 @@ from scripts.planning.gdpevo_v4_training import (
     GROUPS,
     actor_messages,
     example_bank,
+    fresh_call_directory,
     group_curator_view,
     instance_tokens,
     load_inputs,
@@ -96,3 +97,11 @@ def test_parse_skill_list_requires_bounded_unique_skills():
     duplicate = {"skills": [value["skills"][0], value["skills"][0]]}
     with pytest.raises(ValueError):
         parse_skill_list({"choices": [{"message": {"content": json.dumps(duplicate, ensure_ascii=False)}}]}, set())
+
+
+def test_resume_allocates_new_call_directory_without_overwriting_evidence(tmp_path):
+    base = tmp_path / "selector"
+    base.mkdir()
+    assert fresh_call_directory(base).name == "selector-retry-1"
+    (base.parent / "selector-retry-1").mkdir()
+    assert fresh_call_directory(base).name == "selector-retry-2"
