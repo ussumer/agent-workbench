@@ -62,7 +62,10 @@ def run(output: Path = DEFAULT_OUTPUT, *, bank_path: Path = DEFAULT_BANK,
         raise FileExistsError(output)
     env = load_env(path=Path("/mnt/c/dev/rush-harness/.env"))
     os.environ.update({k: v for k, v in env.items() if v is not None})
-    agent_protocol_service.ENV_DIR = ROOT / ".venv-agent-protocol-linux"
+    protocol_env = ROOT / ".venv-agent-protocol-linux"
+    if not protocol_env.exists():
+        protocol_env = Path("/mnt/c/dev/rush-harness/.venv-agent-protocol-linux")
+    agent_protocol_service.ENV_DIR = protocol_env
     if not os.environ.get("JAVA_HOME"):
         os.environ["JAVA_HOME"] = "/tmp/jdk21/usr/lib/jvm/java-21-openjdk-amd64"
     config = json.loads((EVAL / "config.t46.json").read_text())
