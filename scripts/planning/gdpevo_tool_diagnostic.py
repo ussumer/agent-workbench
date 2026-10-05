@@ -112,6 +112,14 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
         raise FileExistsError(output)
     env = load_env(path=Path('/mnt/c/dev/rush-harness/.env'))
     os.environ.update({k: v for k, v in env.items() if v is not None})
+    protocol_env = ROOT / '.venv-agent-protocol-linux'
+    if not protocol_env.exists():
+        protocol_env = Path('/mnt/c/dev/rush-harness/.venv-agent-protocol-linux')
+    agent_protocol_service.ENV_DIR = protocol_env
+    if not os.environ.get('JAVA_HOME'):
+        jdk = Path('/tmp/jdk21/usr/lib/jvm/java-21-openjdk-amd64')
+        if (jdk / 'bin' / 'javac').is_file():
+            os.environ['JAVA_HOME'] = str(jdk)
     public, training, control = (json.loads(path.read_text()) for path in (PUBLIC, TRAINING, CONTROL))
     tasks = {task['task_id']: task for task in public['tasks']}
     selected = [tasks[task_id] for task_id in task_ids]
