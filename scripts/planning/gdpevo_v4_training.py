@@ -124,7 +124,7 @@ def feedback(task: dict, decision: dict | None, grade: dict) -> dict:
 
 def actor_messages(public: dict, training: dict, task: dict, arm: str, *, skills: list[dict] | None = None,
                    examples: list[dict] | None = None, selected: list[dict] | None = None) -> list[dict[str, str]]:
-    if arm not in ARMS and arm not in {"repair", "validation"}:
+    if arm not in ARMS and arm not in {"repair", "validation"} and not arm.startswith("reflect"):
         raise ValueError(f"unknown arm {arm}")
     view = actor_view(public, training, task["task_id"], task["split"])
     system = "你是采购决策助手，只读公开资料，不调用工具、不下单。\n" + public["environment"]["public_contract"] + "\n" + FORMAT
@@ -240,6 +240,27 @@ def reflect_prompt(group: str) -> str:
             "只输出 JSON {\"skills\":[{\"skill_id\":\"...\",\"description\":\"...\",\"body\":\"...\"}]}。")
 
 
+def fewshot_prompt(group: str) -> str:
+    return (f"你是GDPevo的few-shot技能提炼器，处理采购组 {group}。输入是本组五道train题的公开问题、环境和正确训练答案。"
+            "比较答案如何由规则推导，提炼可迁移的检查顺序、条件、例外、输出一致性和自检；不要把实例ID、报价ID、供应商ID、价格、数量或答案原文写入技能。"
+            "技能只影响当前任务判断，不能改变权限、工具或审批。只输出 JSON：{\"skills\":[{\"skill_id\":\"...\",\"description\":\"...\",\"body\":\"...\"}]}。")
+
+
+def select_skills(caller: UnlimitedCalls, directory: Path, task: dict, skills: list[dict]) -> list[dict]:
+    catalog = [{"skill_id": s["skill_id"], "description": s["description"]} for s in skills]
+    messages = [{"role": "system", "content": "按当前任务选择相关技能的有序ID数组，允许空数组；只输出JSON数组，不回答任务。"},
+                {"role": "user", "content": json.dumps({"task": task, "catalog": catalog}, ensure_ascii=False)}]
+    response, call = caller.call(directory, messages, label="selector")
+    if response is None:
+        raise RuntimeError("selector environment failure")
+    selected_ids = json.loads(response["choices"][0]["message"]["content"])
+    by_id = {s["skill_id"]: s for s in skills}
+    if not isinstance(selected_ids, list) or len(set(selected_ids)) != len(selected_ids) or any(x not in by_id for x in selected_ids):
+        raise ValueError("selector must return known unique skill IDs")
+    write(directory / "selection.json", {"selected": selected_ids, "metrics": call.get("metrics", {})})
+    return [by_id[x] for x in selected_ids]
+
+
 def example_bank(answers: dict, train: list[dict], *, exclude: str | None = None) -> list[dict]:
     chosen = []
     for task in train:
@@ -275,7 +296,7 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
     caller = UnlimitedCalls()
     protocol = {"kind": "full v3 GDPevo TRACE evolution", "model_id": caller.model.model_id, "temperature": 0,
                 "thinking": "disabled", "train_count": len(train), "test_count": len(test), "test_repeats": test_repeats,
-                "arms": ARMS, "curator_input": "train public input/output/diagnostics/arithmetic only", "test_feedback": False,
+                "arms": ARMS, "faithful_supervision": True, "curator_input": "train public input/output/diagnostics/arithmetic only", "test_feedback": False,
                 "production_assignment_changed": False, "learning_gain_proven": False,
                 "resumed_from": str(resume_from) if resume_from else None,
                 "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
@@ -309,11 +330,14 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
     write(output / "training-records.json", records)
 
     skills: dict[str, list[dict]] = {}
+    fewshot_skills: dict[str, list[dict]] = {}
     curator_calls = []
     for group in GROUPS:
         material = group_curator_view(public, training, records, group)
         write(output / "curator-input" / f"{group}.json", material)
-        reused = resume_from / "curator" / group / "initial" if resume_from else None
+        source_protocol = json.loads((resume_from / "protocol.json").read_text()) if resume_from and (resume_from / "protocol.json").is_file() else {}
+        reuse_compatible = bool(source_protocol.get("faithful_supervision"))
+        reused = resume_from / "curator" / group / "initial" if resume_from and reuse_compatible else None
         if reused is not None and (reused / "response.txt").is_file():
             response = json.loads((reused / "response.txt").read_text())
             destination = output / "curator" / group / "initial"
@@ -325,23 +349,45 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
         current = parse_skill_list(response, forbidden)
         write(output / "curator" / group / "initial-skills.json", current)
         for round_id in range(1, 4):
-            reused_reflect = resume_from / "curator" / group / f"reflect-{round_id}" if resume_from else None
-            if reused_reflect is not None and (reused_reflect / "response.txt").is_file():
-                response = json.loads((reused_reflect / "response.txt").read_text())
-                destination = output / "curator" / group / f"reflect-{round_id}"
-                shutil.copytree(reused_reflect, destination)
-                curator_calls.append(json.loads((reused_reflect / "call-result.json").read_text()))
-            else:
-                response, call = caller.call(output / "curator" / group / f"reflect-{round_id}", [{"role": "system", "content": reflect_prompt(group)}, {"role": "user", "content": json.dumps({"current_skills": current, "train": material}, ensure_ascii=False)}], label=f"reflect-{group}-{round_id}")
-                curator_calls.append(call)
+            round_rows = []
+            for task in train:
+                if task["group_id"] != group:
+                    continue
+                round_rows.append(call_actor(caller, output / "reflect" / f"round-{round_id}" / task["task_id"],
+                                             public, training, task, control, f"reflect-{round_id}", skills=current))
+            write(output / "reflect" / f"round-{round_id}" / f"{group}-rollouts.json", round_rows)
+            reflect_view = {"group_id": group, "policies": material["policies"],
+                            "current_skills": current,
+                            "rollouts": [{"task_id": r["task_id"], "decision": r.get("decision"),
+                                          "grade": r["grade"], "feedback": r.get("feedback")} for r in round_rows]}
+            response, call = caller.call(output / "curator" / group / f"reflect-{round_id}",
+                                         [{"role": "system", "content": reflect_prompt(group)},
+                                          {"role": "user", "content": json.dumps(reflect_view, ensure_ascii=False)}],
+                                         label=f"reflect-{group}-{round_id}")
+            curator_calls.append(call)
             current = parse_skill_list(response, forbidden)
             write(output / "curator" / group / f"reflect-{round_id}.json", current)
         skills[group] = current
+        gold_material = {"group_id": group, "train": [{"task_id": task["task_id"], "request": task["request"],
+                         "input": task["input"], "correct_answer": answers["tasks"][task["task_id"]][0]}
+                         for task in train if task["group_id"] == group]}
+        (output / "fewshot-curator-input").mkdir(parents=True, exist_ok=True)
+        write(output / "fewshot-curator-input" / f"{group}.json", gold_material)
+        response, call = caller.call(output / "fewshot-curator" / group,
+                                     [{"role": "system", "content": fewshot_prompt(group)},
+                                      {"role": "user", "content": json.dumps(gold_material, ensure_ascii=False)}],
+                                     label=f"fewshot-curator-{group}")
+        curator_calls.append(call)
+        fewshot_skills[group] = parse_skill_list(response, forbidden)
+        write(output / "fewshot-curator" / f"{group}-skills.json", fewshot_skills[group])
     write(output / "skills.json", skills)
+    write(output / "fewshot-skills.json", fewshot_skills)
 
     validation = []
     reused_validation: dict[tuple[str, str], dict] = {}
-    if resume_from is not None and (resume_from / "validation").is_dir():
+    source_protocol = json.loads((resume_from / "protocol.json").read_text()) if resume_from and (resume_from / "protocol.json").is_file() else {}
+    reuse_compatible = bool(source_protocol.get("faithful_supervision"))
+    if reuse_compatible and (resume_from / "validation").is_dir():
         shutil.copytree(resume_from / "validation", output / "validation")
         for arm in ARMS:
             for task in train:
@@ -355,12 +401,13 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
             if (arm, task["task_id"]) in reused_validation:
                 validation.append(reused_validation[(arm, task["task_id"])])
                 continue
-            examples = example_bank(answers, train, exclude=task["task_id"]) if arm == "fewshot" else None
             row = call_actor(caller, output / "validation" / arm / task["task_id"], public, training, task, control, arm,
-                             skills=skill_for_task(skills, task) if arm == "skills" else None, examples=examples)
+                             skills=(skill_for_task(fewshot_skills, task) if arm == "fewshot" else
+                                     skill_for_task(skills, task) if arm == "skills" else None))
             validation.append(row)
         # dynamic selector is train-only and its selected skill is persisted before the actor call.
-        selected = skill_for_task(skills, task)[:1]
+        selected = select_skills(caller, output / "validation" / "dynamic" / task["task_id"] / "selector",
+                                 actor_view(public, training, task["task_id"], "train"), skill_for_task(skills, task))
         (output / "validation" / "dynamic" / task["task_id"]).mkdir(parents=True, exist_ok=True)
         if ("dynamic", task["task_id"]) in reused_validation:
             validation.append(reused_validation[("dynamic", task["task_id"])])
@@ -376,7 +423,7 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
 
     test_rows: list[dict] = []
     reused_test: set[tuple[int, str, str]] = set()
-    if resume_from is not None and (resume_from / "test").is_dir():
+    if reuse_compatible and (resume_from / "test").is_dir():
         shutil.copytree(resume_from / "test", output / "test")
         for result_path in (output / "test").rglob("result.json"):
             row = json.loads(result_path.read_text())
@@ -388,13 +435,13 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | No
                 reused_test.add(key)
                 test_rows.append(row | {"repeat": key[0]})
     def one_test(repeat: int, arm: str, task: dict) -> dict:
-        examples = example_bank(answers, train) if arm == "fewshot" else None
         if arm == "dynamic":
-            selected = skill_for_task(skills, task)[:1]
-            (output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"]).mkdir(parents=True, exist_ok=True)
-            write(output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"] / "selector.json", {"task_id": task["task_id"], "selected": [s["skill_id"] for s in selected], "source": "group-scoped selector"})
+            selected = select_skills(caller, output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"] / "selector",
+                                     actor_view(public, training, task["task_id"], "test"), skill_for_task(skills, task))
             return call_actor(caller, output / "test" / f"repeat-{repeat}" / "dynamic" / task["task_id"] / "actor", public, training, task, control, arm, selected=selected)
-        return call_actor(caller, output / "test" / f"repeat-{repeat}" / arm / task["task_id"], public, training, task, control, arm, skills=skill_for_task(skills, task) if arm == "skills" else None, examples=examples)
+        return call_actor(caller, output / "test" / f"repeat-{repeat}" / arm / task["task_id"], public, training, task, control, arm,
+                          skills=skill_for_task(fewshot_skills, task) if arm == "fewshot" else
+                                 skill_for_task(skills, task) if arm == "skills" else None)
     for repeat in range(1, test_repeats + 1):
         jobs = [(arm, task) for arm in ARMS for task in test
                 if (repeat, arm, task["task_id"]) not in reused_test]
