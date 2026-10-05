@@ -149,7 +149,8 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
         with log_path.open('x') as log:
             with gateway(model_config, proxy_spec, log, {'thinking': {'type': 'disabled'}}) as (url, budget):
                 configured_model = dataclasses.replace(model_config, base_url=url, api_key='evaluation-proxy', max_tokens=4096)
-                chat_model = configured_model.create_chat_model().bind(response_format={'type': 'json_object'})
+                chat_model = configured_model.create_chat_model()
+                json_model = chat_model.bind(response_format={'type': 'json_object'})
                 with sandbox_control(ROOT, run_dir / 'sandbox-control', configuration['sandbox_port']):
                     with running_stack(model_config=configured_model, run_dir=run_dir / 'stack', database_name='v3-tool-diagnostic',
                                        preserve_data=True, warm_pool_size=0, planning_only=True) as stack:
@@ -158,7 +159,7 @@ def run(output: Path = DEFAULT_OUTPUT, *, task_ids: tuple[str, ...] = ('packages
                             for arm in ('text', 'compute'):
                                 row = {'task_id': task['task_id'], 'arm': arm, 'model_calls_before': budget.calls}
                                 if arm == 'text':
-                                    response = chat_model.invoke(_messages(public, training, task, compute=False))
+                                    response = json_model.invoke(_messages(public, training, task, compute=False))
                                     decision = _parse(response.content)
                                     row['messages'] = _messages(public, training, task, compute=False)
                                 else:
