@@ -7,6 +7,7 @@ import pytest
 
 from scripts.planning.gdpevo_trace_loop import (
     execution_policy, group_by_skill, instance_ids, normalize_stage_sources, stage_prompt, validate_stage,
+    validate_trace_skill,
 )
 from agent.evolution.episodes import TextSkill
 from procurement_eval.budget_proxy import Budget
@@ -100,6 +101,12 @@ def test_identifiers_extracted_for_both_description_and_body_checks():
     value = stage(); value['items'][0]['description'] = '读取 quote-id 的方案'
     with pytest.raises(ValueError):
         validate_stage(value,{'task-source'},final=True,forbidden={'quote-id'})
+
+
+def test_approval_authorization_is_domain_text_but_credential_assignment_is_rejected():
+    assert validate_trace_skill('approval', '审批', '检查 authorization=historical_only 后不复用旧批准')
+    with pytest.raises(ValueError):
+        validate_trace_skill('secret', '审批', 'api_key=secret')
 
 
 def test_four_stages_and_refinement_have_distinct_real_curator_protocols():
