@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -259,7 +260,7 @@ def write_manifest(output: Path) -> None:
     write(output / "manifest.json", {str(p.relative_to(output)): digest(p) for p in output.rglob("*") if p.is_file() and p.name != "manifest.json"})
 
 
-def run(output: Path = SESSION, *, test_repeats: int = 3) -> dict:
+def run(output: Path = SESSION, *, test_repeats: int = 3, resume_from: Path | None = None) -> dict:
     if output.exists():
         raise FileExistsError(output)
     if test_repeats < 3:
@@ -267,6 +268,7 @@ def run(output: Path = SESSION, *, test_repeats: int = 3) -> dict:
     public, training, control, answers, train, test = load_inputs()
     output.mkdir(parents=True)
     (output / "frozen").mkdir()
+    (output / "curator-input").mkdir()
     for path in (PUBLIC, TRAINING, CONTROL, Path(__file__), ROOT / "scripts/planning/gdpevo_feedback.py", ROOT / "scripts/planning/gdpevo_expansion_judge.py"):
         (output / "frozen" / path.name).write_bytes(path.read_bytes())
     caller = UnlimitedCalls()
@@ -274,23 +276,35 @@ def run(output: Path = SESSION, *, test_repeats: int = 3) -> dict:
                 "thinking": "disabled", "train_count": len(train), "test_count": len(test), "test_repeats": test_repeats,
                 "arms": ARMS, "curator_input": "train public input/output/diagnostics/arithmetic only", "test_feedback": False,
                 "production_assignment_changed": False, "learning_gain_proven": False,
+                "resumed_from": str(resume_from) if resume_from else None,
                 "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                 "source_hashes": {p.name: digest(p) for p in (output / "frozen").iterdir()}}
     write(output / "protocol.json", protocol)
     forbidden = instance_tokens(public)
     records = []
-    for task in train:
-        folder = output / "train" / task["task_id"] / "attempt-1"
-        row = call_actor(caller, folder, public, training, task, control, "fixed")
-        attempts = [{"attempt": 1, "decision": row.get("decision"), "grade": row["grade"], "feedback": row["feedback"], "status": row["status"]}]
-        if not row["grade"]["business_success"] and row["status"] == "scored":
-            repair_messages = actor_messages(public, training, task, "repair") + [
-                {"role": "assistant", "content": json.dumps(row["decision"], ensure_ascii=False)},
-                {"role": "user", "content": "公开诊断如下。只修复诊断指出的问题，重新输出完整 JSON；不提供参考答案：" + json.dumps(row["feedback"], ensure_ascii=False)}]
-            repair = call_actor(caller, output / "train" / task["task_id"] / "attempt-2", public, training, task, control, "repair", messages=repair_messages)
-            attempts.append({"attempt": 2, "decision": repair.get("decision"), "grade": repair["grade"], "feedback": repair["feedback"], "status": repair["status"]})
-        records.append({"task": {k: task[k] for k in ("task_id", "group_id", "split", "request", "input")}, "attempts": attempts})
-        write(output / "training-records.json", records)
+    if resume_from is not None:
+        source_records = resume_from / "training-records.json"
+        if not source_records.is_file():
+            raise ValueError("resume source lacks completed training-records.json")
+        records = json.loads(source_records.read_text())
+        if len(records) != len(train) or {r["task"]["task_id"] for r in records} != {t["task_id"] for t in train}:
+            raise ValueError("resume source does not contain all twenty train records")
+        shutil.copytree(resume_from / "train", output / "train")
+        shutil.copy2(source_records, output / "training-records.json")
+        write(output / "resume-source.json", {"source": str(resume_from), "training_records_sha256": digest(source_records)})
+    else:
+        for task in train:
+            folder = output / "train" / task["task_id"] / "attempt-1"
+            row = call_actor(caller, folder, public, training, task, control, "fixed")
+            attempts = [{"attempt": 1, "decision": row.get("decision"), "grade": row["grade"], "feedback": row["feedback"], "status": row["status"]}]
+            if not row["grade"]["business_success"] and row["status"] == "scored":
+                repair_messages = actor_messages(public, training, task, "repair") + [
+                    {"role": "assistant", "content": json.dumps(row["decision"], ensure_ascii=False)},
+                    {"role": "user", "content": "公开诊断如下。只修复诊断指出的问题，重新输出完整 JSON；不提供参考答案：" + json.dumps(row["feedback"], ensure_ascii=False)}]
+                repair = call_actor(caller, output / "train" / task["task_id"] / "attempt-2", public, training, task, control, "repair", messages=repair_messages)
+                attempts.append({"attempt": 2, "decision": repair.get("decision"), "grade": repair["grade"], "feedback": repair["feedback"], "status": repair["status"]})
+            records.append({"task": {k: task[k] for k in ("task_id", "group_id", "split", "request", "input")}, "attempts": attempts})
+            write(output / "training-records.json", records)
     write(output / "training-records.json", records)
 
     skills: dict[str, list[dict]] = {}
@@ -380,7 +394,8 @@ if __name__ == "__main__":
     parser.add_argument("command", choices=("run", "verify"))
     parser.add_argument("--output", type=Path, default=SESSION)
     parser.add_argument("--test-repeats", type=int, default=3)
+    parser.add_argument("--resume-from", type=Path)
     args = parser.parse_args()
-    result = run(args.output, test_repeats=args.test_repeats) if args.command == "run" else verify(args.output)
+    result = run(args.output, test_repeats=args.test_repeats, resume_from=args.resume_from) if args.command == "run" else verify(args.output)
     print(json.dumps(result, ensure_ascii=False))
     raise SystemExit(0)
