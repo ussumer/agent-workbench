@@ -219,4 +219,7 @@ if __name__ == '__main__':
     parser.add_argument('command', choices=('run', 'verify'))
     parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
-    print(json.dumps(run(args.output) if args.command == 'run' else verify(args.output), ensure_ascii=False))
+    result = run(args.output) if args.command == 'run' else verify(args.output)
+    print(json.dumps(result, ensure_ascii=False))
+    if args.command == 'verify' and result.get('status') != 'passed':
+        raise SystemExit(2)
