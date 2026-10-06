@@ -168,13 +168,17 @@ def main() -> int:
     model_config = ModelConfig.from_env()
     stack_context = running_stack(model_config=model_config, warm_pool_size=1) if not args.no_tools else contextlib.nullcontext()
     with stack_context as stack:
-        model = model_config.create_chat_model() if args.no_tools else None
+        model = None
         graph = None if args.no_tools else stack.graphs["demo-a"]
         for repeat in range(1, args.repeats + 1):
             for task in tasks:
                 row: dict[str, Any] = {"task_id": task["task_id"], "repeat": repeat, "status": "failed"}
                 try:
                     if args.no_tools:
+                        # Each call gets its own async client because the runner records rows
+                        # incrementally with asyncio.run(); reusing an httpx client after its
+                        # loop closes produces a false ``Event loop is closed`` failure.
+                        model = model_config.create_chat_model()
                         decision, messages = asyncio.run(_run_direct(model, task, args.timeout_seconds))
                     else:
                         decision, messages = asyncio.run(_run_one(graph, task, args.timeout_seconds))
