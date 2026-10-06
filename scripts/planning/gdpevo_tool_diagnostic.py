@@ -117,13 +117,18 @@ def _seed(service: ComputationService, owner: str, thread: str, task: dict) -> d
 
 
 def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path, system_prompt: str,
-                   *, skills: list | None = None, model_identity: dict | None = None) -> tuple[dict, dict]:
+                   *, skills: list | None = None, static_skills: list | None = None,
+                   system_suffix: str = '', owner: str = OWNER,
+                   model_identity: dict | None = None,
+                   extra_callbacks: list | None = None) -> tuple[dict, dict]:
+    if skills is not None and static_skills is not None:
+        raise ValueError('dynamic trace selection and static skill injection are mutually exclusive')
     output.mkdir(parents=True, exist_ok=True)
     thread = 'v3-compute-' + uuid.uuid4().hex[:12]
-    ApplicationRepository(stack.database).ensure_thread(owner_user_id=OWNER, thread_id=thread,
+    ApplicationRepository(stack.database).ensure_thread(owner_user_id=owner, thread_id=thread,
                                                        title='v3 computation diagnostic')
     service = ComputationService(stack.database, stack.manager.get_or_create)
-    seed = _seed(service, OWNER, thread, task_view)
+    seed = _seed(service, owner, thread, task_view)
     profile_key = _register_compute_profile(model)
     middleware, trace_config = [], {}
     episodes = None
@@ -131,44 +136,49 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path, system
         from agent.evolution.episodes import EpisodeStore
         from agent.evolution.orchestration import EpisodeCallbacks, PlanningTraceMiddleware
         episodes = EpisodeStore(stack.database)
-        bank_id = episodes.freeze(OWNER, skills, provenance='trace-loop-experiment')
-        episodes.set_current(OWNER, bank_id)
+        bank_id = episodes.freeze(owner, skills, provenance='trace-loop-experiment')
+        episodes.set_current(owner, bank_id)
         run_id = uuid.uuid4().hex
-        episode_id = episodes.begin_run(OWNER, thread, task_view['task']['task_id'], run_id,
+        episode_id = episodes.begin_run(owner, thread, task_view['task']['task_id'], run_id,
             model=model_identity or {'provenance': 'configured-live', 'model_id': model.model_name},
             interrupt_id=None, public=task_view)
-        guard = EpisodeCallbacks(episodes, OWNER, episode_id, run_id)
+        guard = EpisodeCallbacks(episodes, owner, episode_id, run_id)
         middleware = [PlanningTraceMiddleware(episodes, model)]
         trace_config = {'planning_episode_id': episode_id, 'application_run_id': run_id,
                         'planning_evidence_guard': guard}
+    if static_skills:
+        system_prompt += '\n当前聚焦技能（只作策略提示，服从当前任务输入）：\n' + '\n'.join(
+            f"[{s['skill_id']}] {s['description']}\n{s['body']}" for s in static_skills)
+    if system_suffix:
+        system_prompt += system_suffix
     graph = create_deep_agent(
         model=model,
         tools=build_computation_tools(service),
         backend=StateBackend(),
         checkpointer=stack.resources.checkpointer,
-        store=UserScopedStore(stack.store, OWNER),
+        store=UserScopedStore(stack.store, owner),
         middleware=middleware,
         system_prompt=(
             system_prompt + '\n\n你是采购计算诊断Actor，只用公开task和computation工具。'
             '工具回合完成后必须在最后一条消息直接输出完整JSON决策对象，不要只留下工具调用。'
         ),
     )
-    config = {'configurable': {'thread_id': thread, 'owner_user_id': OWNER}}
+    config = {'configurable': {'thread_id': thread, 'owner_user_id': owner}}
     config['configurable'].update(trace_config)
-    if episodes is not None:
-        config['callbacks'] = [guard]
+    if episodes is not None or extra_callbacks:
+        config['callbacks'] = [*(extra_callbacks or []), *([guard] if episodes is not None else [])]
     result = None
     try:
         result = graph.invoke({'messages': [HumanMessage(content=json.dumps(task_view, ensure_ascii=False))]}, config=config)
         content = result['messages'][-1].content
         decision = _parse(content)
         executions = list(service.executions.find(
-            {'owner_user_id': OWNER, 'thread_id': thread}, {'_id': 0}))
+            {'owner_user_id': owner, 'thread_id': thread}, {'_id': 0}))
         return decision, {'thread_id': thread, 'seed': seed, 'executions': executions,
                           'message_count': len(result['messages']), 'profile_key': profile_key}
     finally:
         executions = list(stack.database.planning_kernel_executions.find(
-            {'owner_user_id': OWNER, 'thread_id': thread}, {'_id': 0}))
+            {'owner_user_id': owner, 'thread_id': thread}, {'_id': 0}))
         messages = [] if result is None else result.get('messages', [])
         evidence = {'thread_id': thread, 'seed': seed, 'executions': executions,
                     'actor_messages': [m.model_dump(mode='json') if hasattr(m, 'model_dump') else m
@@ -179,7 +189,7 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path, system
             if 'decision' in locals():
                 evidence['decision'] = decision
         if episodes is not None:
-            evidence['episode_export'] = episodes.export(OWNER, episode_id)
+            evidence['episode_export'] = episodes.export(owner, episode_id)
         write(output / 'compute-trace.json', evidence)
 
 
