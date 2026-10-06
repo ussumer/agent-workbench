@@ -273,12 +273,15 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, workers: int = 3,
     if resume_from is not None:
         copy_reusable(resume_from, output)
         write(output / "resume-source.json", {"source": str(resume_from)})
+    config = json.loads((EVAL / "config.t46.json").read_text())
+    sandbox_port = int(os.environ.get("T64_SANDBOX_PORT", config["sandbox_port"]))
     protocol = {"kind": "full v3 GDPevo TRACE evolution (compute actor)", "actor": ACTOR_KIND,
                 "text_baseline_attempt": str(TEXT_BASELINE), "model_id": caller.model.model_id,
                 "temperature": 0, "thinking": "disabled", "train_count": len(train),
                 "test_count": len(test), "test_repeats": test_repeats, "arms": ARMS,
                 "episode_isolation": "dedicated owner and sandbox per episode",
                 "dynamic_selector": "PlanningTraceMiddleware per-turn selection",
+                "sandbox_port": sandbox_port,
                 "static_skill_arms": ["fewshot", "skills"], "faithful_supervision": True,
                 "curator_input": "train public input/output/diagnostics/arithmetic only",
                 "test_feedback": False, "production_assignment_changed": False,
@@ -297,16 +300,15 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, workers: int = 3,
     agent_protocol_service.ENV_DIR = protocol_env
     if not os.environ.get("JAVA_HOME"):
         os.environ["JAVA_HOME"] = "/tmp/jdk21/usr/lib/jvm/java-21-openjdk-amd64"
-    config = json.loads((EVAL / "config.t46.json").read_text())
     original = caller.model
     secrets = caller.secrets
     phase_usage: dict[str, Any] = {}
-    sandbox_service.CONTROL_PORT = config["sandbox_port"]
+    sandbox_service.CONTROL_PORT = sandbox_port
     with (output / "model_calls.jsonl").open("x") as log:
         with gateway(original, policy(), log, {"thinking": {"type": "disabled"}}) as (url, budget):
             configured = dataclasses.replace(original, base_url=url, api_key="evaluation-proxy", max_tokens=4096)
             model = configured.create_chat_model()
-            with sandbox_control(ROOT, output / "services" / "sandbox-control", config["sandbox_port"]):
+            with sandbox_control(ROOT, output / "services" / "sandbox-control", sandbox_port):
                 with running_stack(model_config=configured, run_dir=output / "services" / "stack",
                                    database_name="v4-compute-t64-" + uuid.uuid4().hex[:10],
                                    preserve_data=True, warm_pool_size=0, planning_only=True) as stack:
