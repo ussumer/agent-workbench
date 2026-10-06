@@ -3488,10 +3488,10 @@
             "run",
             "--frozen",
             "python",
-            "scripts/planning/gdpevo_v4_training.py",
+            "scripts/planning/gdpevo_v4_compute_training.py",
             "verify",
             "--output",
-            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261005/attempt-gdpevo-v4-full-20261005"
+            "/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261006/attempt-gdpevo-v4-compute-20261006-resume2"
           ],
           "cwd": "."
         }

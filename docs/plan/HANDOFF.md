@@ -1,6 +1,6 @@
 # 当前交接
 
-## 2026-10-06：T64 compute Actor 全量 resume 已完成，gate 受环境配置阻塞
+## 2026-10-06：T64 compute Actor 全量 resume 与 gate 已完成
 
 新的计算 Actor attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261006/attempt-gdpevo-v4-compute-20261006-resume2` 已完成 20 train、learning、20×4 validation 和 20×4×3 held-out test。使用同一 DeepAgents/OpenSandbox compute Actor、Mongo 持久计算、每 episode 独立 owner/sandbox 和 dynamic 的逐回合 selector；test 无反馈、无修订、无倒选。独立 verify 通过：`test_rows=240`，`repeats=3`，403 个 scored evidence rows 中 402 个含真实 computation execution；`learning_gain_proven=false`、`production_assignment_changed=false`。
 
@@ -8,7 +8,7 @@ validation：fixed 15/20、0.942308；few-shot 6/20、0.792308；skills 16/20、
 
 本轮实际 1594 次模型请求，输入 10,835,522、输出 620,916，保守估算 114.284430 CNY，实际账单未知。旧失控 attempt 和两次端口启动失败目录均保留。因评测配置固定端口 18081 被占用，新增可审计环境变量 `T64_SANDBOX_PORT`，本轮使用 18082；代码提交 `955c727`。护栏 `d0ff341` 生效，没有再次出现 655 次退化循环。
 
-T64 gate `artifacts/tasks/T64/20261006T051801Z/receipt.json` 当前为 blocked：gate 进程没有继承真实模型配置（缺少 `MODEL_*`/`OPENAI_*` 等凭据），不是本次已完成 attempt 的 verify 失败。恢复 gate 前需在同一环境提供配置后重跑 gate；不得重新生成模型调用。
+T64 gate `artifacts/tasks/T64/20261006T053256Z/receipt.json` 已通过：unit 22/22，compute evidence verify exit 0。gate 运行时通过临时注入 `/mnt/c/dev/rush-harness/.env` 解决 worktree 根目录没有 `.env` 的入口差异，没有重新生成模型调用。T64 已登记 done；用户 review 仍为 `not_reviewed`，`learning_gain_proven=false` 保持不变。
 
 ## 2026-10-06：聚合选择恢复结果
 

@@ -387,10 +387,10 @@
       "notes": "真实四阶段Curator初始化、动态B0轨迹按实际技能选择回流、一次B1修订与同协议train验证通过。28个单元/协议测试通过；49次真实模型调用，fixed/B0/B1各两道train均有完整Episode与5次OpenSandbox computation。B0成功2/2、均分1.0；B1成功1/2、均分0.8846153846，packages-train-04退化，候选拒绝且未晋升。production_assignment_changed=false，learning_gain_proven=false。"
     },
     "T64": {
-      "status": "in_progress",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "文本中间实验 j 已完成；k 复用证据按用户取消逐题否决后的 aggregate-v2 选择，三组 train validation 候选通过。全量计算 Actor 与新封存验证仍未完成，未登记 done。"
+      "receipt": "artifacts/tasks/T64/20261006T053256Z/receipt.json",
+      "notes": "T64 compute Actor 全量 resume 已完成并通过 gate；20 train、20x4 validation、20x4x3 held-out test，verify test_rows=240。validation fixed/fewshot/skills/dynamic=0.942308/0.792308/0.946154/0.965385；held-out=0.758974/0.601282/0.876923/0.888462。保留2 environment failure和1 format failure，learning_gain_proven=false、production_assignment_changed=false。1594模型请求，保守估算114.284430 CNY。compute护栏提交d0ff341，端口覆盖提交955c727；gate receipt 20261006T053256Z。"
     }
   }
 }
