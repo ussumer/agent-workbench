@@ -283,6 +283,7 @@ def run(output: Path = SESSION, *, test_repeats: int = 3, workers: int = 3,
                 "curator_input": "train public input/output/diagnostics/arithmetic only",
                 "test_feedback": False, "production_assignment_changed": False,
                 "learning_gain_proven": False, "selection_policy": "aggregate-v2",
+                "episode_budget": {"model_calls": 30, "tool_calls": 36, "recursion_limit": 120},
                 "resumed_from": str(resume_from) if resume_from else None, "workers": workers,
                 "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                 "source_hashes": {p.name: digest(p) for p in (output / "frozen").iterdir()}}

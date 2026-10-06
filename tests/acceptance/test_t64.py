@@ -205,6 +205,14 @@ def test_dynamic_bank_dicts_validate_into_text_skills():
     assert TextSkill.model_validate(validated).skill_id == "s1"
 
 
+def test_compute_actor_has_episode_budget_guard():
+    import inspect
+    parameters = inspect.signature(_compute_actor).parameters
+    assert parameters["max_model_calls"].default == 30
+    assert parameters["max_tool_calls"].default == 36
+    assert parameters["recursion_limit"].default == 120
+
+
 def test_repair_suffix_carries_public_diagnosis_without_gold():
     suffix = repair_suffix({"disposition": "order"}, {"success": False, "failed_outcomes": ["freight_audit"],
                                                       "diagnostics": ["freight_cents 与整车阈值不一致"]})

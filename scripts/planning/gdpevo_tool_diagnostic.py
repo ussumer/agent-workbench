@@ -120,9 +120,14 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path, system
                    *, skills: list | None = None, static_skills: list | None = None,
                    system_suffix: str = '', owner: str = OWNER,
                    model_identity: dict | None = None,
-                   extra_callbacks: list | None = None) -> tuple[dict, dict]:
+                   extra_callbacks: list | None = None,
+                   max_model_calls: int = 30, max_tool_calls: int = 36,
+                   recursion_limit: int = 120) -> tuple[dict, dict]:
     if skills is not None and static_skills is not None:
         raise ValueError('dynamic trace selection and static skill injection are mutually exclusive')
+    from langchain.agents.middleware import ModelCallLimitMiddleware, ToolCallLimitMiddleware
+    budget_guard = [ModelCallLimitMiddleware(run_limit=max_model_calls, exit_behavior='end'),
+                    ToolCallLimitMiddleware(run_limit=max_tool_calls, exit_behavior='end')]
     output.mkdir(parents=True, exist_ok=True)
     thread = 'v3-compute-' + uuid.uuid4().hex[:12]
     ApplicationRepository(stack.database).ensure_thread(owner_user_id=owner, thread_id=thread,
@@ -157,13 +162,14 @@ def _compute_actor(stack: Any, model: Any, task_view: dict, output: Path, system
         backend=StateBackend(),
         checkpointer=stack.resources.checkpointer,
         store=UserScopedStore(stack.store, owner),
-        middleware=middleware,
+        middleware=[*budget_guard, *middleware],
         system_prompt=(
             system_prompt + '\n\n你是采购计算诊断Actor，只用公开task和computation工具。'
             '工具回合完成后必须在最后一条消息直接输出完整JSON决策对象，不要只留下工具调用。'
         ),
     )
-    config = {'configurable': {'thread_id': thread, 'owner_user_id': owner}}
+    config = {'configurable': {'thread_id': thread, 'owner_user_id': owner},
+              'recursion_limit': recursion_limit}
     config['configurable'].update(trace_config)
     if episodes is not None or extra_callbacks:
         config['callbacks'] = [*(extra_callbacks or []), *([guard] if episodes is not None else [])]
