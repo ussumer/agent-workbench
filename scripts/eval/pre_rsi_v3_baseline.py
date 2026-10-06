@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import hashlib
 import importlib.util
 import json
@@ -98,6 +99,14 @@ async def _run_one(graph: Any, task: dict[str, Any], timeout: float) -> tuple[di
     return _json_from_message(_last_content(messages)), messages
 
 
+async def _run_direct(model: Any, task: dict[str, Any], timeout: float) -> tuple[dict[str, Any], list[Any]]:
+    """Call the old source's configured chat model without its enterprise tools."""
+    from langchain_core.messages import HumanMessage
+
+    message = await asyncio.wait_for(model.ainvoke([HumanMessage(content=_prompt(task))]), timeout=timeout)
+    return _json_from_message(getattr(message, "content", "")), [message]
+
+
 def _message_usage(messages: list[Any]) -> dict[str, int]:
     usage = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
     for message in messages:
@@ -119,6 +128,11 @@ def main() -> int:
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--timeout-seconds", type=float, default=180.0)
+    parser.add_argument(
+        "--no-tools",
+        action="store_true",
+        help="use the old source's configured model directly; do not start ERP/MCP/OpenSandbox",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.repeats < 1 or args.limit < 0:
@@ -143,6 +157,7 @@ def main() -> int:
         "task_set": str(args.tasks),
         "split": args.split,
         "repeats": args.repeats,
+        "execution_mode": "no_tools_direct_model" if args.no_tools else "ordinary_chat_agent",
         "model": ModelConfig.from_env().redacted(),
         "private_judge": str(args.control),
         "private_data_sent_to_actor": False,
@@ -150,13 +165,19 @@ def main() -> int:
     }
     (args.output / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     started = time.time()
-    with running_stack(model_config=ModelConfig.from_env(), warm_pool_size=1) as stack:
-        graph = stack.graphs["demo-a"]
+    model_config = ModelConfig.from_env()
+    stack_context = running_stack(model_config=model_config, warm_pool_size=1) if not args.no_tools else contextlib.nullcontext()
+    with stack_context as stack:
+        model = model_config.create_chat_model() if args.no_tools else None
+        graph = None if args.no_tools else stack.graphs["demo-a"]
         for repeat in range(1, args.repeats + 1):
             for task in tasks:
                 row: dict[str, Any] = {"task_id": task["task_id"], "repeat": repeat, "status": "failed"}
                 try:
-                    decision, messages = asyncio.run(_run_one(graph, task, args.timeout_seconds))
+                    if args.no_tools:
+                        decision, messages = asyncio.run(_run_direct(model, task, args.timeout_seconds))
+                    else:
+                        decision, messages = asyncio.run(_run_one(graph, task, args.timeout_seconds))
                     row["submission"] = decision
                     row["usage"] = _message_usage(messages)
                     row["grade"] = judge.grade_task(task, decision, control[task["task_id"]])
