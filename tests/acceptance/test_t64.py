@@ -197,6 +197,14 @@ def test_compute_actor_rejects_dual_skill_injection(tmp_path):
         _compute_actor(None, None, {}, tmp_path / "x", "sys", skills=skill, static_skills=skill)
 
 
+def test_dynamic_bank_dicts_validate_into_text_skills():
+    from agent.evolution.episodes import TextSkill
+    skill = {"skill_id": "s1", "description": "版本检查", "body": "先核对有效窗口。"}
+    validated = TextSkill.model_validate(skill)
+    assert validated.skill_id == "s1"
+    assert TextSkill.model_validate(validated).skill_id == "s1"
+
+
 def test_repair_suffix_carries_public_diagnosis_without_gold():
     suffix = repair_suffix({"disposition": "order"}, {"success": False, "failed_outcomes": ["freight_audit"],
                                                       "diagnostics": ["freight_cents 与整车阈值不一致"]})

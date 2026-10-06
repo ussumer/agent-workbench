@@ -79,7 +79,7 @@ def policy() -> dict[str, Any]:
         "total_cny": None,
         "per_attempt_cny": None,
         "enforce_cost_limit": False,
-        "max_model_calls": 4000,
+        "max_model_calls": 6000,
         "max_output_tokens": 4096,
         "max_request_bytes": 500_000,
         "timeout_seconds": 240,
@@ -181,6 +181,9 @@ def compute_episode(ctx: Context, directory: Path, task: dict, control: dict, ar
         row["repeat"] = repeat
     started = time.time()
     usage = UsageCollector()
+    if dynamic_bank is not None:
+        from agent.evolution.episodes import TextSkill
+        dynamic_bank = [TextSkill.model_validate(skill) for skill in dynamic_bank]
     try:
         decision, trace = _compute_actor(
             ctx.stack, ctx.model, view, call_directory, system,
