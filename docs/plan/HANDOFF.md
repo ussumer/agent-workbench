@@ -1,5 +1,15 @@
 # 当前交接
 
+## 2026-10-06：T64 compute Actor 全量 resume 已完成，gate 受环境配置阻塞
+
+新的计算 Actor attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261006/attempt-gdpevo-v4-compute-20261006-resume2` 已完成 20 train、learning、20×4 validation 和 20×4×3 held-out test。使用同一 DeepAgents/OpenSandbox compute Actor、Mongo 持久计算、每 episode 独立 owner/sandbox 和 dynamic 的逐回合 selector；test 无反馈、无修订、无倒选。独立 verify 通过：`test_rows=240`，`repeats=3`，403 个 scored evidence rows 中 402 个含真实 computation execution；`learning_gain_proven=false`、`production_assignment_changed=false`。
+
+validation：fixed 15/20、0.942308；few-shot 6/20、0.792308；skills 16/20、0.946154；dynamic 17/20、0.965385。test：fixed 7/60、0.758974；few-shot 0/60、0.601282；skills 35/60、0.876923；dynamic 35/60、0.888462。test 分母保留 2 个 environment failure 和 1 个 format failure。该结果说明真实计算 Actor 下 skills/dynamic 有 held-out 提升信号，但不宣称统计显著性或生产学习收益。
+
+本轮实际 1594 次模型请求，输入 10,835,522、输出 620,916，保守估算 114.284430 CNY，实际账单未知。旧失控 attempt 和两次端口启动失败目录均保留。因评测配置固定端口 18081 被占用，新增可审计环境变量 `T64_SANDBOX_PORT`，本轮使用 18082；代码提交 `955c727`。护栏 `d0ff341` 生效，没有再次出现 655 次退化循环。
+
+T64 gate `artifacts/tasks/T64/20261006T051801Z/receipt.json` 当前为 blocked：gate 进程没有继承真实模型配置（缺少 `MODEL_*`/`OPENAI_*` 等凭据），不是本次已完成 attempt 的 verify 失败。恢复 gate 前需在同一环境提供配置后重跑 gate；不得重新生成模型调用。
+
 ## 2026-10-06：聚合选择恢复结果
 
 `attempt-gdpevo-v4-faithful-20261005k` 从 j 复用完成证据，candidate-selection.json 的 fewshot/skills/dynamic 均 promote=true；仅使用 20 道 train validation、repeat_count=1，未安装生产技能。k 是事后按新政策重算，不能冒称新的一轮训练或新的独立测试。三轮 reflect 是一次训练内的迭代，三次 test 是同一冻结 bank 的重复，不是三次独立训练。原 v3 test 已用于开发评测，尚无新封存测试结论。
