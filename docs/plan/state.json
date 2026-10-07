@@ -391,6 +391,12 @@
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T64/20261006T053256Z/receipt.json",
       "notes": "T64 compute Actor 全量 resume 已完成并通过 gate；20 train、20x4 validation、20x4x3 held-out test，verify test_rows=240。validation fixed/fewshot/skills/dynamic=0.942308/0.792308/0.946154/0.965385；held-out=0.758974/0.601282/0.876923/0.888462。保留2 environment failure和1 format failure，learning_gain_proven=false、production_assignment_changed=false。1594模型请求，保守估算114.284430 CNY。compute护栏提交d0ff341，端口覆盖提交955c727；gate receipt 20261006T053256Z。"
+    },
+    "T65": {
+      "status": "in_progress",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": "用户授权重新训练；独立v5 compute入口，保留T64；20train、reflect3、四臂validation、20test×4×3；test已见，仅开发评估。"
     }
   }
 }

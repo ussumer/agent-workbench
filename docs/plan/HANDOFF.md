@@ -1,5 +1,10 @@
 # 当前交接
 
+## 2026-10-07：T65 再训练进行中
+
+用户要求先Git保存再训练。文字充分示例诊断见 docs/runtime/gdpevo-dense-fewshot-2026-10-07.md，v2 test15/60、0.826923，无环境失败；不能与T64 compute直接比较。T65独立入口 scripts/planning/gdpevo_v5_compute_training.py 保留T64代码/证据：fewshot提炼加公开企业规则，Actor加完整同组train输入/答案（validation排除自身），训练反馈修正冒号字段匹配。20train、reflect3、80validation、240test；不安装生产bank，test已见故只称开发测试。8项边界测试通过。新attempt默认为 artifacts/experiments/t65-compute-dense-20261007，端口另行设置避免T64。任务尚未完成，须真实运行和verify/gate。既有pckl、检查脚本、docs/portfolio不纳入提交。
+
+
 ## 2026-10-06：T64 compute Actor 全量 resume 与 gate 已完成
 
 新的计算 Actor attempt `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261006/attempt-gdpevo-v4-compute-20261006-resume2` 已完成 20 train、learning、20×4 validation 和 20×4×3 held-out test。使用同一 DeepAgents/OpenSandbox compute Actor、Mongo 持久计算、每 episode 独立 owner/sandbox 和 dynamic 的逐回合 selector；test 无反馈、无修订、无倒选。独立 verify 通过：`test_rows=240`，`repeats=3`，403 个 scored evidence rows 中 402 个含真实 computation execution；`learning_gain_proven=false`、`production_assignment_changed=false`。

@@ -3496,6 +3496,56 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T65",
+      "title": "充分few-shot与准确反馈的全量计算再训练",
+      "file": "docs/plan/tasks/T65.md",
+      "depends_on": [
+        "T64"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-dense-fewshot-2026-10-07.md",
+        "docs/runtime/gdpevo-procurement-taskset-v3.md"
+      ],
+      "checks": [
+        {
+          "id": "dense-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t65.py",
+            "-q",
+            "--junitxml={evidence_dir}/dense-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/dense-unit.xml"
+        },
+        {
+          "id": "dense-compute-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_v5_compute_training.py",
+            "verify"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }
