@@ -396,7 +396,7 @@
       "status": "done",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T65/20261007T112429Z/receipt.json",
-      "notes": "T65全量compute再训练通过gate：20 train、四组reflect-3与few-shot curator、80 validation、240 test（4臂×20×3）。validation fixed/fewshot/skills/dynamic=0.965385/0.953846/0.953846/0.946154，按aggregate-v2三候选均不promote；test fixed/fewshot/skills/dynamic=8/60、41/60、31/60、41/60，均分0.726923/0.928205/0.893590/0.914103。保留3 format_failed与2 environment_failed；verify coverage scored=399、真实computation=396。实际模型请求2684，input=22322979、output=1005904，保守估算228.066219 CNY；learning_gain_proven=false、production_assignment_changed=false。test已见，仅为开发held-out对照，不宣称独立封存泛化。"
+      "notes": "T65全量compute再训练通过gate：20 train、四组reflect-3与few-shot curator、80 validation、240 test（4臂×20×3）。validation fixed/fewshot/skills/dynamic=0.965385/0.953846/0.953846/0.946154，按aggregate-v2三候选均不promote；test fixed/fewshot/skills/dynamic=8/60、41/60、31/60、41/60，均分0.726923/0.928205/0.893590/0.914103。保留3 format_failed与2 environment_failed；verify coverage scored=399、真实computation=396。含20次Curator在内实际模型请求2704，input=22492359、output=1029377，保守估算230.224410 CNY；learning_gain_proven=false、production_assignment_changed=false。test已见，仅为开发held-out对照，不宣称独立封存泛化。"
     }
   }
 }
