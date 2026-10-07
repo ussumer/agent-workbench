@@ -1,8 +1,14 @@
 # 当前交接
 
-## 2026-10-07：T65 再训练进行中
+## 2026-10-07：T65 再训练完成
 
-用户要求先Git保存再训练。文字充分示例诊断见 docs/runtime/gdpevo-dense-fewshot-2026-10-07.md，v2 test15/60、0.826923，无环境失败；不能与T64 compute直接比较。T65独立入口 scripts/planning/gdpevo_v5_compute_training.py 保留T64代码/证据：fewshot提炼加公开企业规则，Actor加完整同组train输入/答案（validation排除自身），训练反馈修正冒号字段匹配。20train、reflect3、80validation、240test；不安装生产bank，test已见故只称开发测试。8项边界测试通过。新attempt默认为 artifacts/experiments/t65-compute-dense-20261007，端口另行设置避免T64。任务尚未完成，须真实运行和verify/gate。既有pckl、检查脚本、docs/portfolio不纳入提交。
+用户授权后，T65 独立 compute 运行目录 `artifacts/experiments/t65-compute-dense-20261007` 完成 20 train、四组 reflect-3/few-shot curator、80 validation、240 test（4 arms × 20 × 3 repeats）。入口为 `scripts/planning/gdpevo_v5_compute_training.py`，完整同组 train 输入/答案只注入 few-shot Actor；train validation 排除自身，test 无反馈、无修订、无倒选，生产 assignment 未改。
+
+结果：validation fixed/fewshot/skills/dynamic 分别 17/20、16/20、16/20、15/20，均分 0.965385/0.953846/0.953846/0.946154；aggregate-v2 因总体回归拒绝三个候选。开发 held-out test 的全量三次合计为 fixed 8/60（0.726923）、fewshot 41/60（0.928205）、skills 31/60（0.893590）、dynamic 41/60（0.914103）。few-shot 两次/三次重复分别为 16/20、12/20、13/20，说明示例不足确实是原 arm 的关键缺口；但 test 已在开发阶段见过，不能称独立封存泛化或 learning gain，`learning_gain_proven=false` 保持不变。
+
+独立 verify 通过：`test_rows=240`，399 scored evidence rows 中 396 个含真实 computation execution，production_assignment_changed=false。保留 3 个 format_failed、2 个 environment_failed（含一次动态 episode recursion limit/沙箱临时端口冲突）；没有删除或重跑覆盖失败证据。全程 2684 次模型请求，input 22,322,979、output 1,005,904，保守估算 228.066219 CNY，实际账单未知。端口使用 18083，T64 未改。
+
+T65 gate：`artifacts/tasks/T65/20261007T112429Z/receipt.json`，8 项单元测试和 compute evidence verify 全部通过。代码提交 `60ef9bf`，相对路径修复提交 `3b3e32d`；startup/config 失败目录 `artifacts/experiments/t65-compute-dense-20261007-startup-denied`、`...-sandbox-config-relative-failed` 保留。运行时 pckl、诊断脚本和 docs/portfolio 不纳入提交。文字充分示例诊断仍见 `docs/runtime/gdpevo-dense-fewshot-2026-10-07.md`，不能与本次 compute 结果混为同一 arm。
 
 
 ## 2026-10-06：T64 compute Actor 全量 resume 与 gate 已完成
