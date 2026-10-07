@@ -268,6 +268,10 @@ def diff_usage(before: dict, after: dict) -> dict:
 
 def run(output: Path = SESSION, *, test_repeats: int = 3, workers: int = 3,
         resume_from: Path | None = None) -> dict:
+    # The sandbox launcher changes its working directory to the service directory.
+    # Keep every evidence/service path absolute so its --config argument cannot be
+    # resolved relative to that directory.
+    output = output.resolve()
     if output.exists():
         raise FileExistsError(output)
     if test_repeats < 3:
