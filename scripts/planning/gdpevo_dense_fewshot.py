@@ -37,13 +37,15 @@ def examples_for(task: dict, train: list[dict], answers: dict, *, exclude_self: 
     """Return only same-group train examples, never a held-out answer."""
     result = []
     for candidate in train:
+        if candidate["split"] != "train" or candidate["group_id"] != task["group_id"]:
+            continue
         if exclude_self and candidate["task_id"] == task["task_id"]:
             continue
         answer = answers["tasks"].get(candidate["task_id"], [])
         if not answer:
             continue
         result.append({"task_id": candidate["task_id"], "request": candidate["request"],
-                       "correct_decision": answer[0]})
+                       "input": candidate["input"], "correct_decision": answer[0]})
     return result
 
 
