@@ -2907,6 +2907,63 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T54",
+      "title": "GDPevo四组采购任务扩展与确定性独立裁判",
+      "file": "docs/plan/tasks/T54.md",
+      "depends_on": [
+        "T52",
+        "T53"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v2.md",
+        "docs/runtime/gdpevo-calibration-2026-10-04.md",
+        "docs/plan/contracts/planning.md",
+        "scripts/planning/gdpevo_oracle.py",
+        "fixtures/planning/gdpevo-procurement-v3.json",
+        "scripts/planning/gdpevo_expansion_judge.py"
+      ],
+      "checks": [
+        {
+          "id": "expansion-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 12,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_gdpevo_expansion.py",
+            "-q",
+            "--junitxml={evidence_dir}/expansion-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/expansion-unit.xml"
+        },
+        {
+          "id": "expansion-report",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/gdpevo_expansion.py",
+            "validate",
+            "--output",
+            "{evidence_dir}/expansion-report.json"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }

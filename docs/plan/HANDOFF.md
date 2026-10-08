@@ -1,8 +1,37 @@
 # 当前交接
 
-## 当前状态：T53新任务内容试跑完成；T51仍暂停
+## 2026-10-04 T54 完成（GDPevo四组任务扩展）
 
-用户授权“新任务跑一下”，T53已完成真实模型只读内容校准，不恢复T51旧题或启动训练。配置 `deepseek-flash`，no-tools/one-shot、thinking disabled；base和policy-visible各5题，均2/5整题全对、76%加权分，无网络/格式失败。给规则没有改善，不能宣称学习增益或正式校准；错误为超预算仍执行、重复采购历史件、违反现场包装盈余和免邮门槛。详细结果 `docs/runtime/gdpevo-calibration-2026-10-04.md`。
+T54 gate `artifacts/tasks/T54/20261004T145714Z/receipt.json`：138 个确定性测试，0 failed/0 skipped。新增 fixture 复用v2采购字段；只增加离线分组和独立审计元数据，不修改生产schema；四组 `quotes/packages/kits/revisions` 各 5 train + 5 test，共 40 新主任务、40 单因素反事实，累计 50 主任务、48 反事实。私有答案/控制面与训练材料分离；每个 task 6 个二值点、权重1–3；`procurement` 合并采购决定/分配/商品运费，审批点合并检查revision与禁止复用旧批准；目录审计只评分未参与采购关系，独立 audit_carts 不并入预算。
+
+入口：`fixtures/planning/gdpevo-procurement-v3.json`、`fixtures/planning/gdpevo-procurement-v3-training.json`、`fixtures/planning/private/gdpevo-procurement-v3-control.json`、`fixtures/planning/private/gdpevo-procurement-v3-answers.json`、`scripts/planning/gdpevo_expansion.py`、`scripts/planning/gdpevo_expansion_judge.py`、`tests/acceptance/test_gdpevo_expansion.py`、`docs/runtime/gdpevo-procurement-taskset-v3.md`。
+
+验证同时比较旧 v2 oracle 与独立有界整数枚举，固定手算期望覆盖全部40道主任务及40个反事实；40/40 反事实真实改变 disposition、可行性、目标或 winner set。哈希已写入 v3 文档和 expansion-report。0 模型调用、0 服务启动、0 下单；不宣称模型学习收益、正式校准或生产 Actor 工具能力。生产 adapter 仍需把合成报价/ERP/承诺映射到 Java ERP、MongoDB planning_goal、MCP 审批与 OpenSandbox 计算。
+
+训练继续在 `/mnt/c/dev/rush-harness-training` 使用 T55；本仓库没有修改 `gdpevo_training.py` 或训练运行目录。旧失败草稿保留在 `artifacts/tasks/T54/`，不得挂载给 Actor。
+
+
+## T54 恢复尝试再次停止（最新现场）
+
+用户“继续”后已恢复，但未形成合格样板。反事实两次修复仍失败（声明no-op、报价最后一题缺少两个有效变体），按止损规则再次停止。当前v3文件全部是未经验收草稿，不得用于训练或评分；`artifacts/tasks/T54/resume-rejected-02/README.md`详列真实失败和缺口。
+
+新增实现草稿：`gdpevo_v3_cases.py`报价组10个原始业务例子；`gdpevo_v3_judge.py`独立每报价整数计数枚举，与旧v2枚举分离；`gdpevo_v3.py`阶段视图、分离training/private文件。仍不合格：其余三组是重复模板；矩阵机械截取而非实际规则触发；人工预期被生成gold替代；反事实未通过；旧草稿说明含错误完成声明。不能用40个条目/结构检查代替有效产出。
+
+T54 blocked、无receipt；等待用户讨论及明确resume。旧v2及试跑、gdpevo_training.py和训练目录未主动修改。本轮无付费模型、Curator、服务或ERP操作。
+
+
+## 2026-10-04 T54 扩题停止：未完成，等待讨论
+
+用户明确本仓库T54留给任务集扩展，训练迁到 `/mnt/c/dev/rush-harness-training` 使用T55。未修改 `gdpevo_training.py`、原训练测试或训练运行目录。下方“T54训练中”为原线程历史，编号已按最新用户指令让给扩题。
+
+扩题草稿没有形成合格业务任务。第一版公开feasible/objective标签、反事实校验失败；第二版隐藏这些标签却仍依赖私有预标注选项而非原始业务事实，反事实before/after与实际输入变更不一致，缺少独立穷举、手算答案与真实评分器。不能把40条模板、7项结构检查通过视为任务集交付。草稿和失败移入 `artifacts/tasks/T54/design-rejected-01/` 与 `design-rejected-02/`；其中v3说明及成功标记均为失效草稿，禁止使用。
+
+按止损规则停止，不继续补丁或重跑。T54 blocked、无receipt、review not_reviewed。旧v2、seed、T53真实结果未改，零模型/零服务启动/零下单。新增gate检查未实现，不宣称通过。待用户讨论并明确resume后，从真实原始业务输入开始重做一组样板。
+
+
+## 当前状态：T54新任务文字技能训练中；训练前版本已提交
+
+用户明确授权开始训练；训练前快照commit 9f2ea2e，tag pre-training-gdpevo-20261004。T54 in_progress，在T52五个train上采集尝试与诊断反馈，再调用Curator并对比raw/curated；现有生产Harness不改、不安装活动技能。T53已完成真实模型只读内容校准。配置 `deepseek-flash`，no-tools/one-shot、thinking disabled；base和policy-visible各5题，均2/5整题全对、76%加权分，无网络/格式失败。给规则没有改善，不能宣称学习增益或正式校准；错误为超预算仍执行、重复采购历史件、违反现场包装盈余和免邮门槛。详细结果 `docs/runtime/gdpevo-calibration-2026-10-04.md`。
 
 T53 gate `artifacts/tasks/T53/20261004T123157Z/receipt.json`：6项单元检查和真实请求证据只读核验通过；这证明试跑证据完整，不代表模型业务成功。10次调用合计保守估算0.307314元，累计账本17.837046/50元，actual_cost未知。原始目录 `/mnt/c/dev/rsi-eval/procurement_eval/runs/planning-session-20261004/attempt-gdpevo-calibration-20261004`。每题原始请求/响应/usage/冻结评分器均保存，未改T52题目/评分。后续适合用带OpenSandbox计算的同配置Actor验证；本次未接新规则生产adapter，未进行ERP下单。已停止新增调用，等待用户决定后续工作。
 

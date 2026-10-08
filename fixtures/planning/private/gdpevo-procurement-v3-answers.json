@@ -1,0 +1,5608 @@
+{
+  "schema_version": 2,
+  "task_group_id": "chengchuan-procurement-v3",
+  "tasks": {
+    "quotes-train-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "A:S1": {
+            "quote_id": "final",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "A:S2": {
+            "quote_id": "alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "A:S3": {
+            "quote_id": "unconfirmed",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "final",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "final",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "draft",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-train-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "B:S1": {
+            "quote_id": "live",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "B:S2": {
+            "quote_id": "fallback",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "live",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "live",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "live",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-train-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "C:S1": {
+            "quote_id": "closed",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "C:S2": {
+            "quote_id": "backup",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "backup",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "backup",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "signed",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-train-04": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "D:S1": {
+            "quote_id": "known",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "D:S2": {
+            "quote_id": "unknown",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "known",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-train-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "E:S1": {
+            "quote_id": "new",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "E:S2": {
+            "quote_id": "alternative",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "new",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "new",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-test-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "F:S1": {
+            "quote_id": "f-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "F:S2": {
+            "quote_id": "f-alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "f-alt",
+            "packs": 5
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "f-alt",
+              "packs": 5
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "f-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "f-alt",
+            "field": "capacity_units"
+          },
+          {
+            "quote_id": "f-alt",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-test-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "G:S1": {
+            "quote_id": "g-new",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "G:S2": {
+            "quote_id": "g-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "g-new",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "g-new",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "g-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 80,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-test-03": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "H:S1": {
+            "quote_id": "h-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "H:S2": {
+            "quote_id": "h-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "h-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-test-04": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "I:S1": {
+            "quote_id": "i-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "I:S2": {
+            "quote_id": "i-alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "J:S2": {
+            "quote_id": "j-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "i-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-test-05": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "K:S1": {
+            "quote_id": "k-new",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "K:S2": {
+            "quote_id": "k-pending",
+            "status": "pending",
+            "erp_active": false,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "k-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-train-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PA:S1": {
+            "quote_id": "pa-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PA:S2": {
+            "quote_id": "pa-unit",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pa-pack",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pa-pack",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pa-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-train-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PB:S1": {
+            "quote_id": "pb-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PB:S2": {
+            "quote_id": "pb-unit",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pb-unit",
+            "packs": 5
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pb-unit",
+              "packs": 5
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pb-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-train-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PC:S1": {
+            "quote_id": "pc-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PC:S2": {
+            "quote_id": "pc-unit",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 3
+          },
+          "PC:S3": {
+            "quote_id": "pc-slow",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 4
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pc-unit",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pc-unit",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pc-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-train-04": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PR:S1": {
+            "quote_id": "pr",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PL:S1": {
+            "quote_id": "pl",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PT:S1": {
+            "quote_id": "pt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pr",
+            "packs": 1
+          },
+          {
+            "quote_id": "pt",
+            "packs": 5
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pr",
+              "packs": 1
+            },
+            {
+              "quote_id": "pt",
+              "packs": 5
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pr",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-train-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PD:S1": {
+            "quote_id": "pd-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PD:S2": {
+            "quote_id": "pd-unit",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pd-pack",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pd-pack",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pd-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 100,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-test-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PE:S1": {
+            "quote_id": "pe-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PE:S2": {
+            "quote_id": "pe-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PF:S1": {
+            "quote_id": "pf-s1",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PF:S2": {
+            "quote_id": "pf-s2",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pe-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "pf-s1",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pe-pack",
+              "packs": 2
+            },
+            {
+              "quote_id": "pf-s1",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pe-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 80,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-test-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PG:S1": {
+            "quote_id": "pg-large",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PG:S2": {
+            "quote_id": "pg-small",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PH:S2": {
+            "quote_id": "ph",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pg-small",
+            "packs": 4
+          },
+          {
+            "quote_id": "ph",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pg-small",
+              "packs": 4
+            },
+            {
+              "quote_id": "ph",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pg-large",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-test-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PI:S1": {
+            "quote_id": "pi-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PI:S2": {
+            "quote_id": "pi-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pi-each",
+            "packs": 5
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pi-each",
+              "packs": 5
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pi-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-test-04": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PJ:S1": {
+            "quote_id": "pj",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PK:S1": {
+            "quote_id": "pk",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PL2:S1": {
+            "quote_id": "pl2",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PM:S1": {
+            "quote_id": "pm",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pj",
+            "packs": 1
+          },
+          {
+            "quote_id": "pk",
+            "packs": 2
+          },
+          {
+            "quote_id": "pm",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pj",
+              "packs": 1
+            },
+            {
+              "quote_id": "pk",
+              "packs": 2
+            },
+            {
+              "quote_id": "pm",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pj",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 100,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-test-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PN:S1": {
+            "quote_id": "pn-cheap",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PN:S2": {
+            "quote_id": "pn-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PO:S2": {
+            "quote_id": "po",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pn-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "po",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pn-pack",
+              "packs": 2
+            },
+            {
+              "quote_id": "po",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pn-cheap",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 180,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-train-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "KA:S1": {
+            "quote_id": "ka",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "KB:S1": {
+            "quote_id": "kb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "KC:S1": {
+            "quote_id": "kc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ka",
+            "packs": 2
+          },
+          {
+            "quote_id": "kb",
+            "packs": 2
+          },
+          {
+            "quote_id": "kc",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ka",
+              "packs": 2
+            },
+            {
+              "quote_id": "kb",
+              "packs": 2
+            },
+            {
+              "quote_id": "kc",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ka",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-train-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "LA:S1": {
+            "quote_id": "la",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "LB:S1": {
+            "quote_id": "lb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "LC:S1": {
+            "quote_id": "lc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "la",
+            "packs": 1
+          },
+          {
+            "quote_id": "lb",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "la",
+              "packs": 1
+            },
+            {
+              "quote_id": "lb",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "la",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-train-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "MA:S1": {
+            "quote_id": "ma",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "MB:S1": {
+            "quote_id": "mb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "MC:S1": {
+            "quote_id": "mc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "MX:S1": {
+            "quote_id": "mx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ma",
+            "packs": 1
+          },
+          {
+            "quote_id": "mx",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ma",
+              "packs": 1
+            },
+            {
+              "quote_id": "mx",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ma",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-train-04": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "NA:S1": {
+            "quote_id": "na",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "NX:S1": {
+            "quote_id": "nx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "NY:S1": {
+            "quote_id": "ny",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "na",
+            "packs": 2
+          },
+          {
+            "quote_id": "ny",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "na",
+              "packs": 2
+            },
+            {
+              "quote_id": "ny",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "na",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-train-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "OA:S1": {
+            "quote_id": "oa",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "OB:S1": {
+            "quote_id": "ob",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "OC:S1": {
+            "quote_id": "oc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "OX:S1": {
+            "quote_id": "ox",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "oa",
+            "packs": 1
+          },
+          {
+            "quote_id": "ox",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "oa",
+              "packs": 1
+            },
+            {
+              "quote_id": "ox",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "oa",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-test-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "QA:S1": {
+            "quote_id": "qa",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QB:S1": {
+            "quote_id": "qb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QC:S1": {
+            "quote_id": "qc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QX:S1": {
+            "quote_id": "qx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "qa",
+            "packs": 1
+          },
+          {
+            "quote_id": "qx",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "qa",
+              "packs": 1
+            },
+            {
+              "quote_id": "qx",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "qa",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-test-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "RA:S1": {
+            "quote_id": "ra",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RB:S1": {
+            "quote_id": "rb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RC:S1": {
+            "quote_id": "rc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RX:S1": {
+            "quote_id": "rx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ra",
+            "packs": 2
+          },
+          {
+            "quote_id": "rx",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ra",
+              "packs": 2
+            },
+            {
+              "quote_id": "rx",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ra",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-test-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "SA:S1": {
+            "quote_id": "sa",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SB:S1": {
+            "quote_id": "sb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SC:S1": {
+            "quote_id": "sc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SX:S1": {
+            "quote_id": "sx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "sa",
+            "packs": 1
+          },
+          {
+            "quote_id": "sx",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "sa",
+              "packs": 1
+            },
+            {
+              "quote_id": "sx",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "sa",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-test-04": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "TA:S1": {
+            "quote_id": "ta",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TB:S1": {
+            "quote_id": "tb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TC:S1": {
+            "quote_id": "tc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TX:S1": {
+            "quote_id": "tx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ta",
+            "packs": 1
+          },
+          {
+            "quote_id": "tc",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-TB",
+            "part_id": "TB",
+            "quantity": 2,
+            "paid_cents": 150
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [
+            {
+              "quote_id": "ta",
+              "packs": 1
+            },
+            {
+              "quote_id": "tc",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ta",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-test-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "UA:S1": {
+            "quote_id": "ua",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UB:S1": {
+            "quote_id": "ub",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UC:S1": {
+            "quote_id": "uc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UX:S1": {
+            "quote_id": "ux",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ua",
+            "packs": 1
+          },
+          {
+            "quote_id": "ux",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ua",
+              "packs": 1
+            },
+            {
+              "quote_id": "ux",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ua",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-train-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VA:S1": {
+            "quote_id": "va-new",
+            "status": "signed",
+            "erp_active": false,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VA",
+            "part_id": "VA",
+            "quantity": 3,
+            "paid_cents": 180
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "va-new",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-train-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VB:S1": {
+            "quote_id": "vb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vb",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VB",
+            "part_id": "VB",
+            "quantity": 2,
+            "paid_cents": 200
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [
+            {
+              "quote_id": "vb",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vb",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-train-03": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "VC:S1": {
+            "quote_id": "vc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VC:S2": {
+            "quote_id": "vc-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VC",
+            "part_id": "VC",
+            "quantity": 1,
+            "paid_cents": 100
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vc",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-train-04": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "VD:S1": {
+            "quote_id": "vd",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VD",
+            "part_id": "VD",
+            "quantity": 2,
+            "paid_cents": 350
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vd",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-train-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VE:S1": {
+            "quote_id": "ve-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VE:S2": {
+            "quote_id": "ve-alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ve-alt",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VE",
+            "part_id": "VE",
+            "quantity": 1,
+            "paid_cents": 100
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [
+            {
+              "quote_id": "ve-alt",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ve-close",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-test-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VF:S1": {
+            "quote_id": "vf-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VF:S2": {
+            "quote_id": "vf-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vf-pack",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 120
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VF",
+            "part_id": "VF",
+            "quantity": 4,
+            "paid_cents": 400
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [
+            {
+              "quote_id": "vf-pack",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vf-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 120,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-test-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VG:S1": {
+            "quote_id": "vg-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VJ:S1": {
+            "quote_id": "vj",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vj",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VG",
+            "part_id": "VG",
+            "quantity": 4,
+            "paid_cents": 360
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [
+            {
+              "quote_id": "vj",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vg-pending",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-test-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VK:S1": {
+            "quote_id": "vk",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VK:S2": {
+            "quote_id": "vk-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vk",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VK",
+            "part_id": "VK",
+            "quantity": 2,
+            "paid_cents": 240
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [
+            {
+              "quote_id": "vk",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vk",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-test-04": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VL:S1": {
+            "quote_id": "vl",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VL:S2": {
+            "quote_id": "vl-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 4
+          },
+          "VM:S1": {
+            "quote_id": "vm",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vl",
+            "packs": 1
+          },
+          {
+            "quote_id": "vm",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VL",
+            "part_id": "VL",
+            "quantity": 3,
+            "paid_cents": 450
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [
+            {
+              "quote_id": "vl",
+              "packs": 1
+            },
+            {
+              "quote_id": "vm",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vl",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 100,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-test-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VN:S1": {
+            "quote_id": "vn-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VN:S2": {
+            "quote_id": "vn-unit",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VN:S3": {
+            "quote_id": "vn-pending",
+            "status": "pending",
+            "erp_active": false,
+            "erp_lead_days": 2
+          },
+          "VO:S2": {
+            "quote_id": "vo",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vn-unit",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VN",
+            "part_id": "VN",
+            "quantity": 2,
+            "paid_cents": 240
+          }
+        ],
+        "approval_request": {
+          "revision": 4,
+          "lines": [
+            {
+              "quote_id": "vn-unit",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vn-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ]
+  },
+  "counterfactuals": {
+    "quotes-cf-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "F:S1": {
+            "quote_id": "f-signed",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "F:S2": {
+            "quote_id": "f-alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "f-signed",
+            "packs": 5
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "f-signed",
+              "packs": 5
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "f-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "f-alt",
+            "field": "capacity_units"
+          },
+          {
+            "quote_id": "f-alt",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-02": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "F:S1": {
+            "quote_id": "f-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "F:S2": {
+            "quote_id": "f-alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "f-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "f-alt",
+            "field": "capacity_units"
+          },
+          {
+            "quote_id": "f-alt",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-03": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "G:S1": {
+            "quote_id": "g-new",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "G:S2": {
+            "quote_id": "g-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "g-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 80,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-04": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "G:S1": {
+            "quote_id": "g-old",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "g-old",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S1": 80
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "g-old",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "g-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 80,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-05": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "H:S1": {
+            "quote_id": "h-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "H:S2": {
+            "quote_id": "h-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "h-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-06": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "H:S1": {
+            "quote_id": "h-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "H:S2": {
+            "quote_id": "h-pending",
+            "status": "pending",
+            "erp_active": false,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "h-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-07": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "I:S1": {
+            "quote_id": "i-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "I:S2": {
+            "quote_id": "i-alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "J:S2": {
+            "quote_id": "j-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "i-alt",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "i-alt",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "i-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-08": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "I:S1": {
+            "quote_id": "i-close",
+            "status": "revoked",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "I:S2": {
+            "quote_id": "i-alt",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "J:S2": {
+            "quote_id": "j-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "i-alt",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "i-alt",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "i-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-09": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "K:S1": {
+            "quote_id": "k-new",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "K:S2": {
+            "quote_id": "k-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "k-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "quotes-cf-10": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "K:S1": {
+            "quote_id": "k-new",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "K:S2": {
+            "quote_id": "k-pending",
+            "status": "pending",
+            "erp_active": false,
+            "erp_lead_days": 2
+          },
+          "AUDIT-quotes:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "k-new",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "k-new",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "k-old",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PE:S1": {
+            "quote_id": "pe-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PE:S2": {
+            "quote_id": "pe-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PF:S1": {
+            "quote_id": "pf-s1",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PF:S2": {
+            "quote_id": "pf-s2",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pe-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "pf-s1",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 80
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pe-pack",
+              "packs": 2
+            },
+            {
+              "quote_id": "pf-s1",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pe-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 80,
+          "under-edge": 80,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PE:S1": {
+            "quote_id": "pe-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PE:S2": {
+            "quote_id": "pe-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PF:S1": {
+            "quote_id": "pf-s1",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PF:S2": {
+            "quote_id": "pf-s2",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pe-each",
+            "packs": 5
+          },
+          {
+            "quote_id": "pf-s2",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S2": 160
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pe-each",
+              "packs": 5
+            },
+            {
+              "quote_id": "pf-s2",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pe-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 80,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PG:S1": {
+            "quote_id": "pg-large",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PG:S2": {
+            "quote_id": "pg-small",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PH:S2": {
+            "quote_id": "ph",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pg-large",
+            "packs": 2
+          },
+          {
+            "quote_id": "ph",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0,
+          "S2": 100
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pg-large",
+              "packs": 2
+            },
+            {
+              "quote_id": "ph",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pg-large",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      },
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PG:S1": {
+            "quote_id": "pg-large",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PG:S2": {
+            "quote_id": "pg-small",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PH:S2": {
+            "quote_id": "ph",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pg-small",
+            "packs": 4
+          },
+          {
+            "quote_id": "ph",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S2": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pg-small",
+              "packs": 4
+            },
+            {
+              "quote_id": "ph",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pg-large",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-04": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "PG:S1": {
+            "quote_id": "pg-large",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PG:S2": {
+            "quote_id": "pg-small",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PH:S2": {
+            "quote_id": "ph",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pg-large",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PI:S1": {
+            "quote_id": "pi-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PI:S2": {
+            "quote_id": "pi-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pi-pack",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pi-pack",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pi-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-06": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "PI:S1": {
+            "quote_id": "pi-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PI:S2": {
+            "quote_id": "pi-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pi-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-07": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PJ:S1": {
+            "quote_id": "pj",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PK:S1": {
+            "quote_id": "pk",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PL2:S1": {
+            "quote_id": "pl2",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PM:S1": {
+            "quote_id": "pm",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pj",
+            "packs": 1
+          },
+          {
+            "quote_id": "pk",
+            "packs": 2
+          },
+          {
+            "quote_id": "pl2",
+            "packs": 1
+          },
+          {
+            "quote_id": "pm",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pj",
+              "packs": 1
+            },
+            {
+              "quote_id": "pk",
+              "packs": 2
+            },
+            {
+              "quote_id": "pl2",
+              "packs": 1
+            },
+            {
+              "quote_id": "pm",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pj",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 100,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-08": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PJ:S1": {
+            "quote_id": "pj",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PK:S1": {
+            "quote_id": "pk",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PL2:S1": {
+            "quote_id": "pl2",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PM:S1": {
+            "quote_id": "pm",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pj",
+            "packs": 1
+          },
+          {
+            "quote_id": "pl2",
+            "packs": 1
+          },
+          {
+            "quote_id": "pm",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 100
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pj",
+              "packs": 1
+            },
+            {
+              "quote_id": "pl2",
+              "packs": 1
+            },
+            {
+              "quote_id": "pm",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pj",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 100,
+          "under-edge": 100,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-09": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PN:S1": {
+            "quote_id": "pn-cheap",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PN:S2": {
+            "quote_id": "pn-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PO:S2": {
+            "quote_id": "po",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pn-cheap",
+            "packs": 3
+          },
+          {
+            "quote_id": "po",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S1": 0,
+          "S2": 100
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pn-cheap",
+              "packs": 3
+            },
+            {
+              "quote_id": "po",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pn-cheap",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 0,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "packages-cf-10": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "PN:S1": {
+            "quote_id": "pn-cheap",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PN:S2": {
+            "quote_id": "pn-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "PO:S2": {
+            "quote_id": "po",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-packages:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "pn-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "po",
+            "packs": 4
+          }
+        ],
+        "freight_cents": {
+          "S2": 100
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "pn-pack",
+              "packs": 2
+            },
+            {
+              "quote_id": "po",
+              "packs": 4
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "pn-cheap",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 180,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-01": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "QA:S1": {
+            "quote_id": "qa",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QB:S1": {
+            "quote_id": "qb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QC:S1": {
+            "quote_id": "qc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QX:S1": {
+            "quote_id": "qx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "qa",
+            "packs": 1
+          },
+          {
+            "quote_id": "qb",
+            "packs": 2
+          },
+          {
+            "quote_id": "qc",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "qa",
+              "packs": 1
+            },
+            {
+              "quote_id": "qb",
+              "packs": 2
+            },
+            {
+              "quote_id": "qc",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "qa",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "QA:S1": {
+            "quote_id": "qa",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QB:S1": {
+            "quote_id": "qb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QC:S1": {
+            "quote_id": "qc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "QX:S1": {
+            "quote_id": "qx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "qa",
+            "packs": 1
+          },
+          {
+            "quote_id": "qb",
+            "packs": 2
+          },
+          {
+            "quote_id": "qc",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "qa",
+              "packs": 1
+            },
+            {
+              "quote_id": "qb",
+              "packs": 2
+            },
+            {
+              "quote_id": "qc",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "qa",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-03": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "RA:S1": {
+            "quote_id": "ra",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RB:S1": {
+            "quote_id": "rb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RC:S1": {
+            "quote_id": "rc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RX:S1": {
+            "quote_id": "rx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ra",
+            "packs": 2
+          },
+          {
+            "quote_id": "rb",
+            "packs": 2
+          },
+          {
+            "quote_id": "rc",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ra",
+              "packs": 2
+            },
+            {
+              "quote_id": "rb",
+              "packs": 2
+            },
+            {
+              "quote_id": "rc",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ra",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-04": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "RA:S1": {
+            "quote_id": "ra",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RB:S1": {
+            "quote_id": "rb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RC:S1": {
+            "quote_id": "rc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "RX:S1": {
+            "quote_id": "rx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ra",
+            "packs": 2
+          },
+          {
+            "quote_id": "rb",
+            "packs": 2
+          },
+          {
+            "quote_id": "rc",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ra",
+              "packs": 2
+            },
+            {
+              "quote_id": "rb",
+              "packs": 2
+            },
+            {
+              "quote_id": "rc",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ra",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-05": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "SA:S1": {
+            "quote_id": "sa",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SB:S1": {
+            "quote_id": "sb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SC:S1": {
+            "quote_id": "sc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SX:S1": {
+            "quote_id": "sx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "sa",
+            "packs": 1
+          },
+          {
+            "quote_id": "sb",
+            "packs": 2
+          },
+          {
+            "quote_id": "sc",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "sa",
+              "packs": 1
+            },
+            {
+              "quote_id": "sb",
+              "packs": 2
+            },
+            {
+              "quote_id": "sc",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "sa",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-06": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "SA:S1": {
+            "quote_id": "sa",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SB:S1": {
+            "quote_id": "sb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SC:S1": {
+            "quote_id": "sc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "SX:S1": {
+            "quote_id": "sx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "sa",
+            "packs": 1
+          },
+          {
+            "quote_id": "sb",
+            "packs": 2
+          },
+          {
+            "quote_id": "sc",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "sa",
+              "packs": 1
+            },
+            {
+              "quote_id": "sb",
+              "packs": 2
+            },
+            {
+              "quote_id": "sc",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "sa",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-07": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "TA:S1": {
+            "quote_id": "ta",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TB:S1": {
+            "quote_id": "tb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TC:S1": {
+            "quote_id": "tc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TX:S1": {
+            "quote_id": "tx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ta",
+            "packs": 1
+          },
+          {
+            "quote_id": "tx",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-TB",
+            "part_id": "TB",
+            "quantity": 2,
+            "paid_cents": 150
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [
+            {
+              "quote_id": "ta",
+              "packs": 1
+            },
+            {
+              "quote_id": "tx",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ta",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-08": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "TA:S1": {
+            "quote_id": "ta",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TB:S1": {
+            "quote_id": "tb",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TC:S1": {
+            "quote_id": "tc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "TX:S1": {
+            "quote_id": "tx",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ta",
+            "packs": 1
+          },
+          {
+            "quote_id": "tc",
+            "packs": 3
+          },
+          {
+            "quote_id": "tx",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-TB",
+            "part_id": "TB",
+            "quantity": 2,
+            "paid_cents": 150
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [
+            {
+              "quote_id": "ta",
+              "packs": 1
+            },
+            {
+              "quote_id": "tc",
+              "packs": 3
+            },
+            {
+              "quote_id": "tx",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ta",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-09": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "UA:S1": {
+            "quote_id": "ua",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UB:S1": {
+            "quote_id": "ub",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UC:S1": {
+            "quote_id": "uc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UX:S1": {
+            "quote_id": "ux",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ua",
+            "packs": 1
+          },
+          {
+            "quote_id": "ub",
+            "packs": 1
+          },
+          {
+            "quote_id": "uc",
+            "packs": 2
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ua",
+              "packs": 1
+            },
+            {
+              "quote_id": "ub",
+              "packs": 1
+            },
+            {
+              "quote_id": "uc",
+              "packs": 2
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ua",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "kits-cf-10": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "UA:S1": {
+            "quote_id": "ua",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UB:S1": {
+            "quote_id": "ub",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UC:S1": {
+            "quote_id": "uc",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "UX:S1": {
+            "quote_id": "ux",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-kits:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "ua",
+            "packs": 1
+          },
+          {
+            "quote_id": "ub",
+            "packs": 1
+          },
+          {
+            "quote_id": "uc",
+            "packs": 2
+          },
+          {
+            "quote_id": "ux",
+            "packs": 3
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [],
+        "approval_request": {
+          "revision": 1,
+          "lines": [
+            {
+              "quote_id": "ua",
+              "packs": 1
+            },
+            {
+              "quote_id": "ub",
+              "packs": 1
+            },
+            {
+              "quote_id": "uc",
+              "packs": 2
+            },
+            {
+              "quote_id": "ux",
+              "packs": 3
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "ua",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-01": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "VF:S1": {
+            "quote_id": "vf-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VF:S2": {
+            "quote_id": "vf-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VF",
+            "part_id": "VF",
+            "quantity": 4,
+            "paid_cents": 400
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vf-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 120,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-02": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VF:S1": {
+            "quote_id": "vf-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VF:S2": {
+            "quote_id": "vf-each",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vf-pack",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VF",
+            "part_id": "VF",
+            "quantity": 4,
+            "paid_cents": 400
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [
+            {
+              "quote_id": "vf-pack",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vf-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 0,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-03": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "VG:S1": {
+            "quote_id": "vg-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VJ:S1": {
+            "quote_id": "vj",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VG",
+            "part_id": "VG",
+            "quantity": 4,
+            "paid_cents": 360
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vg-pending",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-04": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "VG:S1": {
+            "quote_id": "vg-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VJ:S1": {
+            "quote_id": "vj",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 8
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VG",
+            "part_id": "VG",
+            "quantity": 4,
+            "paid_cents": 360
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vg-pending",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-05": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "VK:S1": {
+            "quote_id": "vk",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VK:S2": {
+            "quote_id": "vk-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VK",
+            "part_id": "VK",
+            "quantity": 2,
+            "paid_cents": 240
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vk",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-06": [
+      {
+        "disposition": "infeasible",
+        "source_selection": {
+          "VK:S1": {
+            "quote_id": "vk",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VK:S2": {
+            "quote_id": "vk-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VK",
+            "part_id": "VK",
+            "quantity": 2,
+            "paid_cents": 240
+          }
+        ],
+        "approval_request": {
+          "revision": 2,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vk",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-07": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "VL:S1": {
+            "quote_id": "vl",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VL:S2": {
+            "quote_id": "vl-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 4
+          },
+          "VM:S1": {
+            "quote_id": "vm",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VL",
+            "part_id": "VL",
+            "quantity": 3,
+            "paid_cents": 450
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vl",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 100,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-08": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VL:S1": {
+            "quote_id": "vl",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VL:S2": {
+            "quote_id": "vl-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 4
+          },
+          "VM:S1": {
+            "quote_id": "vm",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vl",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 100
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VL",
+            "part_id": "VL",
+            "quantity": 3,
+            "paid_cents": 450
+          }
+        ],
+        "approval_request": {
+          "revision": 3,
+          "lines": [
+            {
+              "quote_id": "vl",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vl",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 100,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-09": [
+      {
+        "disposition": "execute",
+        "source_selection": {
+          "VN:S1": {
+            "quote_id": "vn-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VN:S2": {
+            "quote_id": "vn-unit",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VN:S3": {
+            "quote_id": "vn-pending",
+            "status": "pending",
+            "erp_active": false,
+            "erp_lead_days": 2
+          },
+          "VO:S2": {
+            "quote_id": "vo",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [
+          {
+            "quote_id": "vn-pack",
+            "packs": 2
+          },
+          {
+            "quote_id": "vo",
+            "packs": 1
+          }
+        ],
+        "freight_cents": {
+          "S1": 0,
+          "S2": 0
+        },
+        "commitment_ledger": [
+          {
+            "order_id": "O-VN",
+            "part_id": "VN",
+            "quantity": 2,
+            "paid_cents": 240
+          }
+        ],
+        "approval_request": {
+          "revision": 4,
+          "lines": [
+            {
+              "quote_id": "vn-pack",
+              "packs": 2
+            },
+            {
+              "quote_id": "vo",
+              "packs": 1
+            }
+          ],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vn-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ],
+    "revisions-cf-10": [
+      {
+        "disposition": "needs_information",
+        "source_selection": {
+          "VN:S1": {
+            "quote_id": "vn-pack",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VN:S2": {
+            "quote_id": "vn-unit",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VN:S3": {
+            "quote_id": "vn-pending",
+            "status": "pending",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "VO:S2": {
+            "quote_id": "vo",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 2
+          },
+          "AUDIT-revisions:AUDIT": {
+            "quote_id": "audit-official",
+            "status": "signed",
+            "erp_active": true,
+            "erp_lead_days": 5
+          }
+        },
+        "allocation": [],
+        "freight_cents": {},
+        "commitment_ledger": [
+          {
+            "order_id": "O-VN",
+            "part_id": "VN",
+            "quantity": 2,
+            "paid_cents": 240
+          }
+        ],
+        "approval_request": {
+          "revision": 4,
+          "lines": [],
+          "reuse_prior_approval": false
+        },
+        "erp_claim_conflicts": [
+          {
+            "quote_id": "vn-pack",
+            "field": "lead_days"
+          },
+          {
+            "quote_id": "audit-draft",
+            "field": "lead_days"
+          }
+        ],
+        "freight_audit": {
+          "at-edge": 0,
+          "under-edge": 75,
+          "no-new-goods": 0
+        }
+      }
+    ]
+  }
+}
