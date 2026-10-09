@@ -1,3 +1,8 @@
+## T69完成：同监督few-shot静态/dynamic配对（2026-10-09）
+Gate artifacts/tasks/T69/20261009T093641Z/receipt.json passed：8unit/0failed/0skipped，live verify passed，receipt日志hash核对。首次缺MODEL环境blocked receipt093517保留，后续内存加载既有env，无新模型调用。
+Run1总160episode：40train诊断、120开发test。static38/60 mean.914103，dynamic40/60 mean.903846；配对得分dynamic10胜10负40平，整题仅dynamic成功8/仅static成功6；三次全过7/20vs10/20。静态/动态同T65 gold bank与完整示例，只有注入方式不同。无Curator/晋升，test不回流；不是新封存结论。
+159scored均有真实completed计算，1dynamic repeat3/packages-test-04 GraphRecursionError按0保留，不重跑。1518调用、input21714010/output474104，保守208.226898CNY，actual未知；static534calls/73.838421，dynamic984calls/134.388477，含train/test/Selector。协议同Actor额度而非同成本。不宣称dynamic全面优胜或统计学习增益。详见docs/runtime/t69-fewshot-dynamic-results-2026-10-09.md。T68保持失败blocked且不恢复；T67未启动。
+
 ## T69真实配对已启动（2026-10-09）
 独立run1：artifacts/experiments/t69-fewshot-dynamic-20261009-run1，exec session32187，OpenSandbox port18085。T68为失败且不恢复。提交6e44962，Linux8unit通过；T65实际gold来源与任务/技能hash核对，GET/models200无生成。双方同fewshot bank+同组完整正确示例，静态与Selector唯一干预；20train诊断×2，20开发test×3×2，不重训Curator，不用train排名否决，不晋升。
 前三episode已真实scored：quotes-train-01 static/dynamic均1.0；quotes-train-02 dynamic0.7692。这是进度，不是最终提升结论。完整结果/verify/gate尚未完成。两次连续environment_failed自动停止，不自行恢复。run.log/rows/usage实时保存，最终manifest；失败全分母。完成后verify --output本run1再gate T69，跟进automation已改为T69，禁止重复启动。

@@ -411,10 +411,10 @@
       "notes": "已知缺口：正式新v4任务/答案/独立裁判/业务adapter/同运行时校准/质量审核；检查入口尚未实现，不计为通过。"
     },
     "T69": {
-      "status": "in_progress",
+      "status": "done",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "已独立启动run1，session32187、port18085。代码6e44962；Linux 8unit通过，T65冻结gold/任务hash核对，provider GET/models200且零生成。复用同gold bank+完整示例，仅改变静态/Selector；20train诊断×2与20开发test×3×2，无训练/Curator/晋升。首次配对双方1.0；尚无全量结果，不宣称收益。T68保持blocked且不续跑。"
+      "receipt": "artifacts/tasks/T69/20261009T093641Z/receipt.json",
+      "notes": "独立同监督配对完成：40train诊断+120开发test，共160episode。static38/60 mean.914103，dynamic40/60 mean.903846；配对得分10胜10负40平，三次全过7/20vs10/20。1518调用，保守208.226898CNY，actual未知。1 dynamic GraphRecursionError按0保留，无补跑。gate8unit+live verify passed；首次缺MODEL配置blocked保留。非封存/统计提升，无生产晋升；T68继续失败blocked，不恢复。"
     }
   }
 }
