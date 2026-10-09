@@ -3656,6 +3656,59 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T68",
+      "title": "持久计算JSON复用与逐调用重建的配对消融",
+      "file": "docs/plan/tasks/T68.md",
+      "depends_on": [
+        "T65"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/persistent-computation.md",
+        "docs/plan/contracts/persistent-computation-ablation.md",
+        "docs/runtime/gdpevo-procurement-taskset-v3.md"
+      ],
+      "checks": [
+        {
+          "id": "paired-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t68.py",
+            "-q",
+            "--junitxml={evidence_dir}/paired-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/paired-unit.xml"
+        },
+        {
+          "id": "paired-live-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/persistent_computation_ablation.py",
+            "verify",
+            "--output",
+            "artifacts/experiments/t68-persistent-paired-20261009-single"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }

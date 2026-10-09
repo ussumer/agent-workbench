@@ -410,6 +410,12 @@
       "receipt": null,
       "notes": "已知缺口：正式新v4任务/答案/独立裁判/业务adapter/同运行时校准/质量审核；检查入口尚未实现，不计为通过。"
     },
+    "T68": {
+      "status": "blocked",
+      "review": "not_reviewed",
+      "receipt": "artifacts/tasks/T68/20261009T072352Z/receipt.json",
+      "notes": "20组单次配对40条轨迹/120回合已记录；17环境失败+1格式失败保留0分。网关45次503且本地预算零拒绝，原日志无法区分网络/上游。4条轨迹无completed计算、2次创建失败缺回收证据；gate unit11通过/live blocked，不宣称持久计算收益。全账本452请求，407known/45unknown，已知部分44.234982CNY，实际未知。报告docs/runtime/t68-persistent-computation-ablation-2026-10-09.md；不追加模型，T64/T65不改、T67pending。"
+    },
     "T69": {
       "status": "done",
       "review": "not_reviewed",

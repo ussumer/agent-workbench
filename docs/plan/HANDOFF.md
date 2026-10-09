@@ -7,6 +7,29 @@ Run1总160episode：40train诊断、120开发test。static38/60 mean.914103，dy
 独立run1：artifacts/experiments/t69-fewshot-dynamic-20261009-run1，exec session32187，OpenSandbox port18085。T68为失败且不恢复。提交6e44962，Linux8unit通过；T65实际gold来源与任务/技能hash核对，GET/models200无生成。双方同fewshot bank+同组完整正确示例，静态与Selector唯一干预；20train诊断×2，20开发test×3×2，不重训Curator，不用train排名否决，不晋升。
 前三episode已真实scored：quotes-train-01 static/dynamic均1.0；quotes-train-02 dynamic0.7692。这是进度，不是最终提升结论。完整结果/verify/gate尚未完成。两次连续environment_failed自动停止，不自行恢复。run.log/rows/usage实时保存，最终manifest；失败全分母。完成后verify --output本run1再gate T69，跟进automation已改为T69，禁止重复启动。
 
+## T69：同监督few-shot动态配对开工
+用户2026-10-09明确T68为失败且不继续，独立启动T69，仅依赖T65。复用T65冻结fewshot bank和同组正确示例；20开发test×3重复×两臂，无Curator，无生产晋升。当前先做输入一致性测试与预检，尚无付费调用。保留T68 blocked及所有用户修改。
+
+## 2026-10-09 T68：20组配对已记录，真实验收blocked
+
+按用户时间约束只跑20对一次重复，共40条轨迹/120业务回合，不追加模型。复用旧17条完整轨迹及B的两回合对话，旧三轮attempt/在飞费用保留。T65收尾已核实，T64/T65/生产计算服务不改，T67仍pending。
+
+全分母：A/B三回合全过12/20、13/20，末回合均15/20，均分0.826923/0.865385。A有9环境失败+1格式失败，B有8环境失败。完整账本452请求=407HTTP200有usage+45HTTP503未知usage；本地预算denied=0，原网关没有细分网络/上游错误，不能确定503根因。已知input4223060/output230646，保守44.234982CNY（未知请求不当零，实际账单未知）。现时零模型HEAD能收到API401，不证明运行时故障原因。
+
+A真实跨调用复用仅2次，B0；B全部event前后仅task，已登记容器A155/B145各自ID唯一。ERP前后data载荷相同且零订单（request_id不同属读请求元数据）。独立诊断重算input/grade/schema/manifest/summary通过，但4条revisions04/05轨迹没有completed计算，2条SandboxApiException未登记容器且recycle=false，不能宣称完整有效计算对照。双方末回合都scored的17对均分A0.972851/B0.959276，子集仅诊断，不替换主分母；本次不能建立收益结论。
+
+首次gate artifacts/tasks/T68/20261009T072005Z/receipt.json failed（unit10通过）；只读verifier修正ERP比较并完整列出覆盖/回收缺口，保留旧receipt与运行冻结源码。最终gate artifacts/tasks/T68/20261009T072352Z/receipt.json BLOCKED，unit11/11，live exit2；state blocked而非done。详见docs/runtime/t68-persistent-computation-ablation-2026-10-09.md；逐对CSV/诊断JSON在首次gate目录，均为后处理文件，未改原manifest或receipt。代码未自动Git提交，保留既有CRLF/portfolio/pckl/诊断脚本等用户修改。
+
+下一步仅在用户决定补齐后显式reopen T68，先确认服务，再新attempt保留全部失败/费用；不自行重启付费实验或跳到T67。使用真实JDK /tmp/demo-jdk/usr/lib/jvm/java-21-openjdk-amd64，不能用被其他会话改坏的/tmp/jdk21。以下是本次范围调整与开工历史。
+
+## T68用户范围调整：20组单次配对
+
+用户明确时间有限，仅20组配对一次重复。原session14606已终止并生成manifest；17条完整轨迹和B的两回合对话保留。新目录artifacts/experiments/t68-persistent-paired-20261009-single将复用结果/对话，从第三回合继续，不重跑已完成业务回合；旧在飞请求保留费用，不能隐藏。原三轮protocol不改写，新scope标为single-repeat diagnostic，缺重复稳定性在报告明示。
+
+## 2026-10-09 T68：持久计算配对消融开工
+
+用户最新指令优先于T67；T65 receipt与收尾提交已核实，无需重跑。T68仅改变派生计算JSON的跨computation_execute复用：A保留，B每次调用后清空；原始task来源、历史和已有订单不删除。两臂全部关闭Curator/学习技能/Selector，真实OpenSandbox和Mongo保持。20道v3开发test×3重复×2臂，每条轨迹按初次规划、无变化复核、预算revision三阶段；不把合成订单账本当真实ERP执行。新实验隔离目录，不覆盖T64/T65/T66；T67仍pending。协议见docs/plan/contracts/persistent-computation-ablation.md。当前in_progress；10项边界测试通过，真实零模型mechanism-probe已passed，完整实验进程运行中（工具session 14606，沙箱端口18084）。attempt为artifacts/experiments/t68-persistent-paired-20261009；prepare-v1仅保留中间冻结材料。尚未完成120条轨迹/verify/gate，不宣称收益。
+
 ## 2026-10-09 T66：官方Stage 1来源发现与v4候选
 
 用户要求调用GDPevo数据构建第一阶段，给v3建立现实任务依据，先生成v4数据版本。已读取原工作区README并执行来源发现：GDPval固定revision `11e7900cdcac61bc4daf59e65feb238acda98fbf`，六条汽车采购/收货原题、两原始报价DOCX、逐题notes、四组来源映射及manifest，位于 `C:/dev/rsi-eval/data_construction/Stage_1_Scenario_Discovery/scenario/SCN_025_automotive_procurement_v4/`。
