@@ -3546,6 +3546,63 @@
           "cwd": "."
         }
       ]
+    },
+    {
+      "id": "T66",
+      "title": "GDPevo Stage 1真实来源发现与v4候选数据包",
+      "file": "docs/plan/tasks/T66.md",
+      "depends_on": [
+        "T65"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-taskset-v3.md",
+        "docs/runtime/t65-compute-dense-results-2026-10-07.md"
+      ],
+      "checks": [
+        {
+          "id": "source-provenance",
+          "mode": "unit",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "C:\\Python314\\python.exe",
+            "scripts/planning/gdpevo_v4_sources.py",
+            "verify"
+          ],
+          "cwd": "."
+        }
+      ]
+    },
+    {
+      "id": "T67",
+      "title": "来源驱动的可运行v4采购任务构造与校准",
+      "file": "docs/plan/tasks/T67.md",
+      "depends_on": [
+        "T66"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/gdpevo-procurement-v4-source-discovery-2026-10-09.md"
+      ],
+      "checks": [
+        {
+          "id": "source-faithful-v4-live",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "python",
+            "scripts/planning/gdpevo_v4_taskset.py",
+            "verify"
+          ],
+          "cwd": "."
+        }
+      ]
     }
   ]
 }

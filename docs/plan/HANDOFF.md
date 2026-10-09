@@ -1,3 +1,13 @@
+## 2026-10-09 T66：官方Stage 1来源发现与v4候选
+
+用户要求调用GDPevo数据构建第一阶段，给v3建立现实任务依据，先生成v4数据版本。已读取原工作区README并执行来源发现：GDPval固定revision `11e7900cdcac61bc4daf59e65feb238acda98fbf`，六条汽车采购/收货原题、两原始报价DOCX、逐题notes、四组来源映射及manifest，位于 `C:/dev/rsi-eval/data_construction/Stage_1_Scenario_Discovery/scenario/SCN_025_automotive_procurement_v4/`。
+
+候选为 `fixtures/planning/gdpevo-procurement-v4-candidate.json`，显式exploratory/intermediate，六原题未分split、未造答案/裁判；40道v3仅以unchanged_synthetic_v3参考快照保存，不包装成46道新校准题。原v3仍为合成采购评测，来源没有证明整包、免邮门槛、kit闭包等规则真实存在。报告 `docs/runtime/gdpevo-procurement-v4-source-discovery-2026-10-09.md`。
+
+T66 gate `artifacts/tasks/T66/20261009T030327Z/receipt.json` passed：原题逐字段对固定Parquet、附件哈希、来源隔离、v3快照和manifest一致。零模型调用，没有新训练/业务执行/生产晋升。首次数据行服务502保留在来源获取记录；从原始文件接口成功读取。WSL Git路径在Windows不可直接使用，Git检查/提交使用显式git-dir/work-tree，不改.git指针；用户已有运行文件和portfolio修改保留。
+
+T66 done仅表示Stage 1和来源候选完成。T67 pending，明确未实现正式新v4任务、独立裁判、adapter、校准和Stage 3；尚未启动。下一命令 `python scripts/plan_guard.py check` → `next` → `packet T67`，先讨论来源保持和改编协议，不能为了官方SQLite要求替换Java ERP/Mongo，也不能复用v3旧baseline宣称新数据提升。
+
 # 当前交接
 
 ## 2026-10-07：T65 再训练完成
