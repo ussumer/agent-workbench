@@ -3577,6 +3577,59 @@
       ]
     },
     {
+      "id": "T69",
+      "title": "同监督few-shot静态与dynamic配对对照",
+      "file": "docs/plan/tasks/T69.md",
+      "depends_on": [
+        "T65"
+      ],
+      "requirements": [
+        "R33"
+      ],
+      "reads": [
+        "docs/runtime/t65-compute-dense-results-2026-10-07.md",
+        "docs/plan/execution.md",
+        "docs/plan/contracts/planning.md"
+      ],
+      "checks": [
+        {
+          "id": "paired-unit",
+          "mode": "unit",
+          "kind": "test",
+          "required": true,
+          "min_tests": 8,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "pytest",
+            "tests/acceptance/test_t69.py",
+            "-q",
+            "--junitxml={evidence_dir}/paired-unit.xml"
+          ],
+          "cwd": ".",
+          "report": "{evidence_dir}/paired-unit.xml"
+        },
+        {
+          "id": "paired-evidence",
+          "mode": "live",
+          "kind": "command",
+          "required": true,
+          "argv": [
+            "uv",
+            "run",
+            "--frozen",
+            "python",
+            "scripts/planning/fewshot_dynamic_paired.py",
+            "verify",
+            "--output",
+            "artifacts/experiments/t69-fewshot-dynamic-20261009-run1"
+          ],
+          "cwd": "."
+        }
+      ]
+    },
+    {
       "id": "T67",
       "title": "来源驱动的可运行v4采购任务构造与校准",
       "file": "docs/plan/tasks/T67.md",

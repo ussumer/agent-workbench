@@ -409,6 +409,12 @@
       "review": "not_reviewed",
       "receipt": null,
       "notes": "已知缺口：正式新v4任务/答案/独立裁判/业务adapter/同运行时校准/质量审核；检查入口尚未实现，不计为通过。"
+    },
+    "T69": {
+      "status": "in_progress",
+      "review": "not_reviewed",
+      "receipt": null,
+      "notes": "已独立启动run1，session32187、port18085。代码6e44962；Linux 8unit通过，T65冻结gold/任务hash核对，provider GET/models200且零生成。复用同gold bank+完整示例，仅改变静态/Selector；20train诊断×2与20开发test×3×2，无训练/Curator/晋升。首次配对双方1.0；尚无全量结果，不宣称收益。T68保持blocked且不续跑。"
     }
   }
 }

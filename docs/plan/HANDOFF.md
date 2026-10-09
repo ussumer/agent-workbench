@@ -1,3 +1,7 @@
+## T69真实配对已启动（2026-10-09）
+独立run1：artifacts/experiments/t69-fewshot-dynamic-20261009-run1，exec session32187，OpenSandbox port18085。T68为失败且不恢复。提交6e44962，Linux8unit通过；T65实际gold来源与任务/技能hash核对，GET/models200无生成。双方同fewshot bank+同组完整正确示例，静态与Selector唯一干预；20train诊断×2，20开发test×3×2，不重训Curator，不用train排名否决，不晋升。
+前三episode已真实scored：quotes-train-01 static/dynamic均1.0；quotes-train-02 dynamic0.7692。这是进度，不是最终提升结论。完整结果/verify/gate尚未完成。两次连续environment_failed自动停止，不自行恢复。run.log/rows/usage实时保存，最终manifest；失败全分母。完成后verify --output本run1再gate T69，跟进automation已改为T69，禁止重复启动。
+
 ## 2026-10-09 T66：官方Stage 1来源发现与v4候选
 
 用户要求调用GDPevo数据构建第一阶段，给v3建立现实任务依据，先生成v4数据版本。已读取原工作区README并执行来源发现：GDPval固定revision `11e7900cdcac61bc4daf59e65feb238acda98fbf`，六条汽车采购/收货原题、两原始报价DOCX、逐题notes、四组来源映射及manifest，位于 `C:/dev/rsi-eval/data_construction/Stage_1_Scenario_Discovery/scenario/SCN_025_automotive_procurement_v4/`。
