@@ -8,7 +8,7 @@ Required conclusions (point_id, output key, weight):
 - R1: `settled_principal`; weight2; Eligible settled historic principal by category excluding unpaid records.
 - R2: `refund_claim`; weight2; Contractually claimable amount versus credits received and outstanding balance.
 - R3: `tooling_disposition`; weight2; Ownership/reuse/transfer credit versus stranded tooling; not a cash refund.
-- R4: `incremental_exposure`; weight3; Future incremental replacement exposure without double-counting historic payments.
+- R4: `incremental_exposure`; weight3; Gross future replacement quotation exposure (operating/tooling/R&D/transition), excluding historic payments, refund claims and separately reported tooling credits.
 - R5: `technical_admissibility`; weight2; Alternative supplier technical qualification set/conditions.
 - R6: `recovery_feasibility`; weight2; Supply capacity and launch-recovery gaps from actual evidence.
 - R7: `change_scope`; weight1; Permitted termination/award scope based on executed documents, not assumed blanket ban.

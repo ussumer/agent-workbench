@@ -1,0 +1,6 @@
+**/data
+**/__pycache__
+*.mv.db
+*.trace.db
+erp/target/*
+!erp/target/procurement-erp-0.1.0.jar

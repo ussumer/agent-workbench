@@ -1,0 +1,5 @@
+scratch/runtime/isolation-attempt*/
+scratch/runtime/tests-attempt*/
+scratch/runtime/staging*/
+scratch/calibration_runs/
+**/__pycache__/

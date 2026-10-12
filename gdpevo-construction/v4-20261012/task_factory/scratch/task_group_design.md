@@ -14,7 +14,7 @@ Two recurring families: multi-year sourcing nomination, and replacement/change r
 |train_003|replacement|PRG-047|failed nomination,paid invoice recovery,eligibility and leadtime|
 |train_004|nomination|PRG-058|different mix and timing,volume revisions,FX and capacity checks|
 |train_005|replacement|PRG-040|owned tooling versus unrecovered upfront amounts,launch/requalification|
-|test_001|nomination|PRG-083|new entities;source/UOM+volume revision+tiering,anchors train001/002/004|
+|test_001|nomination|PRG-084|new entities;source/UOM+volume revision+tiering,anchors train001/002/004|
 |test_002|replacement|PRG-096|new entities;refund+capacity+requalification,anchors train003/005/004|
 |test_003|nomination|PRG-107|new entities;mix+tiering+part-year crossing,anchors train001/002/004|
 |test_004|replacement|PRG-110|new entities;commitments+refund+forecast change,anchors train003/005/002|

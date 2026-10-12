@@ -1,0 +1,14 @@
+{
+  "seed": 20261012025,
+  "counts": {
+    "contracts": 80,
+    "documents": 5560,
+    "engineering": 900,
+    "forecasts": 2400,
+    "payments": 80,
+    "programs": 150,
+    "quotes": 1800,
+    "suppliers": 18
+  },
+  "seed_sha256": "5c96071d2d27a9f05be6f50f8b54f68a16e24f6e4ebb671c1d8cbad81205fbb7"
+}

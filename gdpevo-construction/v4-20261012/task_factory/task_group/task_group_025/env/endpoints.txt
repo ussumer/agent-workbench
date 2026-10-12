@@ -1,0 +1,9 @@
+GET /api/sourcing/programs
+GET /api/sourcing/programs/{program_id}
+GET /api/sourcing/forecasts
+GET /api/sourcing/quotes
+GET /api/sourcing/documents/{document_id}
+GET /api/sourcing/engineering
+GET /api/sourcing/contracts
+GET /api/sourcing/payments
+GET /api/sourcing/suppliers

@@ -1,6 +1,6 @@
 # Independent builder brief: test_001
 
-Family: nomination. Target: PRG-083. Focus: Held-out combination source-state/UOM, cumulative recovery, capacity and calendar.
+Family: nomination. Target: PRG-084. Focus: Held-out combination source-state/UOM, cumulative recovery, capacity and calendar.
 
 Read task-builder-contract.md and financial-contract.md, then actual finalized env/schema.md and business evidence. Source E004/E005; no V3. As-of2026-10-12,projection fiscal2027-2030. If these windows cannot be resolved from actual documents, report instead of inventing policy.
 

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "seed_id": "seed-v1",
+  "currency": "CNY",
+  "description": "采购库存 Mini-ERP 的固定基线数据。Java 初始化、报价站与所有验收都引用本文件；不要在本文件之外各抄一份数字。基线不可改写，只能追加新的 seed_id。",
+  "suppliers": [
+    { "supplier_id": "S001", "name": "华东配件", "active": true, "contact": "华东配件 采购部" },
+    { "supplier_id": "S002", "name": "远航配件", "active": true, "contact": "远航配件 采购部" },
+    { "supplier_id": "S003", "name": "停业示例供应商", "active": false, "contact": "停业示例 采购部" }
+  ],
+  "parts": [
+    { "part_id": "P001", "sku": "BRAKE-01", "name": "刹车片", "unit": "piece", "active": true },
+    { "part_id": "P002", "sku": "FILTER-01", "name": "空气滤芯", "unit": "piece", "active": true },
+    { "part_id": "P003", "sku": "CHAIN-01", "name": "传动链条", "unit": "piece", "active": true },
+    { "part_id": "P004", "sku": "SPARK-01", "name": "火花塞", "unit": "piece", "active": true },
+    { "part_id": "P005", "sku": "SEAL-01", "name": "停用油封", "unit": "piece", "active": false }
+  ],
+  "supplier_parts": [
+    { "supplier_id": "S001", "part_id": "P001", "catalog_price": "25.50", "currency": "CNY", "lead_days": 3 },
+    { "supplier_id": "S001", "part_id": "P002", "catalog_price": "12.00", "currency": "CNY", "lead_days": 3 },
+    { "supplier_id": "S001", "part_id": "P003", "catalog_price": "68.00", "currency": "CNY", "lead_days": 7 },
+    { "supplier_id": "S001", "part_id": "P004", "catalog_price": "18.00", "currency": "CNY", "lead_days": 5 },
+    { "supplier_id": "S002", "part_id": "P001", "catalog_price": "24.00", "currency": "CNY", "lead_days": 4 },
+    { "supplier_id": "S002", "part_id": "P002", "catalog_price": "13.00", "currency": "CNY", "lead_days": 4 },
+    { "supplier_id": "S002", "part_id": "P004", "catalog_price": "17.50", "currency": "CNY", "lead_days": 6 },
+    { "supplier_id": "S003", "part_id": "P001", "catalog_price": "26.00", "currency": "CNY", "lead_days": 9 }
+  ],
+  "inventory": [
+    { "part_id": "P001", "on_hand": 8, "warning_threshold": 20, "target_stock": 50 },
+    { "part_id": "P002", "on_hand": 40, "warning_threshold": 15, "target_stock": 50 },
+    { "part_id": "P003", "on_hand": 5, "warning_threshold": 10, "target_stock": 20 },
+    { "part_id": "P004", "on_hand": 0, "warning_threshold": 10, "target_stock": 30 },
+    { "part_id": "P005", "on_hand": 30, "warning_threshold": 10, "target_stock": 40 }
+  ],
+  "orders": [],
+  "rejection_cases": {
+    "inactive_supplier": "S003",
+    "inactive_part": "P005",
+    "unsupported_pair": { "supplier_id": "S002", "part_id": "P003" },
+    "note": "以上组合必须被拒绝：停用供应商 S003、停用物料 P005、S002 与 P003 之间没有供货关系。"
+  }
+}

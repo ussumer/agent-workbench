@@ -1,0 +1,599 @@
+{
+  "schema_version": 1,
+  "seed": 20261012025,
+  "counts": {
+    "contracts": 80,
+    "documents": 5560,
+    "engineering": 900,
+    "forecasts": 2400,
+    "payments": 80,
+    "programs": 150,
+    "quotes": 1800,
+    "suppliers": 18
+  },
+  "seed_sha256": "5c96071d2d27a9f05be6f50f8b54f68a16e24f6e4ebb671c1d8cbad81205fbb7",
+  "copied_source_lineage": [
+    {
+      "path": "erp/.mvn/wrapper/maven-wrapper.jar",
+      "sha256": "3d8f20ce6103913be8b52aef6d994e0c54705fb527324ceb9b835b338739c7a8",
+      "original_path": "erp/.mvn/wrapper/maven-wrapper.jar",
+      "original_sha256": "3d8f20ce6103913be8b52aef6d994e0c54705fb527324ceb9b835b338739c7a8",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/.mvn/wrapper/maven-wrapper.properties",
+      "sha256": "bf89ab8fda0d9dc65167cb580e2c92451486eeb080e47e788ba415cb960d3198",
+      "original_path": "erp/.mvn/wrapper/maven-wrapper.properties",
+      "original_sha256": "bf89ab8fda0d9dc65167cb580e2c92451486eeb080e47e788ba415cb960d3198",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/mvnw",
+      "sha256": "392f85898d0426c16c6b419fdf4cd8b6ba9d5858a26d1bd2526ace72668c8611",
+      "original_path": "erp/mvnw",
+      "original_sha256": "392f85898d0426c16c6b419fdf4cd8b6ba9d5858a26d1bd2526ace72668c8611",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/mvnw.cmd",
+      "sha256": "b7a0db794b62ed5067a2c074e19c94d61af65c42eb32cb1408f0d589e192f4bf",
+      "original_path": "erp/mvnw.cmd",
+      "original_sha256": "b7a0db794b62ed5067a2c074e19c94d61af65c42eb32cb1408f0d589e192f4bf",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/pom.xml",
+      "sha256": "ac4f93bffdbc2e6fa23da46c37dc03b86a45c84d106b28c8a358926a7052210c",
+      "original_path": "erp/pom.xml",
+      "original_sha256": "ac4f93bffdbc2e6fa23da46c37dc03b86a45c84d106b28c8a358926a7052210c",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/ErpApplication.java",
+      "sha256": "c10f8317f03dee4e46282fad3f33ce3fd9da74f8565834dc8fac3c3bf42d6c28",
+      "original_path": "erp/src/main/java/com/rushharness/erp/ErpApplication.java",
+      "original_sha256": "c10f8317f03dee4e46282fad3f33ce3fd9da74f8565834dc8fac3c3bf42d6c28",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ApiException.java",
+      "sha256": "97572d37b339381d14d3930d6a79d196b6ab7f58455175b52f2df117d222a6f5",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/ApiException.java",
+      "original_sha256": "97572d37b339381d14d3930d6a79d196b6ab7f58455175b52f2df117d222a6f5",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ApiExceptionHandler.java",
+      "sha256": "8a6596f31041c93d52bc04f88135776446f68312b6634c65b850ea4e278de60f",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/ApiExceptionHandler.java",
+      "original_sha256": "8a6596f31041c93d52bc04f88135776446f68312b6634c65b850ea4e278de60f",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ApiResponse.java",
+      "sha256": "e0e56d44f2faf67e79603fab9962ca1983b7cb54572ca147e4b25e66ecefc8d8",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/ApiResponse.java",
+      "original_sha256": "e0e56d44f2faf67e79603fab9962ca1983b7cb54572ca147e4b25e66ecefc8d8",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/PageResponse.java",
+      "sha256": "00810aa508ed8cf3c9e5e11a5a7127402d7ee3de269155c7eb86f249cec010d1",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/PageResponse.java",
+      "original_sha256": "00810aa508ed8cf3c9e5e11a5a7127402d7ee3de269155c7eb86f249cec010d1",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/Pagination.java",
+      "sha256": "8dd56b5bd725d851c124a32b4c88070ce13c0cd9ba5d2f15fae60c985b293984",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/Pagination.java",
+      "original_sha256": "8dd56b5bd725d851c124a32b4c88070ce13c0cd9ba5d2f15fae60c985b293984",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/RequestContext.java",
+      "sha256": "5aac59ec62cd350d809f5d0ce65668e8934e2a07caa616bc218d9a18293a522f",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/RequestContext.java",
+      "original_sha256": "5aac59ec62cd350d809f5d0ce65668e8934e2a07caa616bc218d9a18293a522f",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/RequestIdFilter.java",
+      "sha256": "7dc7632389e11db20f00fecbf3b1ba5da8e0604aa6dc79183e42a7fb0ac31c37",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/RequestIdFilter.java",
+      "original_sha256": "7dc7632389e11db20f00fecbf3b1ba5da8e0604aa6dc79183e42a7fb0ac31c37",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ServiceTokenFilter.java",
+      "sha256": "55ae90a0db8732625445c6057c72cd2ff20b1b12a7eca200b269deb463f2b533",
+      "original_path": "erp/src/main/java/com/rushharness/erp/api/ServiceTokenFilter.java",
+      "original_sha256": "55ae90a0db8732625445c6057c72cd2ff20b1b12a7eca200b269deb463f2b533",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/CatalogController.java",
+      "sha256": "3cdabcb66b035d6639d4f4845c9b1277eeec1dde26ba04e4200cc3d04db5c509",
+      "original_path": "erp/src/main/java/com/rushharness/erp/catalog/CatalogController.java",
+      "original_sha256": "3cdabcb66b035d6639d4f4845c9b1277eeec1dde26ba04e4200cc3d04db5c509",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/CatalogRepository.java",
+      "sha256": "3064d09f4000c6c3e861efdf3b9fb6b78bc6298eaa65c304a871018601188cd2",
+      "original_path": "erp/src/main/java/com/rushharness/erp/catalog/CatalogRepository.java",
+      "original_sha256": "3064d09f4000c6c3e861efdf3b9fb6b78bc6298eaa65c304a871018601188cd2",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/PartDetail.java",
+      "sha256": "af11a7021ad849cb12ef1343d4f555e1cec038d066ed99c6273bc400e7f8ea54",
+      "original_path": "erp/src/main/java/com/rushharness/erp/catalog/PartDetail.java",
+      "original_sha256": "af11a7021ad849cb12ef1343d4f555e1cec038d066ed99c6273bc400e7f8ea54",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/PartView.java",
+      "sha256": "926815b6f945c05871617683c42f3c671e09e19bf92666fc5d89645fc4526c4e",
+      "original_path": "erp/src/main/java/com/rushharness/erp/catalog/PartView.java",
+      "original_sha256": "926815b6f945c05871617683c42f3c671e09e19bf92666fc5d89645fc4526c4e",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierOffer.java",
+      "sha256": "b2e3851d2b39886fa1080fdd521d19da4b4d502f3047a495454b8b452daf3c87",
+      "original_path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierOffer.java",
+      "original_sha256": "b2e3851d2b39886fa1080fdd521d19da4b4d502f3047a495454b8b452daf3c87",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierPartView.java",
+      "sha256": "e0099514762e20f303be994cfae4fdb8487ef2efa86ded452584968c084141d9",
+      "original_path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierPartView.java",
+      "original_sha256": "e0099514762e20f303be994cfae4fdb8487ef2efa86ded452584968c084141d9",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierView.java",
+      "sha256": "cb142ab661cb60e2e3b7f485b773eea740ee983fef0eaac5c6f87d400d5b311f",
+      "original_path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierView.java",
+      "original_sha256": "cb142ab661cb60e2e3b7f485b773eea740ee983fef0eaac5c6f87d400d5b311f",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/config/ErpProperties.java",
+      "sha256": "c3a7650510d3b3efd5b38000cce497a8531ae17cd6081442fe6e43d4153d539f",
+      "original_path": "erp/src/main/java/com/rushharness/erp/config/ErpProperties.java",
+      "original_sha256": "c3a7650510d3b3efd5b38000cce497a8531ae17cd6081442fe6e43d4153d539f",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/config/SeedLoader.java",
+      "sha256": "d7b580c20fc222a15a531582d82abbfcb3396132935aedd1475e2f9b34db6e0d",
+      "original_path": "erp/src/main/java/com/rushharness/erp/config/SeedLoader.java",
+      "original_sha256": "d7b580c20fc222a15a531582d82abbfcb3396132935aedd1475e2f9b34db6e0d",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/health/HealthController.java",
+      "sha256": "e66ee9dc36d9486bba0dbf4cb5ce70f1204f4574a5dc1acd624f881082245fbd",
+      "original_path": "erp/src/main/java/com/rushharness/erp/health/HealthController.java",
+      "original_sha256": "e66ee9dc36d9486bba0dbf4cb5ce70f1204f4574a5dc1acd624f881082245fbd",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryController.java",
+      "sha256": "bada68d607f1e01d1aad97ad52dfdb11e82ba0b6d7bf27511ae1648f35fd71ec",
+      "original_path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryController.java",
+      "original_sha256": "bada68d607f1e01d1aad97ad52dfdb11e82ba0b6d7bf27511ae1648f35fd71ec",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryRepository.java",
+      "sha256": "b517688e9d8495dba0d63b193d76a6d723cc978b7c3955dd52a3de6783558a55",
+      "original_path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryRepository.java",
+      "original_sha256": "b517688e9d8495dba0d63b193d76a6d723cc978b7c3955dd52a3de6783558a55",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryWarning.java",
+      "sha256": "c55082b9e7498a6f32affd8e5192f830f2b8a46b6ebd09d626c52ade374dc8ac",
+      "original_path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryWarning.java",
+      "original_sha256": "c55082b9e7498a6f32affd8e5192f830f2b8a46b6ebd09d626c52ade374dc8ac",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/CreateOrderRequest.java",
+      "sha256": "47dfb367bff2b5897da7f1fec328a8c6bf062c90123f68b3812cf2e608d318bb",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/CreateOrderRequest.java",
+      "original_sha256": "47dfb367bff2b5897da7f1fec328a8c6bf062c90123f68b3812cf2e608d318bb",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderController.java",
+      "sha256": "cb7aa6145c4f1049ca79bf4ae8feaf51496625b0eaf5164b6995a1a5ac0ec3fe",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/OrderController.java",
+      "original_sha256": "cb7aa6145c4f1049ca79bf4ae8feaf51496625b0eaf5164b6995a1a5ac0ec3fe",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderLineRequest.java",
+      "sha256": "d2a2bf2516d16609dd9cc481c0151ecfceb86747dcab4cfd0098f882da8a91c5",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/OrderLineRequest.java",
+      "original_sha256": "d2a2bf2516d16609dd9cc481c0151ecfceb86747dcab4cfd0098f882da8a91c5",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderLineView.java",
+      "sha256": "6cc786782ca7415e34d2d1492d8f464688efc63ee3e690beafcecbf009573eec",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/OrderLineView.java",
+      "original_sha256": "6cc786782ca7415e34d2d1492d8f464688efc63ee3e690beafcecbf009573eec",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderRepository.java",
+      "sha256": "3cbbe0d20f86d99c2a657acdeb17fbf5e31690ec8d23ca1deb4a3a1b74c501cd",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/OrderRepository.java",
+      "original_sha256": "3cbbe0d20f86d99c2a657acdeb17fbf5e31690ec8d23ca1deb4a3a1b74c501cd",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderResult.java",
+      "sha256": "5d521dcd302c22b04a7c9db15cd6e91fd525a60eb1c66cd19de126053370f2d3",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/OrderResult.java",
+      "original_sha256": "5d521dcd302c22b04a7c9db15cd6e91fd525a60eb1c66cd19de126053370f2d3",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderView.java",
+      "sha256": "e061c172e4ee4c73136d140c1b632240ec1a03e9055b5e994f795d76106da922",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/OrderView.java",
+      "original_sha256": "e061c172e4ee4c73136d140c1b632240ec1a03e9055b5e994f795d76106da922",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrdersService.java",
+      "sha256": "8da866d4fbf50e0931f35ef5e1ee22502e2a11d401f94707bbc4832694b3fc3f",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/OrdersService.java",
+      "original_sha256": "8da866d4fbf50e0931f35ef5e1ee22502e2a11d401f94707bbc4832694b3fc3f",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/UpdateOrderRequest.java",
+      "sha256": "7390eb6ed15bad2a0f5ee4ddf42104624b7c7d3dbada347c5c835d417d576bdf",
+      "original_path": "erp/src/main/java/com/rushharness/erp/orders/UpdateOrderRequest.java",
+      "original_sha256": "7390eb6ed15bad2a0f5ee4ddf42104624b7c7d3dbada347c5c835d417d576bdf",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/sourcing/SourcingController.java",
+      "sha256": "b61069c38a0116d3683db1d4ed56e0c266cc2030ad1e6e9dff030b45c9ba1a8f",
+      "original_path": null,
+      "original_sha256": null,
+      "copy_status": "new_or_environment_adapted"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/sourcing/SourcingReadOnlyFilter.java",
+      "sha256": "59ae7575d5bc3229d1862b266a0febe7fd6ac57ec5f4756be3c09da367ed042c",
+      "original_path": null,
+      "original_sha256": null,
+      "copy_status": "new_or_environment_adapted"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/sourcing/SourcingSeed.java",
+      "sha256": "290abcccd9246abc736f14c762ee3fc4de0f292d5e3da7f40e259fba37643ab6",
+      "original_path": null,
+      "original_sha256": null,
+      "copy_status": "new_or_environment_adapted"
+    },
+    {
+      "path": "erp/src/main/resources/application.yml",
+      "sha256": "8637d6eb4b35f42af9d07211037302311555bb3c0e38eabfeaabe9469c53881a",
+      "original_path": "erp/src/main/resources/application.yml",
+      "original_sha256": "a4e2bf328fb0a1e3245cf7ad837d303d4af4ff694e94b1a0c63df7e70678d965",
+      "copy_status": "new_or_environment_adapted"
+    },
+    {
+      "path": "erp/src/main/resources/schema.sql",
+      "sha256": "88cc29824e3ceaa26979da226f5b4d278915f7465cec1aefbaf4611bffa52288",
+      "original_path": "erp/src/main/resources/schema.sql",
+      "original_sha256": "88cc29824e3ceaa26979da226f5b4d278915f7465cec1aefbaf4611bffa52288",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/main/resources/sourcing-schema.sql",
+      "sha256": "ff7e37f5351c34d35231df754f9ac6984ad1ad1be2e9a17647bd79e1840a5f67",
+      "original_path": null,
+      "original_sha256": null,
+      "copy_status": "new_or_environment_adapted"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/CatalogApiTest.java",
+      "sha256": "c18265bce950545b5b70d7e7758cfb3a1e5cb83496ed239fcdf0fd635439b3d8",
+      "original_path": "erp/src/test/java/com/rushharness/erp/CatalogApiTest.java",
+      "original_sha256": "c18265bce950545b5b70d7e7758cfb3a1e5cb83496ed239fcdf0fd635439b3d8",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/OrderApiTest.java",
+      "sha256": "ff97288572b901fa1f99f2d804bc4f81b476c64f6e729386e2573a4e2c3c8cb9",
+      "original_path": "erp/src/test/java/com/rushharness/erp/OrderApiTest.java",
+      "original_sha256": "ff97288572b901fa1f99f2d804bc4f81b476c64f6e729386e2573a4e2c3c8cb9",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/OrderConcurrencyTest.java",
+      "sha256": "6476c94dd75b690361d83196f4726297dad3e58cbf4a8465cbf7332d3dd4110e",
+      "original_path": "erp/src/test/java/com/rushharness/erp/OrderConcurrencyTest.java",
+      "original_sha256": "6476c94dd75b690361d83196f4726297dad3e58cbf4a8465cbf7332d3dd4110e",
+      "copy_status": "unchanged"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/SourcingApiTest.java",
+      "sha256": "11bda158a200b8fd0bfefb235598345569a77a9ca80d0a2b6d36f01ff5fcad22",
+      "original_path": null,
+      "original_sha256": null,
+      "copy_status": "new_or_environment_adapted"
+    }
+  ],
+  "environment_files": [
+    {
+      "path": ".dockerignore",
+      "sha256": "b2ee584abc1e5bb94ef09934af7450b6a3cdcad33f6eac6409d22051493723de"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "7bf5ac138e4f2abd11168de3055c97ce02a892c7bba654f4add5a75da087cd9e"
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "49659c76a2ddaa065e2bd2479f1b214cbde01646eb3dfcb55c5e256fbcdf28db"
+    },
+    {
+      "path": "build.sh",
+      "sha256": "42aad92c157b9f9c4dc8b68e06e446690a20956c5099b4864bb7fb63087066cc"
+    },
+    {
+      "path": "counts.json",
+      "sha256": "f83d64ff4e755c13d9eda2ca9ed3760fe10cae213739604a2286d96b587df60c"
+    },
+    {
+      "path": "diagnose_runtime.py",
+      "sha256": "ca15f76c7ccf6b1df3d11029fc563c1d666c6a15d5f645ffcf1c20faa5b7169f"
+    },
+    {
+      "path": "endpoints.txt",
+      "sha256": "f89fa247cdbb25b211009e5a1bfc077c3ac45fc114e73800fcc01411ddc7dbc0"
+    },
+    {
+      "path": "environment_access.md",
+      "sha256": "6f90136e80f25acaa952e926c0f3290d5641fdfc51fb5956217b0012581c4441"
+    },
+    {
+      "path": "erp/.mvn/wrapper/maven-wrapper.jar",
+      "sha256": "3d8f20ce6103913be8b52aef6d994e0c54705fb527324ceb9b835b338739c7a8"
+    },
+    {
+      "path": "erp/.mvn/wrapper/maven-wrapper.properties",
+      "sha256": "bf89ab8fda0d9dc65167cb580e2c92451486eeb080e47e788ba415cb960d3198"
+    },
+    {
+      "path": "erp/mvnw",
+      "sha256": "392f85898d0426c16c6b419fdf4cd8b6ba9d5858a26d1bd2526ace72668c8611"
+    },
+    {
+      "path": "erp/mvnw.cmd",
+      "sha256": "b7a0db794b62ed5067a2c074e19c94d61af65c42eb32cb1408f0d589e192f4bf"
+    },
+    {
+      "path": "erp/pom.xml",
+      "sha256": "ac4f93bffdbc2e6fa23da46c37dc03b86a45c84d106b28c8a358926a7052210c"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/ErpApplication.java",
+      "sha256": "c10f8317f03dee4e46282fad3f33ce3fd9da74f8565834dc8fac3c3bf42d6c28"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ApiException.java",
+      "sha256": "97572d37b339381d14d3930d6a79d196b6ab7f58455175b52f2df117d222a6f5"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ApiExceptionHandler.java",
+      "sha256": "8a6596f31041c93d52bc04f88135776446f68312b6634c65b850ea4e278de60f"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ApiResponse.java",
+      "sha256": "e0e56d44f2faf67e79603fab9962ca1983b7cb54572ca147e4b25e66ecefc8d8"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/PageResponse.java",
+      "sha256": "00810aa508ed8cf3c9e5e11a5a7127402d7ee3de269155c7eb86f249cec010d1"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/Pagination.java",
+      "sha256": "8dd56b5bd725d851c124a32b4c88070ce13c0cd9ba5d2f15fae60c985b293984"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/RequestContext.java",
+      "sha256": "5aac59ec62cd350d809f5d0ce65668e8934e2a07caa616bc218d9a18293a522f"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/RequestIdFilter.java",
+      "sha256": "7dc7632389e11db20f00fecbf3b1ba5da8e0604aa6dc79183e42a7fb0ac31c37"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/api/ServiceTokenFilter.java",
+      "sha256": "55ae90a0db8732625445c6057c72cd2ff20b1b12a7eca200b269deb463f2b533"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/CatalogController.java",
+      "sha256": "3cdabcb66b035d6639d4f4845c9b1277eeec1dde26ba04e4200cc3d04db5c509"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/CatalogRepository.java",
+      "sha256": "3064d09f4000c6c3e861efdf3b9fb6b78bc6298eaa65c304a871018601188cd2"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/PartDetail.java",
+      "sha256": "af11a7021ad849cb12ef1343d4f555e1cec038d066ed99c6273bc400e7f8ea54"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/PartView.java",
+      "sha256": "926815b6f945c05871617683c42f3c671e09e19bf92666fc5d89645fc4526c4e"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierOffer.java",
+      "sha256": "b2e3851d2b39886fa1080fdd521d19da4b4d502f3047a495454b8b452daf3c87"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierPartView.java",
+      "sha256": "e0099514762e20f303be994cfae4fdb8487ef2efa86ded452584968c084141d9"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/catalog/SupplierView.java",
+      "sha256": "cb142ab661cb60e2e3b7f485b773eea740ee983fef0eaac5c6f87d400d5b311f"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/config/ErpProperties.java",
+      "sha256": "c3a7650510d3b3efd5b38000cce497a8531ae17cd6081442fe6e43d4153d539f"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/config/SeedLoader.java",
+      "sha256": "d7b580c20fc222a15a531582d82abbfcb3396132935aedd1475e2f9b34db6e0d"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/health/HealthController.java",
+      "sha256": "e66ee9dc36d9486bba0dbf4cb5ce70f1204f4574a5dc1acd624f881082245fbd"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryController.java",
+      "sha256": "bada68d607f1e01d1aad97ad52dfdb11e82ba0b6d7bf27511ae1648f35fd71ec"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryRepository.java",
+      "sha256": "b517688e9d8495dba0d63b193d76a6d723cc978b7c3955dd52a3de6783558a55"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/inventory/InventoryWarning.java",
+      "sha256": "c55082b9e7498a6f32affd8e5192f830f2b8a46b6ebd09d626c52ade374dc8ac"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/CreateOrderRequest.java",
+      "sha256": "47dfb367bff2b5897da7f1fec328a8c6bf062c90123f68b3812cf2e608d318bb"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderController.java",
+      "sha256": "cb7aa6145c4f1049ca79bf4ae8feaf51496625b0eaf5164b6995a1a5ac0ec3fe"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderLineRequest.java",
+      "sha256": "d2a2bf2516d16609dd9cc481c0151ecfceb86747dcab4cfd0098f882da8a91c5"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderLineView.java",
+      "sha256": "6cc786782ca7415e34d2d1492d8f464688efc63ee3e690beafcecbf009573eec"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderRepository.java",
+      "sha256": "3cbbe0d20f86d99c2a657acdeb17fbf5e31690ec8d23ca1deb4a3a1b74c501cd"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderResult.java",
+      "sha256": "5d521dcd302c22b04a7c9db15cd6e91fd525a60eb1c66cd19de126053370f2d3"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrderView.java",
+      "sha256": "e061c172e4ee4c73136d140c1b632240ec1a03e9055b5e994f795d76106da922"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/OrdersService.java",
+      "sha256": "8da866d4fbf50e0931f35ef5e1ee22502e2a11d401f94707bbc4832694b3fc3f"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/orders/UpdateOrderRequest.java",
+      "sha256": "7390eb6ed15bad2a0f5ee4ddf42104624b7c7d3dbada347c5c835d417d576bdf"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/sourcing/SourcingController.java",
+      "sha256": "b61069c38a0116d3683db1d4ed56e0c266cc2030ad1e6e9dff030b45c9ba1a8f"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/sourcing/SourcingReadOnlyFilter.java",
+      "sha256": "59ae7575d5bc3229d1862b266a0febe7fd6ac57ec5f4756be3c09da367ed042c"
+    },
+    {
+      "path": "erp/src/main/java/com/rushharness/erp/sourcing/SourcingSeed.java",
+      "sha256": "290abcccd9246abc736f14c762ee3fc4de0f292d5e3da7f40e259fba37643ab6"
+    },
+    {
+      "path": "erp/src/main/resources/application.yml",
+      "sha256": "8637d6eb4b35f42af9d07211037302311555bb3c0e38eabfeaabe9469c53881a"
+    },
+    {
+      "path": "erp/src/main/resources/schema.sql",
+      "sha256": "88cc29824e3ceaa26979da226f5b4d278915f7465cec1aefbaf4611bffa52288"
+    },
+    {
+      "path": "erp/src/main/resources/sourcing-schema.sql",
+      "sha256": "ff7e37f5351c34d35231df754f9ac6984ad1ad1be2e9a17647bd79e1840a5f67"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/CatalogApiTest.java",
+      "sha256": "c18265bce950545b5b70d7e7758cfb3a1e5cb83496ed239fcdf0fd635439b3d8"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/OrderApiTest.java",
+      "sha256": "ff97288572b901fa1f99f2d804bc4f81b476c64f6e729386e2573a4e2c3c8cb9"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/OrderConcurrencyTest.java",
+      "sha256": "6476c94dd75b690361d83196f4726297dad3e58cbf4a8465cbf7332d3dd4110e"
+    },
+    {
+      "path": "erp/src/test/java/com/rushharness/erp/SourcingApiTest.java",
+      "sha256": "11bda158a200b8fd0bfefb235598345569a77a9ca80d0a2b6d36f01ff5fcad22"
+    },
+    {
+      "path": "fixtures/seed-v1.json",
+      "sha256": "5991944913475f7b7321e811325edf00c9a18f978bb672f3dad510e750bd4fd1"
+    },
+    {
+      "path": "generate_seed.py",
+      "sha256": "ca6b845488cfd21c096e96f97ff249e88e270a53ce5a104df8c0912484c87d67"
+    },
+    {
+      "path": "probe_http.py",
+      "sha256": "a69d9be23b33c0cd00a25afab74848e4675eafa2be57b40f9df255534dd6e92a"
+    },
+    {
+      "path": "run.sh",
+      "sha256": "d45783787f1f837c785c30b68c893842dd67d6e52a365ce0cbb075643203eefb"
+    },
+    {
+      "path": "schema.md",
+      "sha256": "cc574a1adf2bcc3da090f89d1aa8bc0c19a36a437848d8adc3dd5a1e599c01a1"
+    },
+    {
+      "path": "seed.json",
+      "sha256": "5c96071d2d27a9f05be6f50f8b54f68a16e24f6e4ebb671c1d8cbad81205fbb7"
+    },
+    {
+      "path": "verify_data.py",
+      "sha256": "cb7c0421a24ac641b43bee31f0c526a36ea82e0691be759863ccf5411dc2457e"
+    },
+    {
+      "path": "verify_runtime.py",
+      "sha256": "99e0cc9e089c45a95ff5608535f2d24fc1ef352364982ce64460c9f47338c9a8"
+    }
+  ],
+  "business_data_checks": {
+    "status": "passed",
+    "capacity_shortfall_supplier_periods": 382,
+    "capacity_adequate_supplier_periods": 1418,
+    "duplicate_ids": false,
+    "charge_identity_across_revisions": true,
+    "fixed_seed_reproducible": true,
+    "target_programs_present": 12
+  },
+  "model_calls": 0
+}
