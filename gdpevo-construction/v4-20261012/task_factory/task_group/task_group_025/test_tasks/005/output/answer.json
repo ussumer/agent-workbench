@@ -1,0 +1,729 @@
+{
+  "program_id": "PRG-129",
+  "as_of": "2026-10-12",
+  "approved_volume": {
+    "uom": "vehicle_set",
+    "lifecycle_total_sets": 199000,
+    "periods": [
+      {
+        "fiscal_period": 2027,
+        "base_sets": 27950,
+        "premium_sets": 15050,
+        "total_sets": 43000,
+        "base_share_basis_points": 6500,
+        "premium_share_basis_points": 3500
+      },
+      {
+        "fiscal_period": 2028,
+        "base_sets": 29900,
+        "premium_sets": 16100,
+        "total_sets": 46000,
+        "base_share_basis_points": 6500,
+        "premium_share_basis_points": 3500
+      },
+      {
+        "fiscal_period": 2029,
+        "base_sets": 31850,
+        "premium_sets": 17150,
+        "total_sets": 49000,
+        "base_share_basis_points": 6500,
+        "premium_share_basis_points": 3500
+      },
+      {
+        "fiscal_period": 2030,
+        "base_sets": 39650,
+        "premium_sets": 21350,
+        "total_sets": 61000,
+        "base_share_basis_points": 6500,
+        "premium_share_basis_points": 3500
+      }
+    ]
+  },
+  "commercial_coverage": [
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2027,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2027,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2028,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2028,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2029,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2029,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2030,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2030,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2027,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2027,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2028,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2028,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2029,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2029,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2030,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2030,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_original"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2027,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2027,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2028,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2028,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2029,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2029,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2030,
+      "variant": "base",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2030,
+      "variant": "premium",
+      "full_year_covered": true,
+      "binding_terms_state": "approved_amendment"
+    }
+  ],
+  "technical_admissibility": [
+    {
+      "supplier_id": "SUP-010",
+      "qualification_status": "qualified",
+      "covered_variants": [
+        "base",
+        "premium"
+      ],
+      "open_required_actions": [],
+      "technical_admissible": true
+    },
+    {
+      "supplier_id": "SUP-011",
+      "qualification_status": "qualified",
+      "covered_variants": [
+        "base",
+        "premium"
+      ],
+      "open_required_actions": [],
+      "technical_admissible": true
+    },
+    {
+      "supplier_id": "SUP-012",
+      "qualification_status": "qualified",
+      "covered_variants": [
+        "base",
+        "premium"
+      ],
+      "open_required_actions": [
+        "photometry_validation"
+      ],
+      "technical_admissible": true
+    }
+  ],
+  "capacity_shortfall": [
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2027,
+      "available_sets": 35000,
+      "shortfall_sets": 8000
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2028,
+      "available_sets": 39000,
+      "shortfall_sets": 7000
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2029,
+      "available_sets": 43000,
+      "shortfall_sets": 6000
+    },
+    {
+      "supplier_id": "SUP-010",
+      "fiscal_period": 2030,
+      "available_sets": 47000,
+      "shortfall_sets": 14000
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2027,
+      "available_sets": 52000,
+      "shortfall_sets": 0
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2028,
+      "available_sets": 58000,
+      "shortfall_sets": 0
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2029,
+      "available_sets": 64000,
+      "shortfall_sets": 0
+    },
+    {
+      "supplier_id": "SUP-011",
+      "fiscal_period": 2030,
+      "available_sets": 70000,
+      "shortfall_sets": 0
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2027,
+      "available_sets": 34000,
+      "shortfall_sets": 9000
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2028,
+      "available_sets": 41000,
+      "shortfall_sets": 5000
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2029,
+      "available_sets": 48000,
+      "shortfall_sets": 1000
+    },
+    {
+      "supplier_id": "SUP-012",
+      "fiscal_period": 2030,
+      "available_sets": 55000,
+      "shortfall_sets": 6000
+    }
+  ],
+  "launch_gap": [
+    {
+      "supplier_id": "SUP-010",
+      "earliest_ready_date": "2026-11-16",
+      "launch_date": "2027-01-01",
+      "late_days": 0,
+      "on_time": true
+    },
+    {
+      "supplier_id": "SUP-011",
+      "earliest_ready_date": "2026-12-07",
+      "launch_date": "2027-01-01",
+      "late_days": 0,
+      "on_time": true
+    },
+    {
+      "supplier_id": "SUP-012",
+      "earliest_ready_date": "2027-02-08",
+      "launch_date": "2027-01-01",
+      "late_days": 38,
+      "on_time": false
+    }
+  ],
+  "financial_exposure": {
+    "currency": "CNY",
+    "unit": "minor",
+    "comparison_basis": "hypothetical_full_award",
+    "candidates": [
+      {
+        "supplier_id": "SUP-010",
+        "upfront_rd_minor": 130000000,
+        "material_pv_minor": 4455506281,
+        "tooling_pv_minor": 187818182,
+        "total_npv_minor": 4773324463,
+        "variant_totals": [
+          {
+            "variant": "base",
+            "allocated_upfront_rd_minor": 65000000,
+            "total_npv_minor": 2646670513
+          },
+          {
+            "variant": "premium",
+            "allocated_upfront_rd_minor": 65000000,
+            "total_npv_minor": 2126653950
+          }
+        ],
+        "periods": [
+          {
+            "fiscal_period": 2027,
+            "cumulative_opening_sets": 0,
+            "cumulative_closing_sets": 43000,
+            "tooling_recovery_sets": 43000,
+            "material_cash_minor": 1078440000,
+            "tooling_cash_minor": 86000000,
+            "operating_cash_minor": 1164440000,
+            "operating_pv_minor": 1164440000,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 595335000,
+                "tooling_cash_minor": 55900000,
+                "operating_cash_minor": 651235000,
+                "operating_pv_minor": 651235000
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 483105000,
+                "tooling_cash_minor": 30100000,
+                "operating_cash_minor": 513205000,
+                "operating_pv_minor": 513205000
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2028,
+            "cumulative_opening_sets": 43000,
+            "cumulative_closing_sets": 89000,
+            "tooling_recovery_sets": 46000,
+            "material_cash_minor": 1182522000,
+            "tooling_cash_minor": 92000000,
+            "operating_cash_minor": 1274522000,
+            "operating_pv_minor": 1158656364,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 652791750,
+                "tooling_cash_minor": 59800000,
+                "operating_cash_minor": 712591750,
+                "operating_pv_minor": 647810682
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 529730250,
+                "tooling_cash_minor": 32200000,
+                "operating_cash_minor": 561930250,
+                "operating_pv_minor": 510845682
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2029,
+            "cumulative_opening_sets": 89000,
+            "cumulative_closing_sets": 138000,
+            "tooling_recovery_sets": 11000,
+            "material_cash_minor": 1290366000,
+            "tooling_cash_minor": 22000000,
+            "operating_cash_minor": 1312366000,
+            "operating_pv_minor": 1084600000,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 712325250,
+                "tooling_cash_minor": 14300000,
+                "operating_cash_minor": 726625250,
+                "operating_pv_minor": 600516736
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 578040750,
+                "tooling_cash_minor": 7700000,
+                "operating_cash_minor": 585740750,
+                "operating_pv_minor": 484083264
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2030,
+            "cumulative_opening_sets": 138000,
+            "cumulative_closing_sets": 199000,
+            "tooling_recovery_sets": 0,
+            "material_cash_minor": 1644621000,
+            "tooling_cash_minor": 0,
+            "operating_cash_minor": 1644621000,
+            "operating_pv_minor": 1235628099,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 907885875,
+                "tooling_cash_minor": 0,
+                "operating_cash_minor": 907885875,
+                "operating_pv_minor": 682108095
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 736735125,
+                "tooling_cash_minor": 0,
+                "operating_cash_minor": 736735125,
+                "operating_pv_minor": 553520004
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "supplier_id": "SUP-011",
+        "upfront_rd_minor": 130545453,
+        "material_pv_minor": 3695147342,
+        "tooling_pv_minor": 227535871,
+        "total_npv_minor": 4053228666,
+        "variant_totals": [
+          {
+            "variant": "base",
+            "allocated_upfront_rd_minor": 65272727,
+            "total_npv_minor": 2235894141
+          },
+          {
+            "variant": "premium",
+            "allocated_upfront_rd_minor": 65272727,
+            "total_npv_minor": 1817334525
+          }
+        ],
+        "periods": [
+          {
+            "fiscal_period": 2027,
+            "cumulative_opening_sets": 0,
+            "cumulative_closing_sets": 43000,
+            "tooling_recovery_sets": 43000,
+            "material_cash_minor": 938310413,
+            "tooling_cash_minor": 103633008,
+            "operating_cash_minor": 1041943421,
+            "operating_pv_minor": 1041943421,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 513630979,
+                "tooling_cash_minor": 67361455,
+                "operating_cash_minor": 580992434,
+                "operating_pv_minor": 580992434
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 424679434,
+                "tooling_cash_minor": 36271553,
+                "operating_cash_minor": 460950987,
+                "operating_pv_minor": 460950987
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2028,
+            "cumulative_opening_sets": 43000,
+            "cumulative_closing_sets": 89000,
+            "tooling_recovery_sets": 46000,
+            "material_cash_minor": 996979583,
+            "tooling_cash_minor": 111789652,
+            "operating_cash_minor": 1108769235,
+            "operating_pv_minor": 1007972031,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 545746473,
+                "tooling_cash_minor": 72663274,
+                "operating_cash_minor": 618409747,
+                "operating_pv_minor": 562190679
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 451233109,
+                "tooling_cash_minor": 39126378,
+                "operating_cash_minor": 490359487,
+                "operating_pv_minor": 445781352
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2029,
+            "cumulative_opening_sets": 89000,
+            "cumulative_closing_sets": 138000,
+            "tooling_recovery_sets": 11000,
+            "material_cash_minor": 1054494480,
+            "tooling_cash_minor": 26953847,
+            "operating_cash_minor": 1081448326,
+            "operating_pv_minor": 893758947,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 577230119,
+                "tooling_cash_minor": 17520000,
+                "operating_cash_minor": 594750120,
+                "operating_pv_minor": 491529024
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 477264360,
+                "tooling_cash_minor": 9433846,
+                "operating_cash_minor": 486698207,
+                "operating_pv_minor": 402229923
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2030,
+            "cumulative_opening_sets": 138000,
+            "cumulative_closing_sets": 199000,
+            "tooling_recovery_sets": 0,
+            "material_cash_minor": 1303060731,
+            "tooling_cash_minor": 0,
+            "operating_cash_minor": 1303060731,
+            "operating_pv_minor": 979008813,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 713295248,
+                "tooling_cash_minor": 0,
+                "operating_cash_minor": 713295248,
+                "operating_pv_minor": 535909277
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 589765483,
+                "tooling_cash_minor": 0,
+                "operating_cash_minor": 589765483,
+                "operating_pv_minor": 443099536
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "supplier_id": "SUP-012",
+        "upfront_rd_minor": 59769233,
+        "material_pv_minor": 5728696862,
+        "tooling_pv_minor": 253617800,
+        "total_npv_minor": 6042083895,
+        "variant_totals": [
+          {
+            "variant": "base",
+            "allocated_upfront_rd_minor": 29884617,
+            "total_npv_minor": 3937541260
+          },
+          {
+            "variant": "premium",
+            "allocated_upfront_rd_minor": 29884617,
+            "total_npv_minor": 2104542635
+          }
+        ],
+        "periods": [
+          {
+            "fiscal_period": 2027,
+            "cumulative_opening_sets": 0,
+            "cumulative_closing_sets": 43000,
+            "tooling_recovery_sets": 43000,
+            "material_cash_minor": 1457449630,
+            "tooling_cash_minor": 115653463,
+            "operating_cash_minor": 1573103093,
+            "operating_pv_minor": 1573103093,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 952214502,
+                "tooling_cash_minor": 75174751,
+                "operating_cash_minor": 1027389253,
+                "operating_pv_minor": 1027389253
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 505235128,
+                "tooling_cash_minor": 40478712,
+                "operating_cash_minor": 545713840,
+                "operating_pv_minor": 545713840
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2028,
+            "cumulative_opening_sets": 43000,
+            "cumulative_closing_sets": 89000,
+            "tooling_recovery_sets": 46000,
+            "material_cash_minor": 1584856840,
+            "tooling_cash_minor": 124518463,
+            "operating_cash_minor": 1709375303,
+            "operating_pv_minor": 1553977548,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 1035455110,
+                "tooling_cash_minor": 80937001,
+                "operating_cash_minor": 1116392111,
+                "operating_pv_minor": 1014901919
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 549401730,
+                "tooling_cash_minor": 43581462,
+                "operating_cash_minor": 592983192,
+                "operating_pv_minor": 539075629
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2029,
+            "cumulative_opening_sets": 89000,
+            "cumulative_closing_sets": 138000,
+            "tooling_recovery_sets": 11000,
+            "material_cash_minor": 1609383572,
+            "tooling_cash_minor": 29966539,
+            "operating_cash_minor": 1639350111,
+            "operating_pv_minor": 1354834802,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 1051480027,
+                "tooling_cash_minor": 19478250,
+                "operating_cash_minor": 1070958277,
+                "operating_pv_minor": 885089485
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 557903545,
+                "tooling_cash_minor": 10488289,
+                "operating_cash_minor": 568391834,
+                "operating_pv_minor": 469745317
+              }
+            ]
+          },
+          {
+            "fiscal_period": 2030,
+            "cumulative_opening_sets": 138000,
+            "cumulative_closing_sets": 199000,
+            "tooling_recovery_sets": 0,
+            "material_cash_minor": 1997031359,
+            "tooling_cash_minor": 0,
+            "operating_cash_minor": 1997031359,
+            "operating_pv_minor": 1500399218,
+            "variants": [
+              {
+                "variant": "base",
+                "material_cash_minor": 1304747338,
+                "tooling_cash_minor": 0,
+                "operating_cash_minor": 1304747338,
+                "operating_pv_minor": 980275986
+              },
+              {
+                "variant": "premium",
+                "material_cash_minor": 692284021,
+                "tooling_cash_minor": 0,
+                "operating_cash_minor": 692284021,
+                "operating_pv_minor": 520123232
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "recommendation": {
+    "supplier_id": "SUP-011",
+    "rationale": "Only candidate with sufficient annual allocation and on-time readiness; finance is separately compared on full demand."
+  }
+}

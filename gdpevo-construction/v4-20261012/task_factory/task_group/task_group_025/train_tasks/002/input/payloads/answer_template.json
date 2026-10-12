@@ -1,0 +1,433 @@
+{
+  "type": "object",
+  "required": [
+    "program_id",
+    "as_of",
+    "approved_volume",
+    "commercial_coverage",
+    "technical_admissibility",
+    "capacity_shortfall",
+    "launch_gap",
+    "financial_exposure"
+  ],
+  "properties": {
+    "program_id": {
+      "type": "string",
+      "description": "Target program stable ID."
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date",
+      "description": "Business knowledge cutoff/nomination decision date, ISO YYYY-MM-DD."
+    },
+    "approved_volume": {
+      "type": "object",
+      "required": [
+        "uom",
+        "periods",
+        "four_year_total_sets"
+      ],
+      "properties": {
+        "uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ],
+          "description": "Quantity unit."
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "fiscal_period",
+              "base_sets",
+              "premium_sets",
+              "total_sets"
+            ],
+            "properties": {
+              "fiscal_period": {
+                "type": "integer",
+                "minimum": 2027,
+                "description": "Fiscal year; order ascending within each supplier.",
+                "maximum": 2030
+              },
+              "base_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Approved base vehicle-set demand."
+              },
+              "premium_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Approved premium vehicle-set demand."
+              },
+              "total_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total approved vehicle sets."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per fiscal year."
+        },
+        "four_year_total_sets": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of four approved whole fiscal-year totals."
+        }
+      },
+      "additionalProperties": true
+    },
+    "commercial_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "fiscal_period",
+          "base_covered",
+          "premium_covered",
+          "commercially_applicable"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+          },
+          "fiscal_period": {
+            "type": "integer",
+            "minimum": 2027,
+            "description": "Fiscal year; order ascending within each supplier.",
+            "maximum": 2030
+          },
+          "base_covered": {
+            "type": "boolean"
+          },
+          "premium_covered": {
+            "type": "boolean"
+          },
+          "commercially_applicable": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": "One row per candidate and fiscal year. Coverage under binding commercial records known at the decision date. No price or currency fields are needed here."
+    },
+    "technical_admissibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "qualification_status",
+          "base_covered",
+          "premium_covered",
+          "required_actions"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional",
+              "unqualified"
+            ],
+            "description": "Authoritative current engineering/quality qualification status."
+          },
+          "base_covered": {
+            "type": "boolean"
+          },
+          "premium_covered": {
+            "type": "boolean"
+          },
+          "required_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "photometry_validation"
+              ],
+              "description": "Normalized required action: complete photometry validation."
+            },
+            "description": "All open required actions from the current assessment; empty if none."
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": "One row per candidate. Qualification, technical variant coverage and actions; capacity and timing are separate outputs."
+    },
+    "capacity_shortfall": {
+      "type": "object",
+      "required": [
+        "uom",
+        "periods"
+      ],
+      "properties": {
+        "uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ],
+          "description": "Annual supply quantity unit."
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "fiscal_period",
+              "available_sets",
+              "shortfall_sets"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+              },
+              "fiscal_period": {
+                "type": "integer",
+                "minimum": 2027,
+                "description": "Fiscal year; order ascending within each supplier.",
+                "maximum": 2030
+              },
+              "available_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Available annual allocation after other business."
+              },
+              "shortfall_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Uncovered annual full-demand quantity. Zero if sufficient."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per candidate and fiscal year."
+        }
+      },
+      "additionalProperties": true
+    },
+    "launch_gap": {
+      "type": "object",
+      "required": [
+        "launch_date",
+        "candidates"
+      ],
+      "properties": {
+        "launch_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Required program launch date, ISO YYYY-MM-DD."
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "ready_date",
+              "gap_days",
+              "on_time"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+              },
+              "ready_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Earliest new-tooling nomination readiness measured from as_of. ISO YYYY-MM-DD."
+              },
+              "gap_days": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Calendar days readiness misses launch; zero if before/on launch."
+              },
+              "on_time": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per candidate."
+        }
+      },
+      "additionalProperties": true
+    },
+    "financial_exposure": {
+      "type": "object",
+      "required": [
+        "currency",
+        "annual_cashflows",
+        "upfront_rd",
+        "candidate_npvs"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ],
+          "description": "All monetary outputs use CNY fen."
+        },
+        "annual_cashflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "fiscal_period",
+              "variant",
+              "parts_minor",
+              "tooling_minor",
+              "cashflow_minor",
+              "discounted_minor"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+              },
+              "fiscal_period": {
+                "type": "integer",
+                "minimum": 2027,
+                "description": "Fiscal year; order ascending within each supplier.",
+                "maximum": 2030
+              },
+              "variant": {
+                "type": "string",
+                "enum": [
+                  "base",
+                  "premium"
+                ],
+                "description": "Headlamp variant."
+              },
+              "parts_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              },
+              "tooling_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              },
+              "cashflow_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              },
+              "discounted_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per candidate, fiscal year and variant; exclude upfront RD here."
+        },
+        "upfront_rd": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "variant",
+              "rd_minor"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+              },
+              "variant": {
+                "type": "string",
+                "enum": [
+                  "base",
+                  "premium"
+                ],
+                "description": "Headlamp variant."
+              },
+              "rd_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per candidate and variant; allocated upfront development cash."
+        },
+        "candidate_npvs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "base_npv_minor",
+              "premium_npv_minor",
+              "total_npv_minor"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+              },
+              "base_npv_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              },
+              "premium_npv_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              },
+              "total_npv_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round final displayed value half-up to nearest fen; compare within 1 fen. Do not round intermediate calculations."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per candidate, including annual discounted cash plus upfront RD. Totals from full precision may differ from sums of displayed rounded rows by a few fen."
+        }
+      },
+      "additionalProperties": true
+    },
+    "recommendation": {
+      "type": "object",
+      "required": [
+        "supplier_id",
+        "rationale"
+      ],
+      "properties": {
+        "supplier_id": {
+          "type": "string",
+          "description": "Stable supplier_id from the program candidate roster. Include every candidate."
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Nomination recommendation, constraints and assumptions. Narrative is unscored."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PRG-034 nomination answer",
+  "description": "Write a JSON object matching this schema. Tables ordered supplier_id, then fiscal_period, then variant; no duplicate business keys. Actions are unordered sets. Quantities and days exact integers; booleans strict. Money integers in fen, final half-up rounding and 1-fen tolerance. Extra explanations/source_references/recommendation permitted and unscored."
+}

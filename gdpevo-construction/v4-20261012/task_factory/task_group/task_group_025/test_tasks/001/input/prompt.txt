@@ -1,0 +1,5 @@
+You are the category buyer preparing the Finance Controller's nomination appraisal for Platform 084 headlamp sourcing (PRG-084). Use business knowledge available as of 2026-10-12 and assess the complete 2027-2030 fiscal life of the program.
+
+The controller needs a comparable appraisal of the program's candidate suppliers, together with the approved demand and variant mix, binding commercial coverage, technical standing and open conditions, annual allocation shortfalls, launch readiness, and financial exposure. Include a nomination recommendation and any assumptions or unresolved issues relevant to approval. Appraise each candidate against the full program demand so that the finance comparison is consistent with the feasibility assessment.
+
+The shared sourcing business environment is available through <TASK_ENV_BASE_URL>. The supplied answer_template.json defines the required JSON deliverable. Save your final appraisal as answer.json. No supplier award or external contact is requested.

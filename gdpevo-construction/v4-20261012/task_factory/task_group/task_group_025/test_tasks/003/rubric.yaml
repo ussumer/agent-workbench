@@ -1,0 +1,19 @@
+rubric:
+  - point_id: N1
+    goal: Reconstruct approved full-fiscal-year base/premium vehicle-set demand and total demand.
+    weight: 2
+  - point_id: N2
+    goal: Resolve binding variant/year coverage and governing dated quotation revision, without monetary or UOM arithmetic.
+    weight: 2
+  - point_id: N3
+    goal: Report each supplier technical qualification, variant coverage and outstanding conditions without inventing disqualification.
+    weight: 2
+  - point_id: N4
+    goal: Determine annual available allocations and full-award capacity shortfalls for every candidate.
+    weight: 2
+  - point_id: N5
+    goal: Determine earliest nomination readiness, launch gap days and launch-date feasibility.
+    weight: 2
+  - point_id: N6
+    goal: Reconcile full-award discounted operating/tooling/R&D exposure with tiers, cap, source amendments, variant allocations, UOM and FX.
+    weight: 3

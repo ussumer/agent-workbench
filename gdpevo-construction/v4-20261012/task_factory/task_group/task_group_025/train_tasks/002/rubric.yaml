@@ -1,0 +1,19 @@
+rubric:
+  - point_id: N1
+    goal: Reconstruct approved full-year vehicle-set demand and variant mix for 2027-2030.
+    weight: 2
+  - point_id: N2
+    goal: Determine binding commercial applicability and variant-period coverage for every candidate.
+    weight: 2
+  - point_id: N3
+    goal: Report engineering and quality qualification, technical coverage and open actions.
+    weight: 2
+  - point_id: N4
+    goal: Compare approved annual full demand with each supplier allocation and report actual shortfalls.
+    weight: 2
+  - point_id: N5
+    goal: Determine candidate readiness dates and calendar launch gaps.
+    weight: 2
+  - point_id: N6
+    goal: Calculate complete candidate and variant discounted financial exposure with annual parts, tooling and upfront development charges.
+    weight: 3

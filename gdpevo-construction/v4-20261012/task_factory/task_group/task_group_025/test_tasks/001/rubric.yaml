@@ -1,0 +1,19 @@
+rubric:
+  - point_id: N1
+    goal: Reconstruct the binding full-fiscal-year demand and base/premium variant quantities.
+    weight: 2
+  - point_id: N2
+    goal: Resolve dated binding commercial source state and variant coverage for each candidate and fiscal year.
+    weight: 2
+  - point_id: N3
+    goal: Report authoritative technical qualification, covered variants and required open actions.
+    weight: 2
+  - point_id: N4
+    goal: Reconcile each candidate's annual available allocation and full-demand shortfall.
+    weight: 2
+  - point_id: N5
+    goal: Determine candidate readiness dates and calendar launch gaps.
+    weight: 2
+  - point_id: N6
+    goal: Compute normalized operating and tooling cash, discounted cash, upfront R&D and variant NPV jointly.
+    weight: 3

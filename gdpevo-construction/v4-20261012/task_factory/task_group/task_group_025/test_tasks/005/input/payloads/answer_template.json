@@ -1,0 +1,496 @@
+{
+  "type": "object",
+  "properties": {
+    "program_id": {
+      "type": "string",
+      "pattern": "^PRG-[0-9]{3}$"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "approved_volume": {
+      "type": "object",
+      "properties": {
+        "uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ]
+        },
+        "lifecycle_total_sets": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fiscal_period": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+              },
+              "base_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+              },
+              "premium_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+              },
+              "total_sets": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+              },
+              "base_share_basis_points": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+              },
+              "premium_share_basis_points": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+              }
+            },
+            "required": [
+              "fiscal_period",
+              "base_sets",
+              "premium_sets",
+              "total_sets",
+              "base_share_basis_points",
+              "premium_share_basis_points"
+            ],
+            "additionalProperties": true
+          },
+          "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+        }
+      },
+      "required": [
+        "uom",
+        "lifecycle_total_sets",
+        "periods"
+      ],
+      "additionalProperties": true
+    },
+    "commercial_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "fiscal_period": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "base",
+              "premium"
+            ]
+          },
+          "full_year_covered": {
+            "type": "boolean"
+          },
+          "binding_terms_state": {
+            "type": "string",
+            "enum": [
+              "approved_original",
+              "approved_amendment",
+              "no_binding_terms"
+            ]
+          }
+        },
+        "required": [
+          "supplier_id",
+          "fiscal_period",
+          "variant",
+          "full_year_covered",
+          "binding_terms_state"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+    },
+    "technical_admissibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional",
+              "unqualified"
+            ]
+          },
+          "covered_variants": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "base",
+                "premium"
+              ]
+            },
+            "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+          },
+          "open_required_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "photometry_validation"
+              ]
+            },
+            "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+          },
+          "technical_admissible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "supplier_id",
+          "qualification_status",
+          "covered_variants",
+          "open_required_actions",
+          "technical_admissible"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+    },
+    "capacity_shortfall": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "fiscal_period": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+          },
+          "available_sets": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+          },
+          "shortfall_sets": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+          }
+        },
+        "required": [
+          "supplier_id",
+          "fiscal_period",
+          "available_sets",
+          "shortfall_sets"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+    },
+    "launch_gap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "earliest_ready_date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "launch_date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "late_days": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+          },
+          "on_time": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "supplier_id",
+          "earliest_ready_date",
+          "launch_date",
+          "late_days",
+          "on_time"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+    },
+    "financial_exposure": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "minor"
+          ]
+        },
+        "comparison_basis": {
+          "type": "string",
+          "enum": [
+            "hypothetical_full_award"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "pattern": "^SUP-[0-9]{3}$"
+              },
+              "upfront_rd_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+              },
+              "material_pv_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+              },
+              "tooling_pv_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+              },
+              "total_npv_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+              },
+              "variant_totals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "variant": {
+                      "type": "string",
+                      "enum": [
+                        "base",
+                        "premium"
+                      ]
+                    },
+                    "allocated_upfront_rd_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                    },
+                    "total_npv_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                    }
+                  },
+                  "required": [
+                    "variant",
+                    "allocated_upfront_rd_minor",
+                    "total_npv_minor"
+                  ],
+                  "additionalProperties": true
+                },
+                "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+              },
+              "periods": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+                    },
+                    "cumulative_opening_sets": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+                    },
+                    "cumulative_closing_sets": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+                    },
+                    "tooling_recovery_sets": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Exact integer; quantities are vehicle sets, shares basis points, calendar gaps days."
+                    },
+                    "material_cash_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                    },
+                    "tooling_cash_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                    },
+                    "operating_cash_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                    },
+                    "operating_pv_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                    },
+                    "variants": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "variant": {
+                            "type": "string",
+                            "enum": [
+                              "base",
+                              "premium"
+                            ]
+                          },
+                          "material_cash_minor": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                          },
+                          "tooling_cash_minor": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                          },
+                          "operating_cash_minor": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                          },
+                          "operating_pv_minor": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Integer CNY fen; only money fields allow absolute tolerance 1 fen."
+                          }
+                        },
+                        "required": [
+                          "variant",
+                          "material_cash_minor",
+                          "tooling_cash_minor",
+                          "operating_cash_minor",
+                          "operating_pv_minor"
+                        ],
+                        "additionalProperties": true
+                      },
+                      "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+                    }
+                  },
+                  "required": [
+                    "fiscal_period",
+                    "cumulative_opening_sets",
+                    "cumulative_closing_sets",
+                    "tooling_recovery_sets",
+                    "material_cash_minor",
+                    "tooling_cash_minor",
+                    "operating_cash_minor",
+                    "operating_pv_minor",
+                    "variants"
+                  ],
+                  "additionalProperties": true
+                },
+                "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+              }
+            },
+            "required": [
+              "supplier_id",
+              "upfront_rd_minor",
+              "material_pv_minor",
+              "tooling_pv_minor",
+              "total_npv_minor",
+              "variant_totals",
+              "periods"
+            ],
+            "additionalProperties": true
+          },
+          "description": "Sort business tables by supplier_id, fiscal_period, variant where present. Set arrays have unique members. Order is normalized in evaluation."
+        }
+      },
+      "required": [
+        "currency",
+        "unit",
+        "comparison_basis",
+        "candidates"
+      ],
+      "additionalProperties": true
+    },
+    "recommendation": {
+      "type": "object",
+      "properties": {
+        "supplier_id": {
+          "type": "string",
+          "pattern": "^SUP-[0-9]{3}$"
+        },
+        "rationale": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "supplier_id",
+        "rationale"
+      ],
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "program_id",
+    "as_of",
+    "approved_volume",
+    "commercial_coverage",
+    "technical_admissibility",
+    "capacity_shortfall",
+    "launch_gap",
+    "financial_exposure"
+  ],
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nomination refresh decision JSON",
+  "description": "Financial exposures model full approved demand for each candidate independently, including infeasible candidates. Technical admissibility means current qualified status and full variant coverage; open required actions remain separately reported. Money is integer CNY fen, rounded half-up at final field, tolerance 1 fen; all other fields exact. Recommendation, narrative and source references are optional and unscored. Return all program candidates and fiscal periods."
+}

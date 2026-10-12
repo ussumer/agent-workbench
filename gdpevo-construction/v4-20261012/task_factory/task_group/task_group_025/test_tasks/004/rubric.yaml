@@ -1,0 +1,22 @@
+rubric:
+  - point_id: R1
+    goal: Eligible settled historical principal by category, excluding unpaid commitments.
+    weight: 2
+  - point_id: R2
+    goal: Paid-base refund entitlement reconciled to actual receipts and outstanding amounts.
+    weight: 2
+  - point_id: R3
+    goal: Tooling title and reusable noncash credit versus stranded assets and cash.
+    weight: 2
+  - point_id: R4
+    goal: Gross four-year prospective quotation exposure for authorized nonincumbent alternatives.
+    weight: 3
+  - point_id: R5
+    goal: Authorized candidate qualification, variant coverage and required actions.
+    weight: 2
+  - point_id: R6
+    goal: Annual capacity shortfalls and dated qualification/launch recovery.
+    weight: 2
+  - point_id: R7
+    goal: Actual lifecycle, supplier authorization and approval scope without invented future ban.
+    weight: 1

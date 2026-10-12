@@ -1,0 +1,7 @@
+Prepare a sourcing recovery decision for Platform PRG-047 headlamps following the incumbent supplier's missed launch milestone. Use information approved or issued by October 12, 2026 and the full fiscal-year 2027-2030 outlook.
+
+Management needs the settled historical exposure, contractual cash-recovery position, disposition of existing tooling, and the future gross financial exposure of each replacement alternative permitted by the current change authorization. Show those alternatives' technical position, annual supply coverage, readiness against launch, and the approvals and scope applicable to an external award. Give a brief recommendation without executing an award.
+
+For the financial comparison, report gross future quotation exposure before existing-tooling asset offsets and historical claims; report those asset and cash-recovery positions separately. Management has not requested a net present value that assumes a cross-currency timing for the asset offset.
+
+The shared sourcing environment is available at <TASK_ENV_BASE_URL>; business records and their document references are accessible through the sourcing tools listed in environment_access.md. Return one answer.json matching input/payloads/answer_template.json. Use CNY integer minor units for reported money and ISO dates. The template defines the deliverable fields; all business findings must be supported by the shared records.

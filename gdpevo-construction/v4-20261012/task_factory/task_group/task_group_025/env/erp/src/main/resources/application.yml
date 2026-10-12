@@ -28,18 +28,18 @@ spring:
       enabled: false
   jackson:
     default-property-inclusion: always
-    property-naming-strategy: SNAKE_CASE # JSON 字段统一 snake_case
+    property-naming-strategy: SNAKE_CASE # JSON fields use snake_case consistently
     serialization:
       write-dates-as-timestamps: false
 
 erp:
   seed:
-    # 与 T01 固定的唯一种子源；解析失败时服务启动失败，不退回硬编码数据
+    # Single fixed seed source from T01; parse failures stop startup without hardcoded fallback data
     path: ${ERP_SEED_PATH:../fixtures/seed-v1.json}
     fallback-path: fixtures/seed-v1.json
   security:
-    # 内部服务令牌：只给 MCP 网关使用，不下发浏览器或沙箱。
-    # 本机 Demo 允许一个可覆盖的本地默认值，生产部署必须通过 ERP_SERVICE_TOKEN 覆盖。
+    # Internal service token for the MCP gateway; never provided to browsers or sandboxes.
+    # Local demo permits an overridable default; production must set ERP_SERVICE_TOKEN.
     service-token: ${ERP_SERVICE_TOKEN:local-demo-service-token}
     header-name: X-Service-Token
 
@@ -50,3 +50,4 @@ logging:
 
 sourcing:
   seed-path: ${SOURCING_SEED_PATH:../seed.json}
+

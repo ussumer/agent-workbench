@@ -1,0 +1,356 @@
+{
+  "type": "object",
+  "required": [
+    "program_id",
+    "as_of",
+    "approved_volume",
+    "commercial_coverage",
+    "technical_admissibility",
+    "capacity_shortfall",
+    "launch_gap",
+    "financial_exposure"
+  ],
+  "properties": {
+    "program_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "approved_volume": {
+      "type": "object",
+      "required": [
+        "uom",
+        "quantity_scope",
+        "annual",
+        "program_total_sets"
+      ],
+      "properties": {
+        "uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ]
+        },
+        "quantity_scope": {
+          "type": "string",
+          "enum": [
+            "full_fiscal_year"
+          ]
+        },
+        "annual": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "fiscal_period",
+              "base_sets",
+              "premium_sets",
+              "total_sets"
+            ],
+            "properties": {
+              "fiscal_period": {
+                "type": "integer",
+                "minimum": 2027,
+                "maximum": 2030
+              },
+              "base_sets": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "premium_sets": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "total_sets": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per complete fiscal year, sorted by fiscal_period."
+        },
+        "program_total_sets": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "commercial_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "fiscal_period",
+          "base_covered",
+          "premium_covered",
+          "source_resolution"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "fiscal_period": {
+            "type": "integer",
+            "minimum": 2027,
+            "maximum": 2030
+          },
+          "base_covered": {
+            "type": "boolean"
+          },
+          "premium_covered": {
+            "type": "boolean"
+          },
+          "source_resolution": {
+            "type": "string",
+            "enum": [
+              "approved_original",
+              "approved_amendment",
+              "prior_approved_after_draft",
+              "prior_approved_after_revoked",
+              "prior_approved_until_future_amendment",
+              "no_binding_coverage"
+            ]
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": "One supplier/year row. Source resolution classifies binding commercial applicability, independently of technical qualification. No price or currency arithmetic belongs in this table."
+    },
+    "technical_admissibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "qualification_status",
+          "technical_coverage",
+          "required_actions"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional",
+              "not_qualified"
+            ]
+          },
+          "technical_coverage": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "base",
+                "premium"
+              ]
+            }
+          },
+          "required_actions": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "photometry_validation"
+              ]
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": "One row per candidate. Preserve authoritative qualification state and listed open actions separately."
+    },
+    "capacity_shortfall": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "fiscal_period",
+          "available_sets",
+          "shortfall_sets"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "fiscal_period": {
+            "type": "integer",
+            "minimum": 2027,
+            "maximum": 2030
+          },
+          "available_sets": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "shortfall_sets": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": "One row per candidate and year; whole vehicle sets. Quantities are exact."
+    },
+    "launch_gap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "ready_date",
+          "launch_gap_days",
+          "on_time"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "ready_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "launch_gap_days": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "on_time": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": "One row per candidate; readiness ISO date, nonnegative calendar-day late gap. Dates and booleans are exact."
+    },
+    "financial_exposure": {
+      "type": "object",
+      "required": [
+        "currency",
+        "candidates"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "annual_variant_cash",
+              "upfront_rd_minor",
+              "variant_npv_minor"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "pattern": "^SUP-[0-9]{3}$"
+              },
+              "annual_variant_cash": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "fiscal_period",
+                    "variant",
+                    "operating_minor",
+                    "tooling_minor",
+                    "discounted_cash_minor"
+                  ],
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "minimum": 2027,
+                      "maximum": 2030
+                    },
+                    "variant": {
+                      "type": "string",
+                      "enum": [
+                        "base",
+                        "premium"
+                      ]
+                    },
+                    "operating_minor": {
+                      "type": "integer",
+                      "description": "CNY minor units (fen); round final field half-up to one fen. Absolute tolerance one fen applies only to monetary values."
+                    },
+                    "tooling_minor": {
+                      "type": "integer",
+                      "description": "CNY minor units (fen); round final field half-up to one fen. Absolute tolerance one fen applies only to monetary values."
+                    },
+                    "discounted_cash_minor": {
+                      "type": "integer",
+                      "description": "CNY minor units (fen); round final field half-up to one fen. Absolute tolerance one fen applies only to monetary values."
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "description": "One row per fiscal year and variant; nominal operating and tooling cash plus discounted combined cash."
+              },
+              "upfront_rd_minor": {
+                "type": "object",
+                "required": [
+                  "base",
+                  "premium"
+                ],
+                "properties": {
+                  "base": {
+                    "type": "integer",
+                    "description": "CNY minor units (fen); round final field half-up to one fen. Absolute tolerance one fen applies only to monetary values."
+                  },
+                  "premium": {
+                    "type": "integer",
+                    "description": "CNY minor units (fen); round final field half-up to one fen. Absolute tolerance one fen applies only to monetary values."
+                  }
+                },
+                "additionalProperties": true
+              },
+              "variant_npv_minor": {
+                "type": "object",
+                "required": [
+                  "base",
+                  "premium"
+                ],
+                "properties": {
+                  "base": {
+                    "type": "integer",
+                    "description": "CNY minor units (fen); round final field half-up to one fen. Absolute tolerance one fen applies only to monetary values."
+                  },
+                  "premium": {
+                    "type": "integer",
+                    "description": "CNY minor units (fen); round final field half-up to one fen. Absolute tolerance one fen applies only to monetary values."
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "One row per candidate; full-demand standalone appraisal. Optional total_npv_minor may summarize variant exposures."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Headlamp supplier nomination appraisal answer",
+  "description": "Output JSON object. Candidate IDs come from the business program. Sort supplier tables by supplier_id then fiscal_period and variant. Table order is normalized by business keys; missing or duplicate business rows are invalid. All quantities, fiscal years and days are exact integers; booleans must be JSON booleans. Money uses CNY fen and one-fen tolerance. Add optional evidence_document_ids, assumptions, recommendation and summary fields as needed; narrative is not string-matched. This schema supplies output conventions, not a finance policy."
+}

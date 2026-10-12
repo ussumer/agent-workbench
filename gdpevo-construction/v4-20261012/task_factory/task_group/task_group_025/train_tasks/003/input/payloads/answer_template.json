@@ -1,0 +1,506 @@
+{
+  "type": "object",
+  "required": [
+    "program_id",
+    "as_of",
+    "settled_principal",
+    "refund_claim",
+    "tooling_disposition",
+    "incremental_exposure",
+    "technical_admissibility",
+    "recovery_feasibility",
+    "change_scope"
+  ],
+  "properties": {
+    "program_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 calendar date (YYYY-MM-DD)."
+    },
+    "settled_principal": {
+      "type": "object",
+      "required": [
+        "currency",
+        "tooling_minor",
+        "rd_minor",
+        "total_minor"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "tooling_minor": {
+          "type": "integer",
+          "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+        },
+        "rd_minor": {
+          "type": "integer",
+          "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+        },
+        "total_minor": {
+          "type": "integer",
+          "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+        }
+      },
+      "additionalProperties": true
+    },
+    "refund_claim": {
+      "type": "object",
+      "required": [
+        "currency",
+        "categories",
+        "due_date",
+        "claimable_total_minor",
+        "received_total_minor",
+        "outstanding_total_minor"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "cost_category",
+              "claimable_minor",
+              "received_minor",
+              "outstanding_minor"
+            ],
+            "properties": {
+              "cost_category": {
+                "type": "string",
+                "enum": [
+                  "tooling",
+                  "rd"
+                ]
+              },
+              "claimable_minor": {
+                "type": "integer",
+                "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+              },
+              "received_minor": {
+                "type": "integer",
+                "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+              },
+              "outstanding_minor": {
+                "type": "integer",
+                "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Sort by cost_category; include exactly one row for each relevant business entity/period."
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 calendar date (YYYY-MM-DD)."
+        },
+        "claimable_total_minor": {
+          "type": "integer",
+          "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+        },
+        "received_total_minor": {
+          "type": "integer",
+          "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+        },
+        "outstanding_total_minor": {
+          "type": "integer",
+          "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+        }
+      },
+      "additionalProperties": true
+    },
+    "tooling_disposition": {
+      "type": "object",
+      "required": [
+        "title",
+        "disposition",
+        "credit_currency",
+        "transfer_credit_minor",
+        "cash_refund_minor",
+        "stranded"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "enum": [
+            "customer",
+            "supplier",
+            "joint",
+            "unknown"
+          ]
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "transfer_for_reuse",
+            "stranded_supplier_asset",
+            "retain_without_reuse",
+            "needs_information"
+          ]
+        },
+        "credit_currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "transfer_credit_minor": {
+          "type": "integer",
+          "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+        },
+        "cash_refund_minor": {
+          "type": "integer",
+          "description": "Cash generated by tooling disposition itself, distinct from the contractual historic paid-cost refund claim."
+        },
+        "stranded": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "incremental_exposure": {
+      "type": "object",
+      "required": [
+        "currency",
+        "basis",
+        "candidates"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "gross_before_asset_credit_and_historical_claims"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "annual",
+              "rd_upfront_minor",
+              "transition_upfront_minor",
+              "future_nominal_minor",
+              "future_npv_minor"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "pattern": "^SUP-[0-9]{3}$"
+              },
+              "annual": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "fiscal_period",
+                    "operating_minor",
+                    "tooling_minor",
+                    "total_minor"
+                  ],
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "description": "Nonnegative integer.",
+                      "enum": [
+                        2027,
+                        2028,
+                        2029,
+                        2030
+                      ]
+                    },
+                    "operating_minor": {
+                      "type": "integer",
+                      "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+                    },
+                    "tooling_minor": {
+                      "type": "integer",
+                      "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+                    },
+                    "total_minor": {
+                      "type": "integer",
+                      "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "description": "Sort by fiscal_period; include exactly one row for each relevant business entity/period."
+              },
+              "rd_upfront_minor": {
+                "type": "integer",
+                "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+              },
+              "transition_upfront_minor": {
+                "type": "integer",
+                "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+              },
+              "future_nominal_minor": {
+                "type": "integer",
+                "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+              },
+              "future_npv_minor": {
+                "type": "integer",
+                "description": "CNY minor units (fen); round the final result to nearest fen, half up. Absolute tolerance: 1 fen."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Sort by supplier_id; include exactly one row for each relevant business entity/period."
+        }
+      },
+      "additionalProperties": true,
+      "description": "Gross replacement exposure for each currently authorized alternative: annual operating and quoted tooling cash flows, upfront R&D and transition, nominal total and NPV at the finance-policy valuation frame. Excludes historic principal, cash claims/receipts and existing-tooling asset offsets."
+    },
+    "technical_admissibility": {
+      "type": "object",
+      "required": [
+        "alternatives"
+      ],
+      "properties": {
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "status",
+              "covered_variants",
+              "required_actions"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "pattern": "^SUP-[0-9]{3}$"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "qualified",
+                  "conditional",
+                  "not_qualified",
+                  "needs_information"
+                ]
+              },
+              "covered_variants": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "base",
+                    "premium"
+                  ]
+                },
+                "description": "Unique set, sorted lexically; order is not scored."
+              },
+              "required_actions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "Engineering action text from the effective assessment; whitespace around entries is ignored."
+                },
+                "description": "Unique set, sorted lexically; order is not scored."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Sort by supplier_id; include exactly one row for each relevant business entity/period."
+        }
+      },
+      "additionalProperties": true
+    },
+    "recovery_feasibility": {
+      "type": "object",
+      "required": [
+        "quantity_uom",
+        "alternatives"
+      ],
+      "properties": {
+        "quantity_uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ]
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "ready_date",
+              "launch_gap_days",
+              "launch_feasible",
+              "annual",
+              "full_program_capacity_feasible"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "pattern": "^SUP-[0-9]{3}$"
+              },
+              "ready_date": {
+                "type": "string",
+                "format": "date",
+                "description": "ISO 8601 calendar date (YYYY-MM-DD)."
+              },
+              "launch_gap_days": {
+                "type": "integer",
+                "description": "Nonnegative calendar days after contractual launch that readiness occurs; zero when ready on or before launch."
+              },
+              "launch_feasible": {
+                "type": "boolean"
+              },
+              "annual": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "fiscal_period",
+                    "required_sets",
+                    "available_sets",
+                    "shortfall_sets"
+                  ],
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "description": "Nonnegative integer.",
+                      "enum": [
+                        2027,
+                        2028,
+                        2029,
+                        2030
+                      ]
+                    },
+                    "required_sets": {
+                      "type": "integer",
+                      "description": "Vehicle sets; one vehicle set contains two headlamps."
+                    },
+                    "available_sets": {
+                      "type": "integer",
+                      "description": "Vehicle sets; one vehicle set contains two headlamps."
+                    },
+                    "shortfall_sets": {
+                      "type": "integer",
+                      "description": "Vehicle sets; one vehicle set contains two headlamps."
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "description": "Sort by fiscal_period; include exactly one row for each relevant business entity/period."
+              },
+              "full_program_capacity_feasible": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Sort by supplier_id; include exactly one row for each relevant business entity/period."
+        }
+      },
+      "additionalProperties": true
+    },
+    "change_scope": {
+      "type": "object",
+      "required": [
+        "incumbent_supplier_id",
+        "incumbent_contract_status",
+        "authorized_supplier_ids",
+        "award_status",
+        "required_approvals",
+        "future_program_restriction"
+      ],
+      "properties": {
+        "incumbent_supplier_id": {
+          "type": "string",
+          "pattern": "^SUP-[0-9]{3}$"
+        },
+        "incumbent_contract_status": {
+          "type": "string",
+          "enum": [
+            "cancelled",
+            "superseded",
+            "active",
+            "needs_information"
+          ]
+        },
+        "authorized_supplier_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "description": "Unique set, sorted lexically; order is not scored."
+        },
+        "award_status": {
+          "type": "string",
+          "enum": [
+            "not_yet_awarded",
+            "awarded",
+            "not_authorized"
+          ]
+        },
+        "required_approvals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Finance",
+              "Engineering",
+              "Legal",
+              "Executive"
+            ]
+          },
+          "description": "Unique set, sorted lexically; order is not scored."
+        },
+        "future_program_restriction": {
+          "type": "string",
+          "enum": [
+            "not_specified",
+            "program_specific",
+            "blanket_ban"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "recommendation": {
+      "type": "object",
+      "properties": {
+        "supplier_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "description": "Optional, unscored management recommendation."
+    }
+  },
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PRG-047 sourcing recovery answer",
+  "description": "Required structured deliverable. Extra evidence references and narrative are accepted and unscored. List order is normalized; duplicate business entities are invalid for the affected outcome. Money totals and NPV are rounded only after summing unrounded components."
+}

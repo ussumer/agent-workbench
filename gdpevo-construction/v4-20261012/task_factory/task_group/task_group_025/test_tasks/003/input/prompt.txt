@@ -1,0 +1,5 @@
+Prepare a sourcing committee decision paper for Platform 107 headlamps (PRG-107), using the business records available as of 2026-10-12. The committee needs a defensible comparison of a full-program award to each candidate for fiscal years 2027-2030 and a recommendation that accounts for the program launch commitment.
+
+Provide the approved annual demand and variant mix, the commercial coverage governing each candidate across the forecast years, engineering admissibility and outstanding actions, annual capacity exposure, launch readiness, and the financial comparison in the program base currency. Distinguish the lowest financial exposure from an award that can support launch, and explain the recommended decision briefly.
+
+The shared sourcing environment is available at <TASK_ENV_BASE_URL>. The business records are accessible through the sourcing programs, forecasts, quotes, engineering, suppliers, contracts, payments, and document interfaces. Return one JSON document conforming to input/payloads/answer_template.json. Supporting references and a concise recommendation may be included.

@@ -1,0 +1,454 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Initial sourcing decision JSON",
+  "description": "Required output structure. Integer quantities and dates are exact. Financial integers use the stated cents tolerance. Additional evidence/narrative fields are permitted and unscored.",
+  "type": "object",
+  "required": [
+    "program_id",
+    "as_of",
+    "approved_volume",
+    "commercial_coverage",
+    "technical_admissibility",
+    "capacity_shortfall",
+    "launch_gap",
+    "financial_exposure",
+    "recommendation"
+  ],
+  "properties": {
+    "program_id": {
+      "type": "string",
+      "description": "Program under decision."
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "approved_volume": {
+      "type": "object",
+      "required": [
+        "quantity_uom",
+        "periods",
+        "lifecycle_sets"
+      ],
+      "properties": {
+        "quantity_uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ],
+          "description": ""
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "fiscal_period",
+              "base_sets",
+              "premium_sets",
+              "total_sets"
+            ],
+            "properties": {
+              "fiscal_period": {
+                "type": "integer",
+                "description": "Fiscal year, 2027 through 2030. One row per year, sorted ascending; evaluation accepts reordered rows."
+              },
+              "base_sets": {
+                "type": "integer",
+                "description": "Full fiscal-year base vehicle sets."
+              },
+              "premium_sets": {
+                "type": "integer",
+                "description": "Full fiscal-year premium vehicle sets."
+              },
+              "total_sets": {
+                "type": "integer",
+                "description": "Combined full fiscal-year vehicle sets."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": ""
+        },
+        "lifecycle_sets": {
+          "type": "integer",
+          "description": "All four fiscal-year vehicle sets."
+        }
+      },
+      "additionalProperties": true
+    },
+    "commercial_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "periods"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "description": "Stable supplier_id from the program. One row per candidate, sorted by supplier_id; evaluation accepts reordered rows."
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "fiscal_period",
+                "base_binding",
+                "premium_binding",
+                "base_terms_basis",
+                "premium_terms_basis"
+              ],
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "description": "Fiscal year, 2027 through 2030. One row per year, sorted ascending; evaluation accepts reordered rows."
+                },
+                "base_binding": {
+                  "type": "boolean"
+                },
+                "premium_binding": {
+                  "type": "boolean"
+                },
+                "base_terms_basis": {
+                  "type": "string",
+                  "enum": [
+                    "approved_original",
+                    "approved_amendment",
+                    "no_binding_terms"
+                  ],
+                  "description": "Binding original or amended commercial state in this fiscal period. This describes dated applicability, not prices or document identifiers."
+                },
+                "premium_terms_basis": {
+                  "type": "string",
+                  "enum": [
+                    "approved_original",
+                    "approved_amendment",
+                    "no_binding_terms"
+                  ],
+                  "description": "Binding original or amended commercial state in this fiscal period. This describes dated applicability, not prices or document identifiers."
+                }
+              },
+              "additionalProperties": true
+            },
+            "description": ""
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": ""
+    },
+    "technical_admissibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "qualification_status",
+          "technical_admissible",
+          "covered_variants",
+          "required_action_codes"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "description": "Stable supplier_id from the program. One row per candidate, sorted by supplier_id; evaluation accepts reordered rows."
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional",
+              "unqualified"
+            ],
+            "description": ""
+          },
+          "technical_admissible": {
+            "type": "boolean",
+            "description": "True when the current assessment is qualified and covers both program variants; report outstanding actions separately. Capacity and launch feasibility belong in their own tables."
+          },
+          "covered_variants": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "base",
+                "premium"
+              ],
+              "description": ""
+            },
+            "description": "Unordered unique variant set."
+          },
+          "required_action_codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "photometry_validation",
+                "crash_validation",
+                "process_audit",
+                "other"
+              ],
+              "description": ""
+            },
+            "description": "Unordered unique action set. Normalize complete photometry validation to photometry_validation; crash validation to crash_validation; process audit to process_audit; unmatched required actions to other. Empty only when no required actions remain."
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": ""
+    },
+    "capacity_shortfall": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "quantity_uom",
+          "periods"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "description": "Stable supplier_id from the program. One row per candidate, sorted by supplier_id; evaluation accepts reordered rows."
+          },
+          "quantity_uom": {
+            "type": "string",
+            "enum": [
+              "vehicle_set"
+            ],
+            "description": ""
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "fiscal_period",
+                "available_sets",
+                "shortfall_sets"
+              ],
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "description": "Fiscal year, 2027 through 2030. One row per year, sorted ascending; evaluation accepts reordered rows."
+                },
+                "available_sets": {
+                  "type": "integer",
+                  "description": "Annual available allocation after other business."
+                },
+                "shortfall_sets": {
+                  "type": "integer",
+                  "description": "Nonnegative full-award demand minus available allocation in vehicle sets."
+                }
+              },
+              "additionalProperties": true
+            },
+            "description": ""
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": ""
+    },
+    "launch_gap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "earliest_ready_date",
+          "launch_gap_days",
+          "on_time"
+        ],
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "description": "Stable supplier_id from the program. One row per candidate, sorted by supplier_id; evaluation accepts reordered rows."
+          },
+          "earliest_ready_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Earliest qualification/delivery readiness from decision date using the applicable nomination duration; ISO YYYY-MM-DD."
+          },
+          "launch_gap_days": {
+            "type": "integer",
+            "description": "Nonnegative calendar days readiness falls after program launch."
+          },
+          "on_time": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      },
+      "description": ""
+    },
+    "financial_exposure": {
+      "type": "object",
+      "required": [
+        "currency",
+        "unit",
+        "scenario",
+        "suppliers"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ],
+          "description": ""
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "minor_currency_unit"
+          ],
+          "description": ""
+        },
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "full_award_comparison"
+          ],
+          "description": ""
+        },
+        "suppliers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "annual_cashflows",
+              "rd_upfront_minor",
+              "rd_allocation_minor",
+              "materials_npv_minor",
+              "tooling_npv_minor",
+              "total_npv_minor",
+              "variant_npv_minor"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string",
+                "description": "Stable supplier_id from the program. One row per candidate, sorted by supplier_id; evaluation accepts reordered rows."
+              },
+              "annual_cashflows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "fiscal_period",
+                    "materials_minor",
+                    "tooling_minor",
+                    "operating_cashflow_minor",
+                    "operating_npv_minor"
+                  ],
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "description": "Fiscal year, 2027 through 2030. One row per year, sorted ascending; evaluation accepts reordered rows."
+                    },
+                    "materials_minor": {
+                      "type": "integer",
+                      "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                    },
+                    "tooling_minor": {
+                      "type": "integer",
+                      "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                    },
+                    "operating_cashflow_minor": {
+                      "type": "integer",
+                      "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                    },
+                    "operating_npv_minor": {
+                      "type": "integer",
+                      "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "description": "Operating cashflows exclude upfront R&D. Show all four periods."
+              },
+              "rd_upfront_minor": {
+                "type": "integer",
+                "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+              },
+              "rd_allocation_minor": {
+                "type": "object",
+                "required": [
+                  "base",
+                  "premium"
+                ],
+                "properties": {
+                  "base": {
+                    "type": "integer",
+                    "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                  },
+                  "premium": {
+                    "type": "integer",
+                    "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                  }
+                },
+                "additionalProperties": true
+              },
+              "materials_npv_minor": {
+                "type": "integer",
+                "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+              },
+              "tooling_npv_minor": {
+                "type": "integer",
+                "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+              },
+              "total_npv_minor": {
+                "type": "integer",
+                "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+              },
+              "variant_npv_minor": {
+                "type": "object",
+                "required": [
+                  "base",
+                  "premium"
+                ],
+                "properties": {
+                  "base": {
+                    "type": "integer",
+                    "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                  },
+                  "premium": {
+                    "type": "integer",
+                    "description": "CNY cents. One CNY = 100 minor units. Keep decimal precision during calculation, round each final field half-up to integer cents. Absolute comparison tolerance: 5 cents per financial field."
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": ""
+        }
+      },
+      "additionalProperties": true
+    },
+    "recommendation": {
+      "type": "object",
+      "required": [
+        "supplier_id",
+        "rationale"
+      ],
+      "properties": {
+        "supplier_id": {
+          "type": "string",
+          "description": "Recommended candidate, or none when infeasible."
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Short nomination rationale, material risks and assumptions. Narrative and recommendation are not separate scored outcomes."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

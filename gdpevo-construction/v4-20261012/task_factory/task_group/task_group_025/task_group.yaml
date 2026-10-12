@@ -1,0 +1,458 @@
+task_group:
+  task_group_id: task_group_025
+  scenario_id: SCN_025_automotive_procurement_v4
+  source_examples:
+  - E004
+  - E005
+  domain: Automotive sourcing finance and supplier changes
+  description: Source-driven synthetic business portfolio. Five formal train and five
+    held-out development tasks require independent record discovery, financial analysis
+    and transfer of repeated commercial conventions. DS/course-stack adaptation; not
+    calibrated or Stage3 accepted.
+env:
+  dockerfile: env/Dockerfile
+  setup: env/build.sh
+  state_mode: read_only
+  files:
+  - env/build.sh
+  - env/counts.json
+  - env/diagnose_runtime.py
+  - env/Dockerfile
+  - env/endpoints.txt
+  - env/environment_access.md
+  - env/generate_seed.py
+  - env/judge_api.py
+  - env/judge_endpoints.txt
+  - env/probe_http.py
+  - env/run.sh
+  - env/schema.md
+  - env/seed.json
+  - env/source-manifest.json
+  - env/verify_data.py
+  - env/verify_runtime.py
+  - env/erp/mvnw
+  - env/erp/mvnw.cmd
+  - env/erp/pom.xml
+  - env/fixtures/seed-v1.json
+  - env/erp/src/test/java/com/rushharness/erp/CatalogApiTest.java
+  - env/erp/src/test/java/com/rushharness/erp/OrderApiTest.java
+  - env/erp/src/test/java/com/rushharness/erp/OrderConcurrencyTest.java
+  - env/erp/src/test/java/com/rushharness/erp/SourcingApiTest.java
+  - env/erp/src/main/resources/application.yml
+  - env/erp/src/main/resources/schema.sql
+  - env/erp/src/main/resources/sourcing-schema.sql
+  - env/erp/src/main/java/com/rushharness/erp/ErpApplication.java
+  - env/erp/src/main/java/com/rushharness/erp/api/ApiException.java
+  - env/erp/src/main/java/com/rushharness/erp/api/ApiExceptionHandler.java
+  - env/erp/src/main/java/com/rushharness/erp/api/ApiResponse.java
+  - env/erp/src/main/java/com/rushharness/erp/api/PageResponse.java
+  - env/erp/src/main/java/com/rushharness/erp/api/Pagination.java
+  - env/erp/src/main/java/com/rushharness/erp/api/RequestContext.java
+  - env/erp/src/main/java/com/rushharness/erp/api/RequestIdFilter.java
+  - env/erp/src/main/java/com/rushharness/erp/api/ServiceTokenFilter.java
+  - env/erp/src/main/java/com/rushharness/erp/catalog/CatalogController.java
+  - env/erp/src/main/java/com/rushharness/erp/catalog/CatalogRepository.java
+  - env/erp/src/main/java/com/rushharness/erp/catalog/PartDetail.java
+  - env/erp/src/main/java/com/rushharness/erp/catalog/PartView.java
+  - env/erp/src/main/java/com/rushharness/erp/catalog/SupplierOffer.java
+  - env/erp/src/main/java/com/rushharness/erp/catalog/SupplierPartView.java
+  - env/erp/src/main/java/com/rushharness/erp/catalog/SupplierView.java
+  - env/erp/src/main/java/com/rushharness/erp/config/ErpProperties.java
+  - env/erp/src/main/java/com/rushharness/erp/config/SeedLoader.java
+  - env/erp/src/main/java/com/rushharness/erp/health/HealthController.java
+  - env/erp/src/main/java/com/rushharness/erp/inventory/InventoryController.java
+  - env/erp/src/main/java/com/rushharness/erp/inventory/InventoryRepository.java
+  - env/erp/src/main/java/com/rushharness/erp/inventory/InventoryWarning.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/CreateOrderRequest.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/OrderController.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/OrderLineRequest.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/OrderLineView.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/OrderRepository.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/OrderResult.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/OrdersService.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/OrderView.java
+  - env/erp/src/main/java/com/rushharness/erp/orders/UpdateOrderRequest.java
+  - env/erp/src/main/java/com/rushharness/erp/sourcing/SourcingController.java
+  - env/erp/src/main/java/com/rushharness/erp/sourcing/SourcingReadOnlyFilter.java
+  - env/erp/src/main/java/com/rushharness/erp/sourcing/SourcingSeed.java
+train_tasks:
+- task_id: train_001
+  input: train_tasks/001/input/
+  prompt_txt: train_tasks/001/input/prompt.txt
+  payloads:
+  - train_tasks/001/input/payloads/answer_template.json
+  notes: train_tasks/001/notes/notes.md
+  output: train_tasks/001/output/
+  answer_json: train_tasks/001/output/answer.json
+  eval:
+    script: train_tasks/001/eval/eval.sh
+    files:
+    - train_tasks/001/eval/eval.sh
+    - train_tasks/001/eval/evaluate.py
+    rubric:
+    - point_id: N1
+      goal: Reconstruct approved full fiscal-year base and premium vehicle-set demand
+        and lifecycle total.
+      weight: 2
+    - point_id: N2
+      goal: Resolve binding original versus amended commercial coverage for each supplier,
+        variant and future fiscal period as known at the decision date.
+      weight: 2
+    - point_id: N3
+      goal: Reconcile current engineering and quality qualification, complete variant
+        coverage and remaining validation actions.
+      weight: 2
+    - point_id: N4
+      goal: Determine each supplier's annual full-award capacity deficits against
+        available allocations.
+      weight: 2
+    - point_id: N5
+      goal: Calculate earliest nomination readiness and calendar launch gaps for every
+        candidate.
+      weight: 2
+    - point_id: N6
+      goal: Compute all candidate cashflows and discounted financial exposures with
+        currency and UOM normalization, graduated tiers, shared tooling cap and upfront
+        equal development allocation.
+      weight: 3
+- task_id: train_002
+  input: train_tasks/002/input/
+  prompt_txt: train_tasks/002/input/prompt.txt
+  payloads:
+  - train_tasks/002/input/payloads/answer_template.json
+  notes: train_tasks/002/notes/notes.md
+  output: train_tasks/002/output/
+  answer_json: train_tasks/002/output/answer.json
+  eval:
+    script: train_tasks/002/eval/eval.sh
+    files:
+    - train_tasks/002/eval/eval.sh
+    - train_tasks/002/eval/evaluate.py
+    rubric:
+    - point_id: N1
+      goal: Reconstruct approved full-year vehicle-set demand and variant mix for
+        2027-2030.
+      weight: 2
+    - point_id: N2
+      goal: Determine binding commercial applicability and variant-period coverage
+        for every candidate.
+      weight: 2
+    - point_id: N3
+      goal: Report engineering and quality qualification, technical coverage and open
+        actions.
+      weight: 2
+    - point_id: N4
+      goal: Compare approved annual full demand with each supplier allocation and
+        report actual shortfalls.
+      weight: 2
+    - point_id: N5
+      goal: Determine candidate readiness dates and calendar launch gaps.
+      weight: 2
+    - point_id: N6
+      goal: Calculate complete candidate and variant discounted financial exposure
+        with annual parts, tooling and upfront development charges.
+      weight: 3
+- task_id: train_003
+  input: train_tasks/003/input/
+  prompt_txt: train_tasks/003/input/prompt.txt
+  payloads:
+  - train_tasks/003/input/payloads/answer_template.json
+  notes: train_tasks/003/notes/notes.md
+  output: train_tasks/003/output/
+  answer_json: train_tasks/003/output/answer.json
+  eval:
+    script: train_tasks/003/eval/eval.sh
+    files:
+    - train_tasks/003/eval/eval.sh
+    - train_tasks/003/eval/evaluate.py
+    rubric:
+    - point_id: R1
+      goal: Reconcile actual settled eligible historic tooling and R&D principal.
+      weight: 2
+    - point_id: R2
+      goal: Separate contractual refund claim, received cash and outstanding balances.
+      weight: 2
+    - point_id: R3
+      goal: Resolve tooling title, reusable asset disposition and noncash transfer
+        credit.
+      weight: 2
+    - point_id: R4
+      goal: Calculate gross future quotation cash flows and NPV excluding historical
+        principal, claims and asset offsets.
+      weight: 3
+    - point_id: R5
+      goal: Identify the effective technical qualification and conditions of authorized
+        alternatives.
+      weight: 2
+    - point_id: R6
+      goal: Reconcile annual available allocation and sequential readiness against
+        contractual launch.
+      weight: 2
+    - point_id: R7
+      goal: Respect incumbent termination and current external-award authorization
+        without inventing future blanket restrictions.
+      weight: 1
+- task_id: train_004
+  input: train_tasks/004/input/
+  prompt_txt: train_tasks/004/input/prompt.txt
+  payloads:
+  - train_tasks/004/input/payloads/answer_template.json
+  notes: train_tasks/004/notes/notes.md
+  output: train_tasks/004/output/
+  answer_json: train_tasks/004/output/answer.json
+  eval:
+    script: train_tasks/004/eval/eval.sh
+    files:
+    - train_tasks/004/eval/eval.sh
+    - train_tasks/004/eval/evaluate.py
+    rubric:
+    - point_id: N1
+      goal: Reconstruct approved full-year variant demand and four-year mix.
+      weight: 2
+    - point_id: N2
+      goal: Resolve dated commercial applicability and complete variant-period coverage.
+      weight: 2
+    - point_id: N3
+      goal: Determine technical admissibility, coverage and remaining required actions.
+      weight: 2
+    - point_id: N4
+      goal: Compute each candidate annual allocation shortfall against approved demand.
+      weight: 2
+    - point_id: N5
+      goal: Determine earliest readiness and calendar-day gap to launch.
+      weight: 2
+    - point_id: N6
+      goal: Compute all candidate and variant cashflow exposure with tiers, UOM, currency,
+        tooling, R&D and discounting.
+      weight: 3
+- task_id: train_005
+  input: train_tasks/005/input/
+  prompt_txt: train_tasks/005/input/prompt.txt
+  payloads:
+  - train_tasks/005/input/payloads/answer_template.json
+  notes: train_tasks/005/notes/notes.md
+  output: train_tasks/005/output/
+  answer_json: train_tasks/005/output/answer.json
+  eval:
+    script: train_tasks/005/eval/eval.sh
+    files:
+    - train_tasks/005/eval/eval.sh
+    - train_tasks/005/eval/evaluate.py
+    rubric:
+    - point_id: R1
+      goal: Settled eligible historical principal by tooling and development category,
+        excluding unpaid commitments.
+      weight: 2
+    - point_id: R2
+      goal: Cash refund entitlement, actual partial receipts and outstanding claims
+        by category and total.
+      weight: 2
+    - point_id: R3
+      goal: Customer tooling title, reusable asset disposition and noncash transfer
+        credit in its own currency.
+      weight: 2
+    - point_id: R4
+      goal: Gross future operating, capped tooling, upfront development and transition
+        exposure and NPV by candidate, before assets or historic claims.
+      weight: 3
+    - point_id: R5
+      goal: Technical qualification and conditional actions of all authorized alternatives.
+      weight: 2
+    - point_id: R6
+      goal: Annual production capacity and sequential transfer/requalification launch
+        recovery dates and gaps.
+      weight: 2
+    - point_id: R7
+      goal: Executed program-change and external-award scope without an unsupported
+        future-program supplier ban.
+      weight: 1
+test_tasks:
+- task_id: test_001
+  input: test_tasks/001/input/
+  prompt_txt: test_tasks/001/input/prompt.txt
+  payloads:
+  - test_tasks/001/input/payloads/answer_template.json
+  notes: test_tasks/001/notes/notes.md
+  output: test_tasks/001/output/
+  answer_json: test_tasks/001/output/answer.json
+  eval:
+    script: test_tasks/001/eval/eval.sh
+    files:
+    - test_tasks/001/eval/eval.sh
+    - test_tasks/001/eval/evaluate.py
+    rubric:
+    - point_id: N1
+      goal: Reconstruct the binding full-fiscal-year demand and base/premium variant
+        quantities.
+      weight: 2
+    - point_id: N2
+      goal: Resolve dated binding commercial source state and variant coverage for
+        each candidate and fiscal year.
+      weight: 2
+    - point_id: N3
+      goal: Report authoritative technical qualification, covered variants and required
+        open actions.
+      weight: 2
+    - point_id: N4
+      goal: Reconcile each candidate's annual available allocation and full-demand
+        shortfall.
+      weight: 2
+    - point_id: N5
+      goal: Determine candidate readiness dates and calendar launch gaps.
+      weight: 2
+    - point_id: N6
+      goal: Compute normalized operating and tooling cash, discounted cash, upfront
+        R&D and variant NPV jointly.
+      weight: 3
+- task_id: test_002
+  input: test_tasks/002/input/
+  prompt_txt: test_tasks/002/input/prompt.txt
+  payloads:
+  - test_tasks/002/input/payloads/answer_template.json
+  notes: test_tasks/002/notes/notes.md
+  output: test_tasks/002/output/
+  answer_json: test_tasks/002/output/answer.json
+  eval:
+    script: test_tasks/002/eval/eval.sh
+    files:
+    - test_tasks/002/eval/eval.sh
+    - test_tasks/002/eval/evaluate.py
+    rubric:
+    - point_id: R1
+      goal: Correct settled eligible historical principal by category, excluding unpaid
+        commitments.
+      weight: 2
+    - point_id: R2
+      goal: Correct paid-base refund entitlement, actual received credits and outstanding
+        receivable.
+      weight: 2
+    - point_id: R3
+      goal: Correct tooling title, reusable or stranded disposition and distinct noncash
+        transfer credit.
+      weight: 2
+    - point_id: R4
+      goal: Correct gross future replacement quotation cashflows and exposure for
+        authorized nonincumbents.
+      weight: 3
+    - point_id: R5
+      goal: Correct qualification, coverage and required actions for all authorized
+        candidates.
+      weight: 2
+    - point_id: R6
+      goal: Correct annual capacity shortfalls and calendar recovery gaps for all
+        authorized candidates.
+      weight: 2
+    - point_id: R7
+      goal: Correct current contractual cancellation and authorization scope without
+        invented future exclusion.
+      weight: 1
+- task_id: test_003
+  input: test_tasks/003/input/
+  prompt_txt: test_tasks/003/input/prompt.txt
+  payloads:
+  - test_tasks/003/input/payloads/answer_template.json
+  notes: test_tasks/003/notes/notes.md
+  output: test_tasks/003/output/
+  answer_json: test_tasks/003/output/answer.json
+  eval:
+    script: test_tasks/003/eval/eval.sh
+    files:
+    - test_tasks/003/eval/eval.sh
+    - test_tasks/003/eval/evaluate.py
+    rubric:
+    - point_id: N1
+      goal: Reconstruct approved full-fiscal-year base/premium vehicle-set demand
+        and total demand.
+      weight: 2
+    - point_id: N2
+      goal: Resolve binding variant/year coverage and governing dated quotation revision,
+        without monetary or UOM arithmetic.
+      weight: 2
+    - point_id: N3
+      goal: Report each supplier technical qualification, variant coverage and outstanding
+        conditions without inventing disqualification.
+      weight: 2
+    - point_id: N4
+      goal: Determine annual available allocations and full-award capacity shortfalls
+        for every candidate.
+      weight: 2
+    - point_id: N5
+      goal: Determine earliest nomination readiness, launch gap days and launch-date
+        feasibility.
+      weight: 2
+    - point_id: N6
+      goal: Reconcile full-award discounted operating/tooling/R&D exposure with tiers,
+        cap, source amendments, variant allocations, UOM and FX.
+      weight: 3
+- task_id: test_004
+  input: test_tasks/004/input/
+  prompt_txt: test_tasks/004/input/prompt.txt
+  payloads:
+  - test_tasks/004/input/payloads/answer_template.json
+  notes: test_tasks/004/notes/notes.md
+  output: test_tasks/004/output/
+  answer_json: test_tasks/004/output/answer.json
+  eval:
+    script: test_tasks/004/eval/eval.sh
+    files:
+    - test_tasks/004/eval/eval.sh
+    - test_tasks/004/eval/evaluate.py
+    rubric:
+    - point_id: R1
+      goal: Eligible settled historical principal by category, excluding unpaid commitments.
+      weight: 2
+    - point_id: R2
+      goal: Paid-base refund entitlement reconciled to actual receipts and outstanding
+        amounts.
+      weight: 2
+    - point_id: R3
+      goal: Tooling title and reusable noncash credit versus stranded assets and cash.
+      weight: 2
+    - point_id: R4
+      goal: Gross four-year prospective quotation exposure for authorized nonincumbent
+        alternatives.
+      weight: 3
+    - point_id: R5
+      goal: Authorized candidate qualification, variant coverage and required actions.
+      weight: 2
+    - point_id: R6
+      goal: Annual capacity shortfalls and dated qualification/launch recovery.
+      weight: 2
+    - point_id: R7
+      goal: Actual lifecycle, supplier authorization and approval scope without invented
+        future ban.
+      weight: 1
+- task_id: test_005
+  input: test_tasks/005/input/
+  prompt_txt: test_tasks/005/input/prompt.txt
+  payloads:
+  - test_tasks/005/input/payloads/answer_template.json
+  notes: test_tasks/005/notes/notes.md
+  output: test_tasks/005/output/
+  answer_json: test_tasks/005/output/answer.json
+  eval:
+    script: test_tasks/005/eval/eval.sh
+    files:
+    - test_tasks/005/eval/eval.sh
+    - test_tasks/005/eval/evaluate.py
+    rubric:
+    - point_id: N1
+      goal: Reconstruct approved full-fiscal-year vehicle-set demand and variant mix.
+      weight: 2
+    - point_id: N2
+      goal: Resolve dated binding commercial terms and complete variant-period coverage.
+      weight: 2
+    - point_id: N3
+      goal: Report current engineering admissibility, coverage and outstanding required
+        actions.
+      weight: 2
+    - point_id: N4
+      goal: Calculate supplier-specific annual allocation deficits against full demand.
+      weight: 2
+    - point_id: N5
+      goal: Calculate earliest new-tooling readiness and calendar launch gaps.
+      weight: 2
+    - point_id: N6
+      goal: Compute full-award discounted cashflows with correct tiers, shared tooling,
+        R&D, UOM and FX.
+      weight: 3

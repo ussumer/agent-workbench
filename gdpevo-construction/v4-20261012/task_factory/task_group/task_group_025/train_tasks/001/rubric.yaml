@@ -1,0 +1,19 @@
+rubric:
+  - point_id: N1
+    goal: Reconstruct approved full fiscal-year base and premium vehicle-set demand and lifecycle total.
+    weight: 2
+  - point_id: N2
+    goal: Resolve binding original versus amended commercial coverage for each supplier, variant and future fiscal period as known at the decision date.
+    weight: 2
+  - point_id: N3
+    goal: Reconcile current engineering and quality qualification, complete variant coverage and remaining validation actions.
+    weight: 2
+  - point_id: N4
+    goal: Determine each supplier's annual full-award capacity deficits against available allocations.
+    weight: 2
+  - point_id: N5
+    goal: Calculate earliest nomination readiness and calendar launch gaps for every candidate.
+    weight: 2
+  - point_id: N6
+    goal: Compute all candidate cashflows and discounted financial exposures with currency and UOM normalization, graduated tiers, shared tooling cap and upfront equal development allocation.
+    weight: 3

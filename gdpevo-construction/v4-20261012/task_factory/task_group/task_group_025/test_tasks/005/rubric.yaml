@@ -1,0 +1,19 @@
+rubric:
+  - point_id: N1
+    goal: Reconstruct approved full-fiscal-year vehicle-set demand and variant mix.
+    weight: 2
+  - point_id: N2
+    goal: Resolve dated binding commercial terms and complete variant-period coverage.
+    weight: 2
+  - point_id: N3
+    goal: Report current engineering admissibility, coverage and outstanding required actions.
+    weight: 2
+  - point_id: N4
+    goal: Calculate supplier-specific annual allocation deficits against full demand.
+    weight: 2
+  - point_id: N5
+    goal: Calculate earliest new-tooling readiness and calendar launch gaps.
+    weight: 2
+  - point_id: N6
+    goal: Compute full-award discounted cashflows with correct tiers, shared tooling, R&D, UOM and FX.
+    weight: 3

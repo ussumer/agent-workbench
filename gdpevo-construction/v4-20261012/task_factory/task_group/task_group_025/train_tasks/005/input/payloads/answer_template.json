@@ -1,0 +1,635 @@
+{
+  "type": "object",
+  "required": [
+    "program_id",
+    "as_of",
+    "settled_principal",
+    "refund_claim",
+    "tooling_disposition",
+    "incremental_exposure",
+    "technical_admissibility",
+    "recovery_feasibility",
+    "change_scope"
+  ],
+  "properties": {
+    "program_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string"
+    },
+    "settled_principal": {
+      "type": "object",
+      "required": [
+        "currency",
+        "categories",
+        "total_paid_minor"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY",
+            "USD",
+            "EUR"
+          ]
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "category",
+              "paid_minor"
+            ],
+            "properties": {
+              "category": {
+                "type": "string",
+                "enum": [
+                  "tooling",
+                  "rd"
+                ]
+              },
+              "paid_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        },
+        "total_paid_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        }
+      },
+      "additionalProperties": true
+    },
+    "refund_claim": {
+      "type": "object",
+      "required": [
+        "currency",
+        "categories",
+        "claim_minor",
+        "received_minor",
+        "outstanding_minor",
+        "due_date",
+        "receipt_status"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY",
+            "USD",
+            "EUR"
+          ]
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "category",
+              "claim_minor",
+              "received_minor",
+              "outstanding_minor"
+            ],
+            "properties": {
+              "category": {
+                "type": "string",
+                "enum": [
+                  "tooling",
+                  "rd"
+                ]
+              },
+              "claim_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              },
+              "received_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              },
+              "outstanding_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        },
+        "claim_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        },
+        "received_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        },
+        "outstanding_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        },
+        "due_date": {
+          "type": "string"
+        },
+        "receipt_status": {
+          "type": "string",
+          "enum": [
+            "unreceived",
+            "partial",
+            "received"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "tooling_disposition": {
+      "type": "object",
+      "required": [
+        "title",
+        "disposition",
+        "reusable",
+        "transfer_credit_currency",
+        "transfer_credit_minor",
+        "credit_is_cash_refund",
+        "supplier_owned_stranded"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "enum": [
+            "customer",
+            "supplier"
+          ]
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "reusable_customer_owned",
+            "stranded_supplier_owned",
+            "requires_further_agreement"
+          ]
+        },
+        "reusable": {
+          "type": "boolean"
+        },
+        "transfer_credit_currency": {
+          "type": "string",
+          "enum": [
+            "CNY",
+            "USD",
+            "EUR"
+          ]
+        },
+        "transfer_credit_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        },
+        "credit_is_cash_refund": {
+          "type": "boolean"
+        },
+        "supplier_owned_stranded": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "incremental_exposure": {
+      "type": "object",
+      "required": [
+        "currency",
+        "definition",
+        "alternatives"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY",
+            "USD",
+            "EUR"
+          ]
+        },
+        "definition": {
+          "type": "string",
+          "enum": [
+            "gross_before_asset_credit_and_historical_claims"
+          ]
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "quote_currency",
+              "annual_cashflows",
+              "upfront_rd_minor",
+              "upfront_transition_minor",
+              "gross_total_minor",
+              "gross_npv_minor"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string"
+              },
+              "quote_currency": {
+                "type": "string",
+                "enum": [
+                  "CNY",
+                  "USD",
+                  "EUR"
+                ]
+              },
+              "annual_cashflows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "fiscal_period",
+                    "operating_minor",
+                    "tooling_minor",
+                    "gross_minor"
+                  ],
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "description": "Exact integer; no quantity, year, duration or day tolerance."
+                    },
+                    "operating_minor": {
+                      "type": "integer",
+                      "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+                    },
+                    "tooling_minor": {
+                      "type": "integer",
+                      "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+                    },
+                    "gross_minor": {
+                      "type": "integer",
+                      "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+              },
+              "upfront_rd_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              },
+              "upfront_transition_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              },
+              "gross_total_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              },
+              "gross_npv_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        }
+      },
+      "additionalProperties": true
+    },
+    "incumbent_reference_exposure": {
+      "type": "object",
+      "required": [
+        "supplier_id",
+        "quote_currency",
+        "annual_cashflows",
+        "upfront_rd_minor",
+        "upfront_transition_minor",
+        "gross_total_minor",
+        "gross_npv_minor"
+      ],
+      "properties": {
+        "supplier_id": {
+          "type": "string"
+        },
+        "quote_currency": {
+          "type": "string",
+          "enum": [
+            "CNY",
+            "USD",
+            "EUR"
+          ]
+        },
+        "annual_cashflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "fiscal_period",
+              "operating_minor",
+              "tooling_minor",
+              "gross_minor"
+            ],
+            "properties": {
+              "fiscal_period": {
+                "type": "integer",
+                "description": "Exact integer; no quantity, year, duration or day tolerance."
+              },
+              "operating_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              },
+              "tooling_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              },
+              "gross_minor": {
+                "type": "integer",
+                "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        },
+        "upfront_rd_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        },
+        "upfront_transition_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        },
+        "gross_total_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        },
+        "gross_npv_minor": {
+          "type": "integer",
+          "description": "Currency minor units, 100 per major unit; tolerance one minor unit."
+        }
+      },
+      "additionalProperties": true
+    },
+    "technical_admissibility": {
+      "type": "object",
+      "required": [
+        "alternatives",
+        "qualified_supplier_ids",
+        "conditional_supplier_ids"
+      ],
+      "properties": {
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "qualification_status",
+              "technical_coverage",
+              "required_action_codes"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string"
+              },
+              "qualification_status": {
+                "type": "string",
+                "enum": [
+                  "qualified",
+                  "conditional",
+                  "unqualified"
+                ]
+              },
+              "technical_coverage": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "base",
+                    "premium"
+                  ]
+                },
+                "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+              },
+              "required_action_codes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "complete_photometry_validation",
+                    "complete_crash_validation",
+                    "complete_quality_audit"
+                  ]
+                },
+                "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        },
+        "qualified_supplier_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        },
+        "conditional_supplier_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        }
+      },
+      "additionalProperties": true
+    },
+    "recovery_feasibility": {
+      "type": "object",
+      "required": [
+        "launch_date",
+        "qualification_deadline",
+        "alternatives"
+      ],
+      "properties": {
+        "launch_date": {
+          "type": "string"
+        },
+        "qualification_deadline": {
+          "type": "string"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "supplier_id",
+              "annual_capacity",
+              "requalification_weeks",
+              "tooling_transfer_weeks",
+              "readiness_date",
+              "launch_gap_days",
+              "ready_by_launch",
+              "capacity_adequate"
+            ],
+            "properties": {
+              "supplier_id": {
+                "type": "string"
+              },
+              "annual_capacity": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "fiscal_period",
+                    "demand_vehicle_sets",
+                    "available_vehicle_sets",
+                    "shortfall_vehicle_sets"
+                  ],
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "description": "Exact integer; no quantity, year, duration or day tolerance."
+                    },
+                    "demand_vehicle_sets": {
+                      "type": "integer",
+                      "description": "Exact integer; no quantity, year, duration or day tolerance."
+                    },
+                    "available_vehicle_sets": {
+                      "type": "integer",
+                      "description": "Exact integer; no quantity, year, duration or day tolerance."
+                    },
+                    "shortfall_vehicle_sets": {
+                      "type": "integer",
+                      "description": "Exact integer; no quantity, year, duration or day tolerance."
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+              },
+              "requalification_weeks": {
+                "type": "integer",
+                "description": "Exact integer; no quantity, year, duration or day tolerance."
+              },
+              "tooling_transfer_weeks": {
+                "type": "integer",
+                "description": "Exact integer; no quantity, year, duration or day tolerance."
+              },
+              "readiness_date": {
+                "type": "string"
+              },
+              "launch_gap_days": {
+                "type": "integer",
+                "description": "Exact integer; no quantity, year, duration or day tolerance."
+              },
+              "ready_by_launch": {
+                "type": "boolean"
+              },
+              "capacity_adequate": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        }
+      },
+      "additionalProperties": true
+    },
+    "change_scope": {
+      "type": "object",
+      "required": [
+        "incumbent_supplier_id",
+        "incumbent_contract_status",
+        "change_reason",
+        "authorization_scope",
+        "authorized_supplier_ids",
+        "future_program_exclusion_supported",
+        "external_award_requires",
+        "nomination_not_yet_awarded"
+      ],
+      "properties": {
+        "incumbent_supplier_id": {
+          "type": "string"
+        },
+        "incumbent_contract_status": {
+          "type": "string",
+          "enum": [
+            "cancelled",
+            "superseded",
+            "active"
+          ]
+        },
+        "change_reason": {
+          "type": "string",
+          "enum": [
+            "planned_engineering_redesign",
+            "validation_failure"
+          ]
+        },
+        "authorization_scope": {
+          "type": "string",
+          "enum": [
+            "this_program",
+            "all_future_programs",
+            "no_authorization"
+          ]
+        },
+        "authorized_supplier_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        },
+        "future_program_exclusion_supported": {
+          "type": "boolean"
+        },
+        "external_award_requires": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Finance",
+              "Engineering",
+              "Quality",
+              "Procurement"
+            ]
+          },
+          "description": "Compare as unordered business rows by stable keys; submit in supplier, category, variant or fiscal-period order. Duplicate rows invalid."
+        },
+        "nomination_not_yet_awarded": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "recommendation": {
+      "type": "object",
+      "required": [
+        "supplier_id",
+        "basis"
+      ],
+      "properties": {
+        "supplier_id": {
+          "type": "string"
+        },
+        "basis": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Supplier change decision record",
+  "description": "Report known-as-of business state and fiscal 2027-2030 projections. Monetary integers use half-up end rounding at each requested output, tolerance one minor unit. Dates ISO YYYY-MM-DD. Stable ERP identifiers exact. Booleans strict. Additional evidence and recommendation unscored. Financial alternatives cover authorized suppliers other than the superseded incumbent; incumbent_reference_exposure is optional reference information. Gross exposure is before asset credit and historical payments or claims; disclose asset credit and refunds separately."
+}

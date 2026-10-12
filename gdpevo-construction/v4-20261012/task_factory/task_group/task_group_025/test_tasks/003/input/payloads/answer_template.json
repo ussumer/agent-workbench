@@ -1,0 +1,434 @@
+{
+  "type": "object",
+  "properties": {
+    "program_id": {
+      "type": "string"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "approved_volume": {
+      "type": "object",
+      "properties": {
+        "quantity_uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ]
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fiscal_period": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "base_vehicle_sets": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "premium_vehicle_sets": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "total_vehicle_sets": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "fiscal_period",
+              "base_vehicle_sets",
+              "premium_vehicle_sets",
+              "total_vehicle_sets"
+            ],
+            "additionalProperties": true
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "quantity_uom",
+        "periods"
+      ],
+      "additionalProperties": true
+    },
+    "commercial_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "variants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "variant": {
+                        "type": "string",
+                        "enum": [
+                          "base",
+                          "premium"
+                        ]
+                      },
+                      "binding_coverage": {
+                        "type": "boolean"
+                      },
+                      "governing_revision": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "variant",
+                      "binding_coverage",
+                      "governing_revision"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "fiscal_period",
+                "variants"
+              ],
+              "additionalProperties": true
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "supplier_id",
+          "periods"
+        ],
+        "additionalProperties": true
+      },
+      "uniqueItems": true
+    },
+    "technical_admissibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string"
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional",
+              "unqualified"
+            ]
+          },
+          "technical_variants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "required_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "complete_photometry_validation"
+              ]
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "supplier_id",
+          "qualification_status",
+          "technical_variants",
+          "required_actions"
+        ],
+        "additionalProperties": true
+      },
+      "uniqueItems": true
+    },
+    "capacity_shortfall": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string"
+          },
+          "quantity_uom": {
+            "type": "string",
+            "enum": [
+              "vehicle_set"
+            ]
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "available_vehicle_sets": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "shortfall_vehicle_sets": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "fiscal_period",
+                "available_vehicle_sets",
+                "shortfall_vehicle_sets"
+              ],
+              "additionalProperties": true
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "supplier_id",
+          "quantity_uom",
+          "periods"
+        ],
+        "additionalProperties": true
+      },
+      "uniqueItems": true
+    },
+    "launch_gap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string"
+          },
+          "earliest_ready_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "launch_gap_days": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ready_by_launch": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "supplier_id",
+          "earliest_ready_date",
+          "launch_gap_days",
+          "ready_by_launch"
+        ],
+        "additionalProperties": true
+      },
+      "uniqueItems": true
+    },
+    "financial_exposure": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "supplier_id": {
+                "type": "string"
+              },
+              "annual_cashflows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "fiscal_period": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "variants": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "variant": {
+                            "type": "string",
+                            "enum": [
+                              "base",
+                              "premium"
+                            ]
+                          },
+                          "operating_cny_minor": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+                          },
+                          "tooling_cny_minor": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+                          }
+                        },
+                        "required": [
+                          "variant",
+                          "operating_cny_minor",
+                          "tooling_cny_minor"
+                        ],
+                        "additionalProperties": true
+                      },
+                      "uniqueItems": true
+                    },
+                    "total_cny_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+                    }
+                  },
+                  "required": [
+                    "fiscal_period",
+                    "variants",
+                    "total_cny_minor"
+                  ],
+                  "additionalProperties": true
+                },
+                "uniqueItems": true
+              },
+              "upfront_rd": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "variant": {
+                      "type": "string",
+                      "enum": [
+                        "base",
+                        "premium"
+                      ]
+                    },
+                    "rd_cny_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+                    }
+                  },
+                  "required": [
+                    "variant",
+                    "rd_cny_minor"
+                  ],
+                  "additionalProperties": true
+                },
+                "uniqueItems": true
+              },
+              "variant_npv": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "variant": {
+                      "type": "string",
+                      "enum": [
+                        "base",
+                        "premium"
+                      ]
+                    },
+                    "npv_cny_minor": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+                    }
+                  },
+                  "required": [
+                    "variant",
+                    "npv_cny_minor"
+                  ],
+                  "additionalProperties": true
+                },
+                "uniqueItems": true
+              },
+              "operating_npv_cny_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+              },
+              "tooling_npv_cny_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+              },
+              "rd_npv_cny_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+              },
+              "total_npv_cny_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen). Round each final reported field half up. Absolute tolerance one minor unit; no intermediate rounding required."
+              }
+            },
+            "required": [
+              "supplier_id",
+              "annual_cashflows",
+              "upfront_rd",
+              "variant_npv",
+              "operating_npv_cny_minor",
+              "tooling_npv_cny_minor",
+              "rd_npv_cny_minor",
+              "total_npv_cny_minor"
+            ],
+            "additionalProperties": true
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "currency",
+        "candidates"
+      ],
+      "additionalProperties": true
+    },
+    "recommendation": {
+      "type": "object",
+      "description": "Optional business recommendation, rationale, and supplier ranking; unscored."
+    }
+  },
+  "required": [
+    "program_id",
+    "as_of",
+    "approved_volume",
+    "commercial_coverage",
+    "technical_admissibility",
+    "capacity_shortfall",
+    "launch_gap",
+    "financial_exposure"
+  ],
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sourcing nomination assessment",
+  "description": "Report a hypothetical full-program award to each listed candidate over fiscal years 2027-2030. Financial exposure covers the full approved forecast independently of capacity or launch constraints; those risks have their own sections. CNY cash outflows are positive. Annual cashflows exclude upfront R&D; NPV includes upfront R&D. Compare each supplier, not a mixed award. Array order may vary; identify rows by supplier_id, fiscal_period and variant. All quantities, dates, revisions and booleans are exact. Evidence references are optional and unscored; recommendations and narrative are unscored. Empty action lists are permitted."
+}

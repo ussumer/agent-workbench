@@ -1,0 +1,222 @@
+{
+  "program_id": "PRG-047",
+  "as_of": "2026-10-12",
+  "settled_principal": {
+    "currency": "CNY",
+    "tooling_minor": 63000000,
+    "rd_minor": 33000000,
+    "total_minor": 96000000
+  },
+  "refund_claim": {
+    "currency": "CNY",
+    "categories": [
+      {
+        "cost_category": "rd",
+        "claimable_minor": 9900000,
+        "received_minor": 0,
+        "outstanding_minor": 9900000
+      },
+      {
+        "cost_category": "tooling",
+        "claimable_minor": 18900000,
+        "received_minor": 0,
+        "outstanding_minor": 18900000
+      }
+    ],
+    "due_date": "2026-12-01",
+    "claimable_total_minor": 28800000,
+    "received_total_minor": 0,
+    "outstanding_total_minor": 28800000
+  },
+  "tooling_disposition": {
+    "title": "customer",
+    "disposition": "transfer_for_reuse",
+    "credit_currency": "CNY",
+    "transfer_credit_minor": 20000000,
+    "cash_refund_minor": 0,
+    "stranded": false
+  },
+  "incremental_exposure": {
+    "currency": "CNY",
+    "basis": "gross_before_asset_credit_and_historical_claims",
+    "candidates": [
+      {
+        "supplier_id": "SUP-016",
+        "annual": [
+          {
+            "fiscal_period": 2027,
+            "operating_minor": 1106236110,
+            "tooling_minor": 92618590,
+            "total_minor": 1198854699
+          },
+          {
+            "fiscal_period": 2028,
+            "operating_minor": 987354819,
+            "tooling_minor": 105807692,
+            "total_minor": 1093162511
+          },
+          {
+            "fiscal_period": 2029,
+            "operating_minor": 1090575770,
+            "tooling_minor": 53240385,
+            "total_minor": 1143816155
+          },
+          {
+            "fiscal_period": 2030,
+            "operating_minor": 1598008386,
+            "tooling_minor": 0,
+            "total_minor": 1598008386
+          }
+        ],
+        "rd_upfront_minor": 100128207,
+        "transition_upfront_minor": 18000000,
+        "future_nominal_minor": 5151969958,
+        "future_npv_minor": 4456676966
+      },
+      {
+        "supplier_id": "SUP-017",
+        "annual": [
+          {
+            "fiscal_period": 2027,
+            "operating_minor": 1155880000,
+            "tooling_minor": 155400000,
+            "total_minor": 1311280000
+          },
+          {
+            "fiscal_period": 2028,
+            "operating_minor": 1292398800,
+            "tooling_minor": 176400000,
+            "total_minor": 1468798800
+          },
+          {
+            "fiscal_period": 2029,
+            "operating_minor": 1363626000,
+            "tooling_minor": 88200000,
+            "total_minor": 1451826000
+          },
+          {
+            "fiscal_period": 2030,
+            "operating_minor": 1909388800,
+            "tooling_minor": 0,
+            "total_minor": 1909388800
+          }
+        ],
+        "rd_upfront_minor": 100000000,
+        "transition_upfront_minor": 18000000,
+        "future_nominal_minor": 6259293600,
+        "future_npv_minor": 5398959901
+      }
+    ]
+  },
+  "technical_admissibility": {
+    "alternatives": [
+      {
+        "supplier_id": "SUP-016",
+        "status": "qualified",
+        "covered_variants": [
+          "base",
+          "premium"
+        ],
+        "required_actions": []
+      },
+      {
+        "supplier_id": "SUP-017",
+        "status": "qualified",
+        "covered_variants": [
+          "base",
+          "premium"
+        ],
+        "required_actions": []
+      }
+    ]
+  },
+  "recovery_feasibility": {
+    "quantity_uom": "vehicle_set",
+    "alternatives": [
+      {
+        "supplier_id": "SUP-016",
+        "ready_date": "2026-12-14",
+        "launch_gap_days": 0,
+        "launch_feasible": true,
+        "annual": [
+          {
+            "fiscal_period": 2027,
+            "required_sets": 37000,
+            "available_sets": 63000,
+            "shortfall_sets": 0
+          },
+          {
+            "fiscal_period": 2028,
+            "required_sets": 42000,
+            "available_sets": 67000,
+            "shortfall_sets": 0
+          },
+          {
+            "fiscal_period": 2029,
+            "required_sets": 45000,
+            "available_sets": 71000,
+            "shortfall_sets": 0
+          },
+          {
+            "fiscal_period": 2030,
+            "required_sets": 64000,
+            "available_sets": 75000,
+            "shortfall_sets": 0
+          }
+        ],
+        "full_program_capacity_feasible": true
+      },
+      {
+        "supplier_id": "SUP-017",
+        "ready_date": "2027-01-04",
+        "launch_gap_days": 3,
+        "launch_feasible": false,
+        "annual": [
+          {
+            "fiscal_period": 2027,
+            "required_sets": 37000,
+            "available_sets": 63000,
+            "shortfall_sets": 0
+          },
+          {
+            "fiscal_period": 2028,
+            "required_sets": 42000,
+            "available_sets": 69000,
+            "shortfall_sets": 0
+          },
+          {
+            "fiscal_period": 2029,
+            "required_sets": 45000,
+            "available_sets": 75000,
+            "shortfall_sets": 0
+          },
+          {
+            "fiscal_period": 2030,
+            "required_sets": 64000,
+            "available_sets": 81000,
+            "shortfall_sets": 0
+          }
+        ],
+        "full_program_capacity_feasible": true
+      }
+    ]
+  },
+  "change_scope": {
+    "incumbent_supplier_id": "SUP-018",
+    "incumbent_contract_status": "cancelled",
+    "authorized_supplier_ids": [
+      "SUP-016",
+      "SUP-017"
+    ],
+    "award_status": "not_yet_awarded",
+    "required_approvals": [
+      "Engineering",
+      "Finance"
+    ],
+    "future_program_restriction": "not_specified"
+  },
+  "recommendation": {
+    "supplier_id": "SUP-016",
+    "note": "Lowest gross future NPV among the authorized alternatives, fully qualified with adequate annual allocation and December 14 readiness. External award remains subject to Finance and Engineering approvals; the CNY 200,000 asset credit and CNY 288,000 unreceived claim remain separate."
+  }
+}

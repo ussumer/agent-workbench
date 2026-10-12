@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "in_progress",
+      "status": "blocked",
       "review": "not_reviewed",
-      "receipt": null,
-      "notes": "用户2026-10-12授权官方完整构造流程适配现有栈，并指定DS。Stage2设计/环境蓝图已落盘；5train+5heldout/3skills/15base+15fewshot/六独立review。模型与SQLite/Codex运行适配明确记录，尚未构造或校准通过。"
+      "receipt": "artifacts/tasks/T67/20261012T154907Z/receipt.json",
+      "notes": "5train+5heldout候选已构造，未修改官方结构检查attempt2通过，真实train-only反馈9案例通过。Runtime verifier边界30项既有通过；SDK typed proxy attempt4真实创建后30秒/6次健康检查超时并清理，零付费调用，按止损暂停，不自动attempt5。MCP doctor/fewshot真实沙盒会话/3skills+15base15fewshot/6独立Stage3评审未完成，非正式校准或学习收益。Gate被MODEL配置预检阻塞，真实SDK入口阻塞另有证据。T68保持失败不恢复。"
     },
     "T68": {
       "status": "blocked",

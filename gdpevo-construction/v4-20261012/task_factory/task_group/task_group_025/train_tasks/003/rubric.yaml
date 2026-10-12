@@ -1,0 +1,22 @@
+rubric:
+  - point_id: R1
+    goal: Reconcile actual settled eligible historic tooling and R&D principal.
+    weight: 2
+  - point_id: R2
+    goal: Separate contractual refund claim, received cash and outstanding balances.
+    weight: 2
+  - point_id: R3
+    goal: Resolve tooling title, reusable asset disposition and noncash transfer credit.
+    weight: 2
+  - point_id: R4
+    goal: Calculate gross future quotation cash flows and NPV excluding historical principal, claims and asset offsets.
+    weight: 3
+  - point_id: R5
+    goal: Identify the effective technical qualification and conditions of authorized alternatives.
+    weight: 2
+  - point_id: R6
+    goal: Reconcile annual available allocation and sequential readiness against contractual launch.
+    weight: 2
+  - point_id: R7
+    goal: Respect incumbent termination and current external-award authorization without inventing future blanket restrictions.
+    weight: 1

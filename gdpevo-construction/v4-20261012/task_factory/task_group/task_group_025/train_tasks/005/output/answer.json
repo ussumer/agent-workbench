@@ -1,0 +1,329 @@
+{
+  "program_id": "PRG-040",
+  "as_of": "2026-10-12",
+  "settled_principal": {
+    "currency": "CNY",
+    "categories": [
+      {
+        "category": "tooling",
+        "paid_minor": 72000000
+      },
+      {
+        "category": "rd",
+        "paid_minor": 33000000
+      }
+    ],
+    "total_paid_minor": 105000000
+  },
+  "refund_claim": {
+    "currency": "CNY",
+    "categories": [
+      {
+        "category": "tooling",
+        "claim_minor": 21600000,
+        "received_minor": 10800000,
+        "outstanding_minor": 10800000
+      },
+      {
+        "category": "rd",
+        "claim_minor": 9900000,
+        "received_minor": 4950000,
+        "outstanding_minor": 4950000
+      }
+    ],
+    "claim_minor": 31500000,
+    "received_minor": 15750000,
+    "outstanding_minor": 15750000,
+    "due_date": "2026-12-01",
+    "receipt_status": "partial"
+  },
+  "tooling_disposition": {
+    "title": "customer",
+    "disposition": "reusable_customer_owned",
+    "reusable": true,
+    "transfer_credit_currency": "CNY",
+    "transfer_credit_minor": 20000000,
+    "credit_is_cash_refund": false,
+    "supplier_owned_stranded": false
+  },
+  "incremental_exposure": {
+    "currency": "CNY",
+    "definition": "gross_before_asset_credit_and_historical_claims",
+    "alternatives": [
+      {
+        "supplier_id": "SUP-013",
+        "quote_currency": "USD",
+        "annual_cashflows": [
+          {
+            "fiscal_period": 2027,
+            "operating_minor": 727834121,
+            "tooling_minor": 50047552,
+            "gross_minor": 777881673
+          },
+          {
+            "fiscal_period": 2028,
+            "operating_minor": 877723528,
+            "tooling_minor": 58882237,
+            "gross_minor": 936605765
+          },
+          {
+            "fiscal_period": 2029,
+            "operating_minor": 1295237199,
+            "tooling_minor": 84822377,
+            "gross_minor": 1380059576
+          },
+          {
+            "fiscal_period": 2030,
+            "operating_minor": 1303668799,
+            "tooling_minor": 17105454,
+            "gross_minor": 1320774253
+          }
+        ],
+        "upfront_rd_minor": 148951049,
+        "upfront_transition_minor": 18000000,
+        "gross_total_minor": 4582272316,
+        "gross_npv_minor": 3929154857
+      },
+      {
+        "supplier_id": "SUP-014",
+        "quote_currency": "EUR",
+        "annual_cashflows": [
+          {
+            "fiscal_period": 2027,
+            "operating_minor": 631684272,
+            "tooling_minor": 83461539,
+            "gross_minor": 715145811
+          },
+          {
+            "fiscal_period": 2028,
+            "operating_minor": 730593803,
+            "tooling_minor": 98000000,
+            "gross_minor": 828593803
+          },
+          {
+            "fiscal_period": 2029,
+            "operating_minor": 1034399976,
+            "tooling_minor": 140897436,
+            "gross_minor": 1175297412
+          },
+          {
+            "fiscal_period": 2030,
+            "operating_minor": 999268482,
+            "tooling_minor": 28358974,
+            "gross_minor": 1027627456
+          }
+        ],
+        "upfront_rd_minor": 109294871,
+        "upfront_transition_minor": 18000000,
+        "gross_total_minor": 3873959354,
+        "gross_npv_minor": 3339099669
+      }
+    ]
+  },
+  "incumbent_reference_exposure": {
+    "supplier_id": "SUP-015",
+    "quote_currency": "CNY",
+    "annual_cashflows": [
+      {
+        "fiscal_period": 2027,
+        "operating_minor": 528000000,
+        "tooling_minor": 79200000,
+        "gross_minor": 607200000
+      },
+      {
+        "fiscal_period": 2028,
+        "operating_minor": 714352800,
+        "tooling_minor": 92400000,
+        "gross_minor": 806752800
+      },
+      {
+        "fiscal_period": 2029,
+        "operating_minor": 1030608000,
+        "tooling_minor": 132000000,
+        "gross_minor": 1162608000
+      },
+      {
+        "fiscal_period": 2030,
+        "operating_minor": 991798536,
+        "tooling_minor": 26400000,
+        "gross_minor": 1018198536
+      }
+    ],
+    "upfront_rd_minor": 120000000,
+    "upfront_transition_minor": 18000000,
+    "gross_total_minor": 3732759336,
+    "gross_npv_minor": 3204432325
+  },
+  "technical_admissibility": {
+    "alternatives": [
+      {
+        "supplier_id": "SUP-013",
+        "qualification_status": "qualified",
+        "technical_coverage": [
+          "base",
+          "premium"
+        ],
+        "required_action_codes": []
+      },
+      {
+        "supplier_id": "SUP-014",
+        "qualification_status": "qualified",
+        "technical_coverage": [
+          "base",
+          "premium"
+        ],
+        "required_action_codes": []
+      },
+      {
+        "supplier_id": "SUP-015",
+        "qualification_status": "conditional",
+        "technical_coverage": [
+          "base",
+          "premium"
+        ],
+        "required_action_codes": [
+          "complete_photometry_validation"
+        ]
+      }
+    ],
+    "qualified_supplier_ids": [
+      "SUP-013",
+      "SUP-014"
+    ],
+    "conditional_supplier_ids": [
+      "SUP-015"
+    ]
+  },
+  "recovery_feasibility": {
+    "launch_date": "2027-01-01",
+    "qualification_deadline": "2027-01-01",
+    "alternatives": [
+      {
+        "supplier_id": "SUP-013",
+        "annual_capacity": [
+          {
+            "fiscal_period": 2027,
+            "demand_vehicle_sets": 24000,
+            "available_vehicle_sets": 39000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2028,
+            "demand_vehicle_sets": 28000,
+            "available_vehicle_sets": 43000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2029,
+            "demand_vehicle_sets": 40000,
+            "available_vehicle_sets": 47000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2030,
+            "demand_vehicle_sets": 39000,
+            "available_vehicle_sets": 51000,
+            "shortfall_vehicle_sets": 0
+          }
+        ],
+        "requalification_weeks": 6,
+        "tooling_transfer_weeks": 2,
+        "readiness_date": "2026-12-07",
+        "launch_gap_days": 0,
+        "ready_by_launch": true,
+        "capacity_adequate": true
+      },
+      {
+        "supplier_id": "SUP-014",
+        "annual_capacity": [
+          {
+            "fiscal_period": 2027,
+            "demand_vehicle_sets": 24000,
+            "available_vehicle_sets": 43000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2028,
+            "demand_vehicle_sets": 28000,
+            "available_vehicle_sets": 49000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2029,
+            "demand_vehicle_sets": 40000,
+            "available_vehicle_sets": 55000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2030,
+            "demand_vehicle_sets": 39000,
+            "available_vehicle_sets": 61000,
+            "shortfall_vehicle_sets": 0
+          }
+        ],
+        "requalification_weeks": 9,
+        "tooling_transfer_weeks": 2,
+        "readiness_date": "2026-12-28",
+        "launch_gap_days": 0,
+        "ready_by_launch": true,
+        "capacity_adequate": true
+      },
+      {
+        "supplier_id": "SUP-015",
+        "annual_capacity": [
+          {
+            "fiscal_period": 2027,
+            "demand_vehicle_sets": 24000,
+            "available_vehicle_sets": 35000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2028,
+            "demand_vehicle_sets": 28000,
+            "available_vehicle_sets": 42000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2029,
+            "demand_vehicle_sets": 40000,
+            "available_vehicle_sets": 49000,
+            "shortfall_vehicle_sets": 0
+          },
+          {
+            "fiscal_period": 2030,
+            "demand_vehicle_sets": 39000,
+            "available_vehicle_sets": 56000,
+            "shortfall_vehicle_sets": 0
+          }
+        ],
+        "requalification_weeks": 18,
+        "tooling_transfer_weeks": 2,
+        "readiness_date": "2027-03-01",
+        "launch_gap_days": 59,
+        "ready_by_launch": false,
+        "capacity_adequate": true
+      }
+    ]
+  },
+  "change_scope": {
+    "incumbent_supplier_id": "SUP-015",
+    "incumbent_contract_status": "superseded",
+    "change_reason": "planned_engineering_redesign",
+    "authorization_scope": "this_program",
+    "authorized_supplier_ids": [
+      "SUP-013",
+      "SUP-014",
+      "SUP-015"
+    ],
+    "future_program_exclusion_supported": false,
+    "external_award_requires": [
+      "Finance",
+      "Engineering"
+    ],
+    "nomination_not_yet_awarded": true
+  },
+  "recommendation": {
+    "supplier_id": "SUP-014",
+    "basis": "Qualified, adequate annual capacity and ready before launch; lower gross NPV than SUP-013. SUP-015 is cheaper on gross exposure but conditional and 59 days late. The CNY tooling credit is separate; foreign-currency credit timing has not been assumed."
+  }
+}

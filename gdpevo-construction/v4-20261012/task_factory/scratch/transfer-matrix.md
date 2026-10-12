@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 |test_001|N1|train_002/train_004|effective forecast/mix reconstruction|new program/supplier/source versions and actual amounts|
 |test_001|N2|train_001/train_004|source UOM and commercial eligibility|new program/supplier/source versions and actual amounts|
-|test_001|N3|train_001/train_004|dated engineering/quality evidence|new program/supplier/source versions and actual amounts|
+|test_001|N3|train_001/train_004/train_005|dated engineering/quality evidence|new program/supplier/source versions and actual amounts|
 |test_001|N4|train_002/train_004|period-wise available allocations|new program/supplier/source versions and actual amounts|
 |test_001|N5|train_001/train_004|qualification/delivery calendar|new program/supplier/source versions and actual amounts|
 |test_001|N6|train_001/train_002/train_004|shared tooling/tier/R&D/discount/currency accounting|new program/supplier/source versions and actual amounts|

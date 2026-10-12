@@ -1,0 +1,512 @@
+{
+  "type": "object",
+  "properties": {
+    "program_id": {
+      "type": "string",
+      "pattern": "^PRG-[0-9]{3}$"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "settled_principal": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cost_category": {
+                "type": "string",
+                "enum": [
+                  "tooling",
+                  "rd"
+                ]
+              },
+              "paid_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+              }
+            },
+            "required": [
+              "cost_category",
+              "paid_minor"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "total_paid_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+        }
+      },
+      "required": [
+        "currency",
+        "categories",
+        "total_paid_minor"
+      ],
+      "additionalProperties": true
+    },
+    "refund_claim": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cost_category": {
+                "type": "string",
+                "enum": [
+                  "tooling",
+                  "rd"
+                ]
+              },
+              "claim_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+              },
+              "received_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+              },
+              "outstanding_minor": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+              }
+            },
+            "required": [
+              "cost_category",
+              "claim_minor",
+              "received_minor",
+              "outstanding_minor"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "total_claim_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+        },
+        "total_received_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+        },
+        "total_outstanding_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "receipt_status": {
+          "type": "string",
+          "enum": [
+            "not_received",
+            "partial",
+            "received"
+          ]
+        }
+      },
+      "required": [
+        "currency",
+        "categories",
+        "total_claim_minor",
+        "total_received_minor",
+        "total_outstanding_minor",
+        "due_date",
+        "receipt_status"
+      ],
+      "additionalProperties": true
+    },
+    "tooling_disposition": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "enum": [
+            "customer",
+            "supplier"
+          ]
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "reusable_customer_asset",
+            "stranded_supplier_asset"
+          ]
+        },
+        "credit_currency": {
+          "type": "string",
+          "enum": [
+            "CNY"
+          ]
+        },
+        "transfer_credit_minor": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+        },
+        "credit_kind": {
+          "type": "string",
+          "enum": [
+            "noncash_tooling_reduction",
+            "none"
+          ]
+        },
+        "stranded_supplier_owned_asset": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "title",
+        "disposition",
+        "credit_currency",
+        "transfer_credit_minor",
+        "credit_kind",
+        "stranded_supplier_owned_asset"
+      ],
+      "additionalProperties": true
+    },
+    "incremental_exposure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "CNY"
+            ]
+          },
+          "basis": {
+            "type": "string",
+            "enum": [
+              "gross_before_asset_credit_and_historical_claims"
+            ]
+          },
+          "annual_cashflows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "minimum": 2027,
+                  "description": "Exact integer; no numeric tolerance.",
+                  "maximum": 2030
+                },
+                "base_operating_minor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+                },
+                "premium_operating_minor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+                },
+                "operating_minor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+                },
+                "tooling_minor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+                },
+                "gross_minor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+                },
+                "present_value_minor": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+                }
+              },
+              "required": [
+                "fiscal_period",
+                "base_operating_minor",
+                "premium_operating_minor",
+                "operating_minor",
+                "tooling_minor",
+                "gross_minor",
+                "present_value_minor"
+              ],
+              "additionalProperties": true
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "upfront_rd_minor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+          },
+          "upfront_transition_minor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+          },
+          "gross_total_minor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+          },
+          "gross_npv_minor": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "CNY minor units (fen); end-round half-up, absolute tolerance 1 minor unit inclusive."
+          }
+        },
+        "required": [
+          "supplier_id",
+          "currency",
+          "basis",
+          "annual_cashflows",
+          "upfront_rd_minor",
+          "upfront_transition_minor",
+          "gross_total_minor",
+          "gross_npv_minor"
+        ],
+        "additionalProperties": true
+      },
+      "description": "All authorized quoted alternatives other than the historic incumbent; independent full-program award scenarios, including late candidates. Gross future quotation exposure before historical payments, refunds and noncash asset credit."
+    },
+    "technical_admissibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional",
+              "unqualified"
+            ]
+          },
+          "covered_variants": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "base",
+                "premium"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "required_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "complete_photometry_validation"
+              ]
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "supplier_id",
+          "qualification_status",
+          "covered_variants",
+          "required_actions"
+        ],
+        "additionalProperties": true
+      },
+      "description": "All authorized quoted candidates, including the incumbent if authorized."
+    },
+    "recovery_feasibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "tooling_transfer_weeks": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; no numeric tolerance."
+          },
+          "requalification_weeks": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; no numeric tolerance."
+          },
+          "ready_date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "qualification_gap_days": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; no numeric tolerance."
+          },
+          "launch_gap_days": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Exact integer; no numeric tolerance."
+          },
+          "annual_capacity": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "minimum": 2027,
+                  "description": "Exact integer; no numeric tolerance.",
+                  "maximum": 2030
+                },
+                "available_vehicle_sets": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Exact integer; no numeric tolerance."
+                },
+                "shortfall_vehicle_sets": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Exact integer; no numeric tolerance."
+                }
+              },
+              "required": [
+                "fiscal_period",
+                "available_vehicle_sets",
+                "shortfall_vehicle_sets"
+              ],
+              "additionalProperties": true
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "required": [
+          "supplier_id",
+          "tooling_transfer_weeks",
+          "requalification_weeks",
+          "ready_date",
+          "qualification_gap_days",
+          "launch_gap_days",
+          "annual_capacity"
+        ],
+        "additionalProperties": true
+      },
+      "description": "All authorized quoted candidates, including the incumbent if authorized."
+    },
+    "change_scope": {
+      "type": "object",
+      "properties": {
+        "historic_status": {
+          "type": "string",
+          "enum": [
+            "cancelled",
+            "superseded",
+            "active"
+          ]
+        },
+        "historic_reason": {
+          "type": "string",
+          "enum": [
+            "supplier_failed_launch_milestone",
+            "planned_engineering_redesign"
+          ]
+        },
+        "authorized_supplier_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "uniqueItems": true
+        },
+        "nomination_awarded": {
+          "type": "boolean"
+        },
+        "required_approvals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "engineering",
+              "finance"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "authorization_scope": {
+          "type": "string",
+          "pattern": "^PRG-[0-9]{3}$"
+        },
+        "future_program_exclusion_supported": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "historic_status",
+        "historic_reason",
+        "authorized_supplier_ids",
+        "nomination_awarded",
+        "required_approvals",
+        "authorization_scope",
+        "future_program_exclusion_supported"
+      ],
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "program_id",
+    "as_of",
+    "settled_principal",
+    "refund_claim",
+    "tooling_disposition",
+    "incremental_exposure",
+    "technical_admissibility",
+    "recovery_feasibility",
+    "change_scope"
+  ],
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://task.local/test_004/answer.schema.json",
+  "title": "Supplier-change CPO decision record",
+  "description": "Submit output/answer.json. Money is integer CNY minor units, independently end-rounded half-up from full precision with 1 minor unit comparison tolerance. All other quantities and dates exact. Rows sorted by cost_category/supplier_id/fiscal_period; evaluator accepts reordered rows and sets, rejects duplicate business keys for that result. Extra recommendation, narrative and source references are unscored."
+}

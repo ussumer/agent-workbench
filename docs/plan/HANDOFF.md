@@ -1,3 +1,18 @@
+## T67 paused after actual isolation attempt4 (2026-10-12)
+T67 is blocked, not done. Five train and five held-out development task candidates are present. The unchanged upstream checker passed in scratch/official-structure-attempt2.yaml, including all ten gold evaluations. Actual trusted feedback HTTP integration passed nine cases in scratch/judge-actual-integration.json: five train golds, a one-point-volume error scored 11/13, test/traversal rejected, and disabled route absent. This is component evidence, not model calibration or learning benefit.
+
+The corrected SDK Pydantic model_copy path was actually used. sandbox creation and proxy endpoint discovery succeeded; readiness returned false for 30 seconds/six checks. Failure and cleanup are in scratch/runtime/isolation-attempt4-result.json and isolation-attempt4/server.log; DELETE204, owned server stopped and owned private network removed. No paid model call occurred. Do not launch attempt5 or paid calibration automatically; discuss the stop-loss blocker with the user first. Proxy ingress/network routing is still unproven; the existing logs do not establish its exact root cause.
+
+Verifier acceptance fixes have existing verifier-green.xml (30 passed, zero failures/errors/skips); not repeated unchanged. Old fake-evidence negative fixture is retained. Real MCP doctor, fresh tool-enabled fewshot sessions, served image boundary freeze, three DS skills plus fifteen base and fifteen fewshot attempts, independent re-review and six Stage3 votes remain unfinished. Candidate difficulty has not been established.
+
+The English-only Java environment now runs as gdpevo-sourcing-025-envbuild-english-only on gdpevo-group025-v4, private172.26.0.2:9025, no published host ports, same persistent volume and unchanged business seed. Build/independent readiness and PRG021 hash evidence is scratch/env-builder/english-only-runtime-report.json. Prior stopped containers/images remain preserved.
+
+Gate artifacts/tasks/T67/20261012T154907Z/receipt.json is BLOCKED by runner MODEL configuration precheck; no credentials were loaded for this zero-model gate, so this receipt does not execute or replace the isolation probe evidence. Existing configured DS is not asserted unavailable. Complete live calibration and Stage3 checks before any done status; gate scope must be strengthened and point to the actual final run before completion. T68 remains blocked and must never resume. Preserve the user's .langgraph_api/.langgraph_ops.pckl change. Read construction ledger and runtime STATUS on resume.
+
+## T67 当前现场更新（2026-10-12）
+官方构造路线现有5train+5heldout正式任务、独立gold/eval/schema/双语notes，十个clean-contexttaskbuilders分别产出；新共享Java/H2数据源已真实查询和重启核验，来源E004/E005，DS/课程栈适配明确。官方checker首次只因isolatedenv继承中文展示/注释失败，10个gold/evaluator通过；正按Englishformal规范修复，不修改原root数据。SDK前三轮预检失败保留，人类已明确允许恢复；现在继续actualtypedfix/独立新attempt及verifier假阳性修复。此前verify接受空模型/伪造分数已被独立review发现，不能调用旧verify作完成证据。
+T67in_progress。任务目录 gdpevo-construction/v4-20261012/task_factory/task_group/task_group_025；construction-ledger、runtime/STATUS保留完整现场。尚未开始DS付费校准、三技能/15base15fewshot未产生、六独立Stage3评审未开始。T68保持失败不恢复，T69历史结果不改。下一步修复/核验runtime后准备新freeze并实际DS校准，完整质量门槛未过不得done。
+
 ## T67开工：官方构造路线的DS/课程栈适配（2026-10-12）
 用户授权重新生成，不复用V3答案/分数；随后明确DS不用GPT。复用已接受Stage1SCN025，聚焦E004/E005金融采购/供应商变更。同一隔离trainingworktree，保留pckl用户改动。设计、adaptation、env_blueprint在gdpevo-construction/v4-20261012/task_factory/scratch；尚无题目/环境/校准结果。官方角色分离、多实例技能/测试、六review保持；Java/H2+Mongo/MCP/OpenSandbox/DeepAgents适配替代SQLite与CodexGPT校准，不能冒称官方GPT结果。T68不恢复。下一步独立env-builder，再十task-builder，不允许总脚本生成全部。
 

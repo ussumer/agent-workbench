@@ -1,0 +1,7 @@
+Prepare a refreshed headlamp supplier nomination assessment for Platform PRG-129, using business evidence available as of 2026-10-12, for full fiscal years 2027-2030 and both program variants. The committee needs the refreshed position after commercial and demand revisions, before deciding a new-tooling nomination.
+
+Report approved annual demand and variant mix, commercial variant/year coverage and binding terms status, technical qualification with outstanding required actions, each candidate's annual allocation shortfalls, and earliest readiness against program launch. Compare discounted financial exposure under a hypothetical full-program award to each candidate, even where its operational assessment is unfavorable. Include annual and variant cashflow breakdowns, shared tooling recovery, upfront development allocation and total exposure. Give a short nomination recommendation with unresolved actions or constraints.
+
+Use the shared sourcing business environment at <TASK_ENV_BASE_URL>. Available business domains are programs, forecasts, quotes, engineering, contracts, payments, suppliers and individually referenced documents under /api/sourcing/. This is a read-only committee assessment.
+
+Deliver one JSON file conforming to input/payloads/answer_template.json. Use stable business IDs, ISO dates and integer monetary minor units. All actual source facts and terms must come from the shared business records.

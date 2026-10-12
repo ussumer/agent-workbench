@@ -1,0 +1,22 @@
+rubric:
+  - point_id: R1
+    goal: Settled eligible historical principal by tooling and development category, excluding unpaid commitments.
+    weight: 2
+  - point_id: R2
+    goal: Cash refund entitlement, actual partial receipts and outstanding claims by category and total.
+    weight: 2
+  - point_id: R3
+    goal: Customer tooling title, reusable asset disposition and noncash transfer credit in its own currency.
+    weight: 2
+  - point_id: R4
+    goal: Gross future operating, capped tooling, upfront development and transition exposure and NPV by candidate, before assets or historic claims.
+    weight: 3
+  - point_id: R5
+    goal: Technical qualification and conditional actions of all authorized alternatives.
+    weight: 2
+  - point_id: R6
+    goal: Annual production capacity and sequential transfer/requalification launch recovery dates and gaps.
+    weight: 2
+  - point_id: R7
+    goal: Executed program-change and external-award scope without an unsupported future-program supplier ban.
+    weight: 1

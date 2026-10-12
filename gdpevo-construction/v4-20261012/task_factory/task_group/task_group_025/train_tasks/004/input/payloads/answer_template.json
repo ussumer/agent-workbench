@@ -1,0 +1,492 @@
+{
+  "type": "object",
+  "properties": {
+    "program_id": {
+      "type": "string",
+      "const": "PRG-058"
+    },
+    "as_of": {
+      "type": "string",
+      "const": "2026-10-12"
+    },
+    "approved_volume": {
+      "type": "object",
+      "properties": {
+        "uom": {
+          "type": "string",
+          "enum": [
+            "vehicle_set"
+          ]
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fiscal_period": {
+                "type": "integer",
+                "description": "Exact integer; booleans are not integers."
+              },
+              "base_quantity": {
+                "type": "integer",
+                "description": "Whole vehicle sets; exact."
+              },
+              "premium_quantity": {
+                "type": "integer",
+                "description": "Whole vehicle sets; exact."
+              },
+              "total_quantity": {
+                "type": "integer",
+                "description": "Whole vehicle sets; exact."
+              },
+              "base_mix_basis_points": {
+                "type": "integer",
+                "description": "Integer basis points, 10000 = 100%; exact."
+              },
+              "premium_mix_basis_points": {
+                "type": "integer",
+                "description": "Integer basis points, 10000 = 100%; exact."
+              }
+            },
+            "required": [
+              "fiscal_period",
+              "base_quantity",
+              "premium_quantity",
+              "total_quantity",
+              "base_mix_basis_points",
+              "premium_mix_basis_points"
+            ],
+            "additionalProperties": true
+          },
+          "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+        },
+        "total_quantity": {
+          "type": "integer",
+          "description": "Whole vehicle sets; exact."
+        }
+      },
+      "required": [
+        "uom",
+        "periods",
+        "total_quantity"
+      ],
+      "additionalProperties": true
+    },
+    "commercial_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "variant_periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variant": {
+                  "type": "string",
+                  "enum": [
+                    "base",
+                    "premium"
+                  ]
+                },
+                "fiscal_period": {
+                  "type": "integer",
+                  "description": "Exact integer; booleans are not integers."
+                },
+                "covered": {
+                  "type": "boolean"
+                },
+                "applicable_revision": {
+                  "type": "integer",
+                  "description": "Exact integer; booleans are not integers."
+                }
+              },
+              "required": [
+                "variant",
+                "fiscal_period",
+                "covered",
+                "applicable_revision"
+              ],
+              "additionalProperties": true
+            },
+            "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+          },
+          "complete_program_coverage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "supplier_id",
+          "variant_periods",
+          "complete_program_coverage"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+    },
+    "technical_admissibility": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "qualification_status": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional"
+            ]
+          },
+          "technical_coverage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "base",
+                "premium"
+              ]
+            },
+            "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+          },
+          "required_action_codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "photometry_validation"
+              ]
+            },
+            "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+          },
+          "admissibility": {
+            "type": "string",
+            "enum": [
+              "qualified",
+              "conditional",
+              "not_admissible"
+            ]
+          }
+        },
+        "required": [
+          "supplier_id",
+          "qualification_status",
+          "technical_coverage",
+          "required_action_codes",
+          "admissibility"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+    },
+    "capacity_shortfall": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "uom": {
+            "type": "string",
+            "enum": [
+              "vehicle_set"
+            ]
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "description": "Exact integer; booleans are not integers."
+                },
+                "shortfall_quantity": {
+                  "type": "integer",
+                  "description": "Whole vehicle sets; exact."
+                }
+              },
+              "required": [
+                "fiscal_period",
+                "shortfall_quantity"
+              ],
+              "additionalProperties": true
+            },
+            "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+          },
+          "four_year_shortfall_quantity": {
+            "type": "integer",
+            "description": "Whole vehicle sets; exact."
+          }
+        },
+        "required": [
+          "supplier_id",
+          "uom",
+          "periods",
+          "four_year_shortfall_quantity"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+    },
+    "launch_gap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "earliest_ready_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "launch_gap_days": {
+            "type": "integer",
+            "description": "Nonnegative calendar days after launch; zero if ready on or before launch."
+          },
+          "launch_status": {
+            "type": "string",
+            "enum": [
+              "on_time",
+              "late"
+            ]
+          }
+        },
+        "required": [
+          "supplier_id",
+          "earliest_ready_date",
+          "launch_gap_days",
+          "launch_status"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+    },
+    "financial_exposure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supplier_id": {
+            "type": "string",
+            "pattern": "^SUP-[0-9]{3}$"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "CNY"
+            ]
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fiscal_period": {
+                  "type": "integer",
+                  "description": "Exact integer; booleans are not integers."
+                },
+                "operating_payment_date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "variants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "variant": {
+                        "type": "string",
+                        "enum": [
+                          "base",
+                          "premium"
+                        ]
+                      },
+                      "operating_minor": {
+                        "type": "integer",
+                        "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                        "x-absolute-tolerance": 1
+                      },
+                      "tooling_cash_minor": {
+                        "type": "integer",
+                        "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                        "x-absolute-tolerance": 1
+                      },
+                      "discounted_operating_minor": {
+                        "type": "integer",
+                        "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                        "x-absolute-tolerance": 1
+                      },
+                      "discounted_tooling_minor": {
+                        "type": "integer",
+                        "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                        "x-absolute-tolerance": 1
+                      }
+                    },
+                    "required": [
+                      "variant",
+                      "operating_minor",
+                      "tooling_cash_minor",
+                      "discounted_operating_minor",
+                      "discounted_tooling_minor"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+                },
+                "operating_minor": {
+                  "type": "integer",
+                  "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                  "x-absolute-tolerance": 1
+                },
+                "tooling_cash_minor": {
+                  "type": "integer",
+                  "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                  "x-absolute-tolerance": 1
+                },
+                "discounted_cashflow_minor": {
+                  "type": "integer",
+                  "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                  "x-absolute-tolerance": 1
+                }
+              },
+              "required": [
+                "fiscal_period",
+                "operating_payment_date",
+                "variants",
+                "operating_minor",
+                "tooling_cash_minor",
+                "discounted_cashflow_minor"
+              ],
+              "additionalProperties": true
+            },
+            "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+          },
+          "variant_exposure": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variant": {
+                  "type": "string",
+                  "enum": [
+                    "base",
+                    "premium"
+                  ]
+                },
+                "rd_upfront_minor": {
+                  "type": "integer",
+                  "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                  "x-absolute-tolerance": 1
+                },
+                "operating_npv_minor": {
+                  "type": "integer",
+                  "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                  "x-absolute-tolerance": 1
+                },
+                "tooling_npv_minor": {
+                  "type": "integer",
+                  "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                  "x-absolute-tolerance": 1
+                },
+                "total_npv_minor": {
+                  "type": "integer",
+                  "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+                  "x-absolute-tolerance": 1
+                }
+              },
+              "required": [
+                "variant",
+                "rd_upfront_minor",
+                "operating_npv_minor",
+                "tooling_npv_minor",
+                "total_npv_minor"
+              ],
+              "additionalProperties": true
+            },
+            "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+          },
+          "rd_upfront_minor": {
+            "type": "integer",
+            "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+            "x-absolute-tolerance": 1
+          },
+          "operating_npv_minor": {
+            "type": "integer",
+            "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+            "x-absolute-tolerance": 1
+          },
+          "tooling_npv_minor": {
+            "type": "integer",
+            "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+            "x-absolute-tolerance": 1
+          },
+          "total_npv_minor": {
+            "type": "integer",
+            "description": "Integer CNY fen (100 fen = 1 CNY). Round each reported final field half-up to a fen from unrounded arithmetic. Absolute tolerance one fen on this field only.",
+            "x-absolute-tolerance": 1
+          }
+        },
+        "required": [
+          "supplier_id",
+          "currency",
+          "periods",
+          "variant_exposure",
+          "rd_upfront_minor",
+          "operating_npv_minor",
+          "tooling_npv_minor",
+          "total_npv_minor"
+        ],
+        "additionalProperties": true
+      },
+      "description": "Order is not scored. Duplicate business keys or duplicate set members are invalid."
+    },
+    "recommendation": {
+      "type": "object",
+      "properties": {
+        "supplier_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rationale": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "source_references": {
+      "type": [
+        "object",
+        "array"
+      ],
+      "description": "Optional unscored evidence references."
+    }
+  },
+  "required": [
+    "program_id",
+    "as_of",
+    "approved_volume",
+    "commercial_coverage",
+    "technical_admissibility",
+    "capacity_shortfall",
+    "launch_gap",
+    "financial_exposure"
+  ],
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "train_004/answer_template.json",
+  "title": "PRG-058 committee sourcing assessment",
+  "description": "Required business result schema. Arrays may be submitted in any order; fiscal-period order is recommended. Financial exposure models each candidate supplying the complete approved demand for both variants. Capacity shortfalls are reported separately. All money is CNY minor units. Source references and recommendation are optional and unscored."
+}

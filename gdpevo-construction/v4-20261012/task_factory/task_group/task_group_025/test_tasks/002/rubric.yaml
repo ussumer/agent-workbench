@@ -1,0 +1,22 @@
+rubric:
+  - point_id: R1
+    goal: Correct settled eligible historical principal by category, excluding unpaid commitments.
+    weight: 2
+  - point_id: R2
+    goal: Correct paid-base refund entitlement, actual received credits and outstanding receivable.
+    weight: 2
+  - point_id: R3
+    goal: Correct tooling title, reusable or stranded disposition and distinct noncash transfer credit.
+    weight: 2
+  - point_id: R4
+    goal: Correct gross future replacement quotation cashflows and exposure for authorized nonincumbents.
+    weight: 3
+  - point_id: R5
+    goal: Correct qualification, coverage and required actions for all authorized candidates.
+    weight: 2
+  - point_id: R6
+    goal: Correct annual capacity shortfalls and calendar recovery gaps for all authorized candidates.
+    weight: 2
+  - point_id: R7
+    goal: Correct current contractual cancellation and authorization scope without invented future exclusion.
+    weight: 1

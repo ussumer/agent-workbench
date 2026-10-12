@@ -1,0 +1,415 @@
+{
+  "program_id": "PRG-021",
+  "as_of": "2026-10-12",
+  "approved_volume": {
+    "quantity_uom": "vehicle_set",
+    "periods": [
+      {
+        "fiscal_period": 2027,
+        "base_sets": 20800,
+        "premium_sets": 11200,
+        "total_sets": 32000
+      },
+      {
+        "fiscal_period": 2028,
+        "base_sets": 25350,
+        "premium_sets": 13650,
+        "total_sets": 39000
+      },
+      {
+        "fiscal_period": 2029,
+        "base_sets": 31200,
+        "premium_sets": 16800,
+        "total_sets": 48000
+      },
+      {
+        "fiscal_period": 2030,
+        "base_sets": 30550,
+        "premium_sets": 16450,
+        "total_sets": 47000
+      }
+    ],
+    "lifecycle_sets": 166000
+  },
+  "commercial_coverage": [
+    {
+      "supplier_id": "SUP-010",
+      "periods": [
+        {
+          "fiscal_period": 2027,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_amendment",
+          "premium_terms_basis": "approved_amendment"
+        },
+        {
+          "fiscal_period": 2028,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_amendment",
+          "premium_terms_basis": "approved_amendment"
+        },
+        {
+          "fiscal_period": 2029,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_amendment",
+          "premium_terms_basis": "approved_amendment"
+        },
+        {
+          "fiscal_period": 2030,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_amendment",
+          "premium_terms_basis": "approved_amendment"
+        }
+      ]
+    },
+    {
+      "supplier_id": "SUP-011",
+      "periods": [
+        {
+          "fiscal_period": 2027,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_original",
+          "premium_terms_basis": "approved_original"
+        },
+        {
+          "fiscal_period": 2028,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_amendment",
+          "premium_terms_basis": "approved_amendment"
+        },
+        {
+          "fiscal_period": 2029,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_amendment",
+          "premium_terms_basis": "approved_amendment"
+        },
+        {
+          "fiscal_period": 2030,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_amendment",
+          "premium_terms_basis": "approved_amendment"
+        }
+      ]
+    },
+    {
+      "supplier_id": "SUP-012",
+      "periods": [
+        {
+          "fiscal_period": 2027,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_original",
+          "premium_terms_basis": "approved_original"
+        },
+        {
+          "fiscal_period": 2028,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_original",
+          "premium_terms_basis": "approved_original"
+        },
+        {
+          "fiscal_period": 2029,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_original",
+          "premium_terms_basis": "approved_original"
+        },
+        {
+          "fiscal_period": 2030,
+          "base_binding": true,
+          "premium_binding": true,
+          "base_terms_basis": "approved_original",
+          "premium_terms_basis": "approved_original"
+        }
+      ]
+    }
+  ],
+  "technical_admissibility": [
+    {
+      "supplier_id": "SUP-010",
+      "qualification_status": "qualified",
+      "technical_admissible": true,
+      "covered_variants": [
+        "base",
+        "premium"
+      ],
+      "required_action_codes": []
+    },
+    {
+      "supplier_id": "SUP-011",
+      "qualification_status": "qualified",
+      "technical_admissible": true,
+      "covered_variants": [
+        "base",
+        "premium"
+      ],
+      "required_action_codes": []
+    },
+    {
+      "supplier_id": "SUP-012",
+      "qualification_status": "qualified",
+      "technical_admissible": true,
+      "covered_variants": [
+        "base",
+        "premium"
+      ],
+      "required_action_codes": [
+        "photometry_validation"
+      ]
+    }
+  ],
+  "capacity_shortfall": [
+    {
+      "supplier_id": "SUP-010",
+      "quantity_uom": "vehicle_set",
+      "periods": [
+        {
+          "fiscal_period": 2027,
+          "available_sets": 24000,
+          "shortfall_sets": 8000
+        },
+        {
+          "fiscal_period": 2028,
+          "available_sets": 28000,
+          "shortfall_sets": 11000
+        },
+        {
+          "fiscal_period": 2029,
+          "available_sets": 32000,
+          "shortfall_sets": 16000
+        },
+        {
+          "fiscal_period": 2030,
+          "available_sets": 36000,
+          "shortfall_sets": 11000
+        }
+      ]
+    },
+    {
+      "supplier_id": "SUP-011",
+      "quantity_uom": "vehicle_set",
+      "periods": [
+        {
+          "fiscal_period": 2027,
+          "available_sets": 41000,
+          "shortfall_sets": 0
+        },
+        {
+          "fiscal_period": 2028,
+          "available_sets": 47000,
+          "shortfall_sets": 0
+        },
+        {
+          "fiscal_period": 2029,
+          "available_sets": 53000,
+          "shortfall_sets": 0
+        },
+        {
+          "fiscal_period": 2030,
+          "available_sets": 59000,
+          "shortfall_sets": 0
+        }
+      ]
+    },
+    {
+      "supplier_id": "SUP-012",
+      "quantity_uom": "vehicle_set",
+      "periods": [
+        {
+          "fiscal_period": 2027,
+          "available_sets": 23000,
+          "shortfall_sets": 9000
+        },
+        {
+          "fiscal_period": 2028,
+          "available_sets": 30000,
+          "shortfall_sets": 9000
+        },
+        {
+          "fiscal_period": 2029,
+          "available_sets": 37000,
+          "shortfall_sets": 11000
+        },
+        {
+          "fiscal_period": 2030,
+          "available_sets": 44000,
+          "shortfall_sets": 3000
+        }
+      ]
+    }
+  ],
+  "launch_gap": [
+    {
+      "supplier_id": "SUP-010",
+      "earliest_ready_date": "2026-11-16",
+      "launch_gap_days": 0,
+      "on_time": true
+    },
+    {
+      "supplier_id": "SUP-011",
+      "earliest_ready_date": "2026-12-07",
+      "launch_gap_days": 0,
+      "on_time": true
+    },
+    {
+      "supplier_id": "SUP-012",
+      "earliest_ready_date": "2027-02-08",
+      "launch_gap_days": 38,
+      "on_time": false
+    }
+  ],
+  "financial_exposure": {
+    "currency": "CNY",
+    "unit": "minor_currency_unit",
+    "scenario": "full_award_comparison",
+    "suppliers": [
+      {
+        "supplier_id": "SUP-010",
+        "annual_cashflows": [
+          {
+            "fiscal_period": 2027,
+            "materials_minor": 914400000,
+            "tooling_minor": 105600000,
+            "operating_cashflow_minor": 1020000000,
+            "operating_npv_minor": 1020000000
+          },
+          {
+            "fiscal_period": 2028,
+            "materials_minor": 1142285625,
+            "tooling_minor": 128700000,
+            "operating_cashflow_minor": 1270985625,
+            "operating_npv_minor": 1155441477
+          },
+          {
+            "fiscal_period": 2029,
+            "materials_minor": 1440180000,
+            "tooling_minor": 95700000,
+            "operating_cashflow_minor": 1535880000,
+            "operating_npv_minor": 1269322314
+          },
+          {
+            "fiscal_period": 2030,
+            "materials_minor": 1443751875,
+            "tooling_minor": 0,
+            "operating_cashflow_minor": 1443751875,
+            "operating_npv_minor": 1084712153
+          }
+        ],
+        "rd_upfront_minor": 120000000,
+        "rd_allocation_minor": {
+          "base": 60000000,
+          "premium": 60000000
+        },
+        "materials_npv_minor": 4227785035,
+        "tooling_npv_minor": 301690909,
+        "total_npv_minor": 4649475944,
+        "variant_npv_minor": {
+          "base": 3189286783,
+          "premium": 1460189160
+        }
+      },
+      {
+        "supplier_id": "SUP-011",
+        "annual_cashflows": [
+          {
+            "fiscal_period": 2027,
+            "materials_minor": 705029577,
+            "tooling_minor": 76477763,
+            "operating_cashflow_minor": 781507340,
+            "operating_npv_minor": 781507340
+          },
+          {
+            "fiscal_period": 2028,
+            "materials_minor": 996037480,
+            "tooling_minor": 93992728,
+            "operating_cashflow_minor": 1090030209,
+            "operating_npv_minor": 990936553
+          },
+          {
+            "fiscal_period": 2029,
+            "materials_minor": 1217312095,
+            "tooling_minor": 70476085,
+            "operating_cashflow_minor": 1287788180,
+            "operating_npv_minor": 1064287752
+          },
+          {
+            "fiscal_period": 2030,
+            "materials_minor": 1183244485,
+            "tooling_minor": 0,
+            "operating_cashflow_minor": 1183244485,
+            "operating_npv_minor": 888989095
+          }
+        ],
+        "rd_upfront_minor": 129454544,
+        "rd_allocation_minor": {
+          "base": 64727272,
+          "premium": 64727272
+        },
+        "materials_npv_minor": 3505550344,
+        "tooling_npv_minor": 220170396,
+        "total_npv_minor": 3855175284,
+        "variant_npv_minor": {
+          "base": 2373467042,
+          "premium": 1481708242
+        }
+      },
+      {
+        "supplier_id": "SUP-012",
+        "annual_cashflows": [
+          {
+            "fiscal_period": 2027,
+            "materials_minor": 973841077,
+            "tooling_minor": 79692308,
+            "operating_cashflow_minor": 1053533385,
+            "operating_npv_minor": 1053533385
+          },
+          {
+            "fiscal_period": 2028,
+            "materials_minor": 1206451385,
+            "tooling_minor": 97750000,
+            "operating_cashflow_minor": 1304201385,
+            "operating_npv_minor": 1185637622
+          },
+          {
+            "fiscal_period": 2029,
+            "materials_minor": 1461363743,
+            "tooling_minor": 73150641,
+            "operating_cashflow_minor": 1534514384,
+            "operating_npv_minor": 1268193705
+          },
+          {
+            "fiscal_period": 2030,
+            "materials_minor": 1381547267,
+            "tooling_minor": 0,
+            "operating_cashflow_minor": 1381547267,
+            "operating_npv_minor": 1037976910
+          }
+        ],
+        "rd_upfront_minor": 69730769,
+        "rd_allocation_minor": {
+          "base": 34865385,
+          "premium": 34865385
+        },
+        "materials_npv_minor": 4316330604,
+        "tooling_npv_minor": 229011019,
+        "total_npv_minor": 4615072392,
+        "variant_npv_minor": {
+          "base": 2571482902,
+          "premium": 2043589490
+        }
+      }
+    ]
+  },
+  "recommendation": {
+    "supplier_id": "SUP-011",
+    "rationale": "Only this candidate has sufficient annual allocation and meets launch timing; its full-award NPV is also lowest. Preserve remaining validation actions for the other candidate."
+  }
+}

@@ -7,3 +7,4 @@ GET /api/sourcing/engineering
 GET /api/sourcing/contracts
 GET /api/sourcing/payments
 GET /api/sourcing/suppliers
+GET /health

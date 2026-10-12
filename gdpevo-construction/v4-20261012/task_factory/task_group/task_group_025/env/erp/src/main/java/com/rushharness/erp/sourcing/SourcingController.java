@@ -25,7 +25,7 @@ public class SourcingController {
     if(offset<0||limit<1||limit>100)throw ApiException.invalidArgument("INVALID_ARGUMENT","offset>=0 and 1<=limit<=100 required",Map.of());
     String where=" WHERE domain=?";
     List<Object> args=new ArrayList<>();args.add(domain);
-    if(program!=null){where+=" AND program_id=?";args.add(program);}
+    if(program!=null){where+=domain.equals("programs")?" AND record_id=?":" AND program_id=?";args.add(program);}
     if(supplier!=null){where+=" AND supplier_id=?";args.add(supplier);}
     if(!query.isBlank()){where+=" AND (LOWER(record_id) LIKE ? OR LOWER(payload) LIKE ?)";String q="%"+query.toLowerCase(Locale.ROOT).replace("\\","\\\\").replace("%","\\%").replace("_","\\_")+"%";args.add(q);args.add(q);}
     long total=jdbc.queryForObject("SELECT COUNT(*) FROM sourcing_records"+where,Long.class,args.toArray());
@@ -48,4 +48,5 @@ public class SourcingController {
     return ApiResponse.ok(Map.of("status","ready","database","up","service","java-sourcing-erp","state_mode","read_only"));
   }
 }
+
 

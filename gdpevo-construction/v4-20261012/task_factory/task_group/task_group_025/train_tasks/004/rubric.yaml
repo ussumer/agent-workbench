@@ -1,0 +1,19 @@
+rubric:
+  - point_id: N1
+    goal: Reconstruct approved full-year variant demand and four-year mix.
+    weight: 2
+  - point_id: N2
+    goal: Resolve dated commercial applicability and complete variant-period coverage.
+    weight: 2
+  - point_id: N3
+    goal: Determine technical admissibility, coverage and remaining required actions.
+    weight: 2
+  - point_id: N4
+    goal: Compute each candidate annual allocation shortfall against approved demand.
+    weight: 2
+  - point_id: N5
+    goal: Determine earliest readiness and calendar-day gap to launch.
+    weight: 2
+  - point_id: N6
+    goal: Compute all candidate and variant cashflow exposure with tiers, UOM, currency, tooling, R&D and discounting.
+    weight: 3

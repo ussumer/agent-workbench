@@ -1,0 +1,44 @@
+# T67 construction code/spec review — 2026-10-12
+
+Reviewer: independent construction review context. This is **not Stage 3**, not an acceptance vote, and not a calibration or learning-effectiveness result. Reviewed shared ERP environment, train_001..005 and test_001..003, and only load_formal/prepare/verify acceptance boundaries in scripts/planning/gdpevo_v4_taskset.py. test_004/005 were outside this review's completed-task scope. Paused SDK/runtime direction was not repaired, restarted or probed. Zero model calls, zero service launches, zero production actions. No implementation/task files changed.
+
+## Findings
+
+### [P1] Verification can call a zero-model, empty-evidence fixture calibrated
+
+Path: scripts/planning/gdpevo_v4_taskset.py:566-597 (especially 575-589 and 591-597).
+
+The verifier trusts result.json grade.score values, counts three entries in skills, accepts arbitrary completed-code markers, and checks only existence of trace/submission/isolation/cleanup files. It does not require actual nonempty generation traces/skill packages, reconcile grades to the frozen evaluator and submitted business output, or reconcile per-attempt evidence and real model-call accounting. Empty source/run manifests are accepted as well. Consequently the named required T67 verify command can report calibration_passed when the claimed business/calibration evidence never happened.
+
+A focused negative fixture invoked the **actual verify function**: 30 scheduled rows with handwritten base=.5/fewshot=.7, empty submission.json/raw-trace/tools/isolation/cleanup files, skills=[{},{},{}], usage.model_calls=0, and a fabricated completed `2 * 3` execution marker. It returned status=calibration_passed, calibration_complete=true and reasons=[]. This fixture is plainly labelled a negative acceptance test and is **not real model evidence**. See scratch/construction-code-review-negative-probe/NEGATIVE-PROBE-RESULT.json and the files in that same directory. A preceding OS-temp attempt was permission-blocked and did not evaluate; the second attempt used the authorized private review scratch. No sandbox or Actor was launched.
+
+Required before any future calibration acceptance: verify complete expected manifests and source inventory; verify actual three skill-session identities/files/traces; compare each stored grade to the frozen evaluator/submission and attempt result; reconcile actual Actor/model/tool evidence and failure denominator. A completed calculation is an execution fact, not evidence that computation contributed to a better decision. No demand for a dynamic win or a contribution threshold is made here. Runtime remains paused; this finding is for the parent's acceptance backlog, not permission to resume that direction.
+
+### [P1] Preparation does not freeze the shared business environment
+
+Path: scripts/planning/gdpevo_v4_taskset.py:94-107,125-129.
+
+source-hashes.json freezes task_group.yaml and task prompt/payload/notes/answer/evaluator paths, but no env/seed.json, generate_seed.py, source-manifest.json, schema, built business service or environment data receipt. Java/H2 is the source of truth that Actor queries, while the answer/evaluator is frozen independently. A changed/rebuilt seed or environment can therefore be used after preparation without check_frozen_sources detecting it, producing a task/gold versus served-facts mismatch while the acceptance verifier still treats the candidate as frozen. The task notes' seed hash does not enforce this check.
+
+Bind the prepared task candidate to the concrete env manifest/seed/service version and compare served environment identity at the trusted control boundary before accepting its results. This is a missing acceptance condition, not evidence that the current served seed actually drifted.
+
+### Resolved concurrently: program ID filter
+
+Initial inspected controller filtered all domains by indexed program_id although generate_seed.py:25 leaves the programs index null. At final line verification, another context had changed SourcingController.java:28 to use `record_id=?` for programs and program_id for other domains. This resolves the static mismatch with env/schema.md:17. This reviewer did not modify the controller or rerun Java/HTTP checks. Owning env builder should reconcile source-manifest/build evidence for that retained Java change; the initial report observation is not a current open bug.
+
+## Task/business assessment and limits
+
+- The public Java controller serves stored raw domain/document records; the read-only filter denies write and legacy ERP/judge routes. No task-shaped aggregation, NPV/winner endpoint, gold/rubric field or public answer interface was found in the inspected environment code/seed/schema. This is static inspection plus existing environment evidence, not a fresh full-stack penetration test.
+- Inspected actual task evaluators and builder component evidence: keyed table/set normalization, strict integers/booleans, declared one-fen financial tolerance (five-fen for train001), isolated whole-point mutations, currency/UOM errors, malformed/duplicate inputs, and manual source/arithmetic checks. Used existing scoring_checks/validation-results/manual_spotchecks and notes; did not repeat already-passed component suites.
+- No critical source-facts-versus-gold temporal/currency/refund/NPV error was confirmed in the eight reviewed tasks. Notes explicitly distinguish as-of source knowledge from 2027-2030 delivery effectivity, approved future amendments from nonbinding revisions, common charge IDs, first-year-undiscounted NPV, actual-paid-base refund entitlement, received cash versus claims, reusable title credit, and gross future quotation exposure. Actual declared quote facts and independent manual checks were inspected; this report does not claim a new independent all-field recalculation.
+- A new ad hoc all-task NPV recomputation probe failed twice with StopIteration due to my incorrect seed wrapper selection (program/document indexing); it was stopped under the two-attempt rule. No gold was overwritten and no outcome from that failed probe is represented as passing. The failures are visible in the review conversation/tool outputs.
+- No duplicate separate reward for NPV/rank/recommendation was found: financial outcomes are one whole N6/R4 point; commercial temporal coverage excludes currency/price arithmetic. Recommendation is intentionally unscored under the accepted contract. Thus score=1 does not certify every narrative recommendation; the report must not equate the component grade with an executed procurement decision.
+- **Score-floor risk, not a calibration verdict:** all nonfinancial nomination points total 10/13=.76923 and non-R4 replacement points total 11/14=.78571. Correct source reconciliation/feasibility can earn those totals while the complete financial point fails. Several qualifications and capacity tables are legitimate positive controls. This may make the provisional DS difficulty target hard to meet, but there is no DS calibration evidence and no threshold result is invented. Do not alter weights after observing model results merely to hit a band.
+- The concrete recurring training anchors cover forecast/source effectivity, pieces/sets/cumulative tiers, tooling cap and R&D split, date/annual allocation checks and paid/refund/title/change-scope separation. train005 supplies actual conditional qualification and partial-refund experiences. The current design transfer-matrix.md:7 lists only train001/train004 for test001 N3; both are qualified-status positive controls. test001's own notes explicitly call its conditional state new local evidence. No missing hidden policy was found, but final point-level anchor mapping should add actual train005 for conditional classification rather than imply the two listed cases demonstrate it.
+- The JSON deliverable adaptation is explicitly disclosed in notes; source documents retain provenance and synthetic terms. No claim of unchanged original Word/Excel work is supported or made.
+
+## Review disposition
+
+Construction artifacts can be preserved as reviewed component work with these findings/limitations. There is no Stage 3 approval or T67 completion. The P1 acceptance gaps need resolution before accepting future real calibration; the paused SDK work remains paused. The concurrently resolved program filter requires corresponding owner evidence; the final transfer-matrix correction should be scheduled by actual impact. Preserve negative probe evidence distinctly from real attempts; it must never be fed to Actor or counted as calibration/model output.
+
+Read-only plan protocol used Windows Python after the python3 launcher returned no output: training worktree check valid (70 tasks/67 done), next=T67, packet T67 loaded. No plan state/HANDOFF edits or Git commit were made by this reviewer.

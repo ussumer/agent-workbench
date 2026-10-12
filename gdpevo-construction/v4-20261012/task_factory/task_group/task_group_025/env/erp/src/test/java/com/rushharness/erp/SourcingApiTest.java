@@ -34,6 +34,18 @@ class SourcingApiTest {
       mvc.perform(get("/api/sourcing/programs/PRG-"+id).header("X-Service-Token", "test-sourcing-token"))
         .andExpect(status().isOk()).andExpect(jsonPath("$.data.variants.length()").value(2));
   }
+  @Test void programFilterUsesBusinessIdentifierAndCombinesWithPagination() throws Exception {
+    mvc.perform(get("/api/sourcing/programs").header("X-Service-Token", "test-sourcing-token").param("program_id","PRG-021"))
+      .andExpect(status().isOk()).andExpect(jsonPath("$.data.total").value(1))
+      .andExpect(jsonPath("$.data.items[0].program_id").value("PRG-021"));
+    mvc.perform(get("/api/sourcing/programs").header("X-Service-Token", "test-sourcing-token").param("program_id","PRG-021").param("offset","1"))
+      .andExpect(status().isOk()).andExpect(jsonPath("$.data.total").value(1))
+      .andExpect(jsonPath("$.data.items.length()").value(0));
+    mvc.perform(get("/api/sourcing/programs").header("X-Service-Token", "test-sourcing-token").param("program_id","PRG-999"))
+      .andExpect(status().isOk()).andExpect(jsonPath("$.data.total").value(0));
+    mvc.perform(get("/api/sourcing/programs").header("X-Service-Token", "test-sourcing-token").param("program_id","PRG-021").param("query","PRG-022"))
+      .andExpect(status().isOk()).andExpect(jsonPath("$.data.total").value(0));
+  }
   @Test void candidatesForecastVersionsAndDocumentsAreReachable() throws Exception {
     mvc.perform(get("/api/sourcing/quotes").header("X-Service-Token", "test-sourcing-token").param("program_id","PRG-021"))
       .andExpect(status().isOk()).andExpect(jsonPath("$.data.total").value(12));
@@ -91,5 +103,6 @@ class SourcingApiTest {
     assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM sourcing_records WHERE domain='programs'", Integer.class)).isEqualTo(150);
   }
 }
+
 
 

@@ -36,3 +36,12 @@ Zero-generation Codexgateway probe saw exactgpt5.5 available,butunused following
 Parent initialresumequestionpremature: isolationattempt1wasbaseline,attempt2wasfirstrepair whichfailedprecontainer dueConnectionConfigSyncnotdataclass. ExistinguserfullDSauthorization permitsonecorrecttypedsecondrepair. Communicatedcorrectionpublicly, resumedexactoneprobe;ifsecondrepairfailsstop. Nohumanexplicitpause received. Alloriginalfailurelogsretained,noassumedquestionresponse.
 
 Actualdata targetreassignment: test001PRG083→PRG084because083hasreplacementcontracthistorycontrarytoinitialfamilybrief;084naturallyordinary. Noformaltestfiles/goldexistedbeforechange;environmentnotmodifiedforanswer.
+
+## Human resume and continuation
+Human expressly answered allowsfix/resumeisolatedpreflight,thenexplicitlycontinued. Alltenindependentbuilders completedformal5+5 with componentgold/manual/negativechecks. Newindex integrated,officialcheckerallgold passedbutlanguage leftoversin copiedenvfailed—retainoriginalreport. SDKattempt3patchapplicationfailure preserved; nowexacttypedfix verifiedbeforeattempt4. Verifierempty-evidencefalsepassindependentnegativefixture preserved,acceptancefix pendingbeforeanypaidruns. Overallnotdone andnoStage3voteyet.
+
+## Final task components
+Tenformal taskfolders complete withprivategold/scorer/schema/notes. Componentgoldscores1,isolatedwholepointnegativechecks andDecimal/Fraction/manualfinancialproof perbuilder. Fullofficialstructurecheckerfirstattemptallgoldpassed,languageresidualsinsolatedlegacyfixture/configcommentsfailed;envbuildertranslationsdon'talterbusinessfacts. NewMCP/DSruntimeacceptancefixmustnotacceptfakezero-callfixture. Human expressly permits SDKresume;nextprobeusesactualtypedpatch,newdirectory. No paidDSyet,noStage3votesyet.
+
+## Current stop-loss checkpoint
+Official structure attempt2 passed; actual train feedback nine-case integration passed. English-only environment source/runtime identity refreshed with unchanged business seed. SDK actual typed proxy attempt4 failed readiness after real creation and was cleaned; zero paid calls. No attempt5 without user discussion. T67 blocked, full DS calibration and Stage3 review absent. Gate 20261012T154907Z blocked on configuration precheck, separate from actual SDK failure evidence. Useful construction/runtime boundary code is preserved as intermediate, not accepted model output.

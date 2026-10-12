@@ -36,3 +36,6 @@ Use adaptation.md,actual DSconfig,identical runtime/model/limits and three repea
 
 ## Concrete briefs and transfer gate
 Ten task-briefs/*.md define each output/weighted rubric; transfer-matrix.md gives point-level repeated anchors; financial-contract.md resolves generated source semantics. Final targets are provisional until shared facts validate family and complete references. No taskbuilder may silently invent missing feasibility or policy.
+
+## Final constructed candidate (pre-calibration)
+Allfiveformaltrainandfiveformalheldouttasksarepresent. Distinctbuildercontexts: train001/002/003/004/005 andtest001/002/003/004/005. Nominatingprograms021/034/058/084/107/129;replacement047/040/096/110. Sourcefinancialsemanticsvalidatedinprivatecomponentproofs. No formalDSskillgeneration orcalibrationscoresyet. Do notcall candidateacceptedonconstructionalone.
