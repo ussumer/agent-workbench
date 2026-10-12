@@ -1,3 +1,6 @@
+## T67开工：官方构造路线的DS/课程栈适配（2026-10-12）
+用户授权重新生成，不复用V3答案/分数；随后明确DS不用GPT。复用已接受Stage1SCN025，聚焦E004/E005金融采购/供应商变更。同一隔离trainingworktree，保留pckl用户改动。设计、adaptation、env_blueprint在gdpevo-construction/v4-20261012/task_factory/scratch；尚无题目/环境/校准结果。官方角色分离、多实例技能/测试、六review保持；Java/H2+Mongo/MCP/OpenSandbox/DeepAgents适配替代SQLite与CodexGPT校准，不能冒称官方GPT结果。T68不恢复。下一步独立env-builder，再十task-builder，不允许总脚本生成全部。
+
 ## T69完成：同监督few-shot静态/dynamic配对（2026-10-09）
 Gate artifacts/tasks/T69/20261009T093641Z/receipt.json passed：8unit/0failed/0skipped，live verify passed，receipt日志hash核对。首次缺MODEL环境blocked receipt093517保留，后续内存加载既有env，无新模型调用。
 Run1总160episode：40train诊断、120开发test。static38/60 mean.914103，dynamic40/60 mean.903846；配对得分dynamic10胜10负40平，整题仅dynamic成功8/仅static成功6；三次全过7/20vs10/20。静态/动态同T65 gold bank与完整示例，只有注入方式不同。无Curator/晋升，test不回流；不是新封存结论。

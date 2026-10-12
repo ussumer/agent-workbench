@@ -1,0 +1,186 @@
+# Task Structure
+
+## Input
+
+Each construction run reads one scenario. The scenario should contain several examples, and each example should contain:
+
+- `example_id`
+- `source`
+- `prompt`
+- `notes`
+- `attachments`
+
+These examples define task complexity, business context, data types, and long-horizon work intensity. The task group must not simply copy the examples; it should abstract transferable scenario experience and SOPs from them.
+
+## Output Directory
+
+`task_factory/task_group/<task_group_id>/` should contain:
+
+A completed task group should contain exactly 5 train tasks and 5 test tasks.
+
+```text
+task_group_001/
+├── task_group.yaml
+├── env/
+│   ├── Dockerfile
+│   ├── setup.sh
+│   ├── judge_api.py
+│   ├── endpoints.txt
+│   └── <shared business services, data, setup files, and support files>
+├── train_tasks/
+│   ├── 001/
+│       ├── input/
+│       │   ├── prompt.txt
+│       │   └── payloads/
+│       │       └── answer_template.json
+│       ├── notes/
+│       │   └── notes.md
+│       ├── output/
+│       │   └── answer.json
+│       └── eval/
+│           └── eval.sh
+│   └── 005/
+│       └── ...
+└── test_tasks/
+    ├── 001/
+        ├── input/
+        │   ├── prompt.txt
+        │   └── payloads/
+        │       └── answer_template.json
+        ├── notes/
+        │   └── notes.md
+        ├── output/
+        │   └── answer.json
+        └── eval/
+            └── eval.sh
+    └── 005/
+        └── ...
+```
+
+## task_group.yaml
+
+```yaml
+task_group:
+  task_group_id: task_group_001
+  scenario_id: SCN_001_example_scenario
+  source_examples:
+    - E001
+    - E002
+  domain: Example Domain
+  description: |
+    Describe the train-predict benchmark and the shared business environment.
+
+env:
+  dockerfile: env/Dockerfile
+  setup: env/setup.sh
+  state_mode: read_only # or mutable
+  files:
+    - env/Dockerfile
+    - env/setup.sh
+    - env/judge_api.py
+    - env/endpoints.txt
+    - env/<shared_business_service_or_support_file>
+
+train_tasks:
+  - task_id: train_001
+    input: train_tasks/001/input/
+    prompt_txt: train_tasks/001/input/prompt.txt
+    payloads:
+      - train_tasks/001/input/payloads/answer_template.json
+      - train_tasks/001/input/payloads/<task_material>
+    notes: train_tasks/001/notes/notes.md
+    output: train_tasks/001/output/
+    answer_json: train_tasks/001/output/answer.json
+    eval:
+      script: train_tasks/001/eval/eval.sh
+      files:
+        - train_tasks/001/eval/eval.sh
+      rubric:
+        - goal: <rule-based business-result check>
+          weight: 2
+        # Repeat until the task has 6-10 scoring points.
+  # Repeat through train_005.
+
+test_tasks:
+  - task_id: test_001
+    input: test_tasks/001/input/
+    prompt_txt: test_tasks/001/input/prompt.txt
+    payloads:
+      - test_tasks/001/input/payloads/answer_template.json
+      - test_tasks/001/input/payloads/<task_material>
+    notes: test_tasks/001/notes/notes.md
+    output: test_tasks/001/output/
+    answer_json: test_tasks/001/output/answer.json
+    eval:
+      script: test_tasks/001/eval/eval.sh
+      files:
+        - test_tasks/001/eval/eval.sh
+      rubric:
+        - goal: <rule-based business-result check>
+          weight: 2
+        # Repeat until the task has 6-10 scoring points.
+  # Repeat through test_005.
+```
+
+## Field Requirements
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `task_group.task_group_id` | Yes | Globally unique task group identifier; the directory name must match this field |
+| `task_group.scenario_id` | Yes | Source scenario ID |
+| `task_group.source_examples` | Yes | Stage 1 example IDs used to construct the task group; all must come from the same scenario |
+| `task_group.domain` | Yes | Domain label |
+| `task_group.description` | Yes | Shared task-group background; not default solver input |
+| `env.dockerfile` | Yes | Docker build entry point for the isolated environment image; the build context is `env/` only |
+| `env.setup` | Yes | Environment setup entry point |
+| `env.state_mode` | Yes | `read_only` only when concurrent attempts cannot change any later solver-visible result; otherwise `mutable` |
+| `env.files` | Yes | Shared environment files declared in the final task group index; must include `env/endpoints.txt` |
+| `train_tasks` | Yes | Exactly 5 train task entries: `train_001` through `train_005` |
+| `test_tasks` | Yes | Exactly 5 test task entries: `test_001` through `test_005` |
+
+`env/endpoints.txt` is a plain endpoint inventory. List every reachable endpoint
+once as `METHOD /path`, including business endpoints, `/health`, and
+`/api/judge`. Do not include descriptions, examples, host names, credentials,
+or usage instructions.
+
+The constructor must declare `env.state_mode`; calibration and evaluation
+orchestrators must not infer it at runtime. Use `read_only` only when business
+endpoints are observational and sessions, caches, authentication state, logs,
+rate limits, or judge bookkeeping cannot change a later attempt's visible
+behavior. If any task performs a write, or if there is uncertainty, use
+`mutable`. A `read_only` environment may be shared by concurrent attempts in
+the same capability stage. A `mutable` environment receives a fresh container
+and isolated writable layer for every attempt.
+
+Each item under `train_tasks` and `test_tasks` is a formal task:
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `task_id` | Yes | Task identifier unique within the task group; use `train_001` or `test_001` |
+| `input` | Yes | Solver input directory |
+| `prompt_txt` | Yes | Solver-visible task request |
+| `payloads` | Yes | List of solver-visible payload files; must include `input/payloads/answer_template.json` |
+| `notes` | Yes | Hidden bilingual notes file in English and Chinese; use `<task>/notes/notes.md` |
+| `output` | Yes | Standard-answer directory |
+| `answer_json` | Yes | Standard-answer file |
+| `eval.script` | Yes | Evaluation entry script |
+| `eval.files` | Yes | Evaluation-related files |
+| `eval.rubric` | Yes | 6-10 scoring points spanning at least 4 distinct, non-duplicate business outcomes; each item uses `goal` and `weight`; each `weight` can only be `1`, `2`, or `3`, and the point earns either all of its assigned `weight / sum(weight)` score or zero; within-point fractions and semantic double counting are not allowed |
+
+## answer_template.json
+
+Every train and test task must provide:
+
+```text
+input/payloads/answer_template.json
+```
+
+This file is solver-visible and specifies the exact expected output format. It should include:
+
+- Required top-level keys and nested keys.
+- Field types, such as number, integer, boolean, enum, list, object, or string.
+- Numeric precision and units for scored numeric values.
+- Allowed enum values for classifications, statuses, actions, tags, or other choice fields.
+- List ordering rules, stable identifiers, and required object keys.
+
+`answer_template.json` should remove output-schema uncertainty without revealing answers, scoring weights, hidden notes, SOPs, or evidence shortcuts.

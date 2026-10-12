@@ -3640,7 +3640,10 @@
         "R33"
       ],
       "reads": [
-        "docs/runtime/gdpevo-procurement-v4-source-discovery-2026-10-09.md"
+        "docs/runtime/gdpevo-procurement-v4-source-discovery-2026-10-09.md",
+        "gdpevo-construction/v4-20261012/task_factory/scratch/adaptation.md",
+        "gdpevo-construction/v4-20261012/task_factory/scratch/task_group_design.md",
+        "gdpevo-construction/v4-20261012/task_factory/scratch/env_blueprint.md"
       ],
       "checks": [
         {

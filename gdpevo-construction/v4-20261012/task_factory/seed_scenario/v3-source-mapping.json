@@ -1,0 +1,52 @@
+{
+  "quotes": {
+    "examples": [
+      "E004",
+      "E005"
+    ],
+    "preserved_business_basis": "Compare supplier quotations, financial impact and sourcing alternatives.",
+    "unsupported_v3_extensions": [
+      "signed/draft/revoked precedence",
+      "pending-price intervals",
+      "exact ERP field-authority protocol"
+    ]
+  },
+  "packages": {
+    "examples": [
+      "E002",
+      "E003"
+    ],
+    "preserved_business_basis": "Component costs, sourcing volume, supplier capacity and transition lead time.",
+    "unsupported_v3_extensions": [
+      "integer package sizes",
+      "free-freight thresholds",
+      "non-greedy optional-demand coverage"
+    ]
+  },
+  "kits": {
+    "examples": [
+      "E001",
+      "E002",
+      "E004"
+    ],
+    "preserved_business_basis": "Modular cost drivers, child parts, component assembly and product variants.",
+    "unsupported_v3_extensions": [
+      "all-or-none kit closure",
+      "independent-member exceptions",
+      "lexicographic procurement priorities"
+    ]
+  },
+  "revisions": {
+    "examples": [
+      "E001",
+      "E005",
+      "E006"
+    ],
+    "preserved_business_basis": "Post-nomination changes, renewed signoffs, paid-upfront costs and order discrepancies.",
+    "unsupported_v3_extensions": [
+      "immutable commitment ledger schema",
+      "append-only residual ordering",
+      "supplier-cart historical freight exclusion"
+    ]
+  }
+}

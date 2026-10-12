@@ -1,0 +1,12 @@
+{
+  "raw_source_sha256": "10493adeffe088867c9dadf843a3123bf14329f0e01b06277c862c2354a018f1",
+  "reference_files": [
+    {
+      "path": "attachments/E005/Model A HL quotes_1.docx",
+      "source_path": "reference_files/c41747c5d1641a515ac32263e9a697d6/Model A HL quotes_1.docx",
+      "url": "https://huggingface.co/datasets/openai/gdpval/resolve/11e7900cdcac61bc4daf59e65feb238acda98fbf/reference_files/c41747c5d1641a515ac32263e9a697d6/Model%20A%20HL%20quotes_1.docx",
+      "sha256": "c41747c5d1641a515ac32263e9a697d601ed029d46110764218771ed2f58efb9",
+      "bytes": 14174
+    }
+  ]
+}

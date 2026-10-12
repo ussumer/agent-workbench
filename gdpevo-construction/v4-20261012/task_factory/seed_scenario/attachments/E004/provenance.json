@@ -1,0 +1,12 @@
+{
+  "raw_source_sha256": "5f2292f492f534a4208db0484cf152d060079795d6c8e0c0faf5841ad673f050",
+  "reference_files": [
+    {
+      "path": "attachments/E004/Quotations and volume projection for model I headlamp.docx",
+      "source_path": "reference_files/787218a67c75e5c2f6dc405027a2f07c/Quotations and volume projection for model I headlamp.docx",
+      "url": "https://huggingface.co/datasets/openai/gdpval/resolve/11e7900cdcac61bc4daf59e65feb238acda98fbf/reference_files/787218a67c75e5c2f6dc405027a2f07c/Quotations%20and%20volume%20projection%20for%20model%20I%20headlamp.docx",
+      "sha256": "787218a67c75e5c2f6dc405027a2f07c087f1c1260cdba6c2adc4465085adbb6",
+      "bytes": 14948
+    }
+  ]
+}

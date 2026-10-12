@@ -1,0 +1,94 @@
+{
+  "created_at": "2026-10-09T03:02:09.696333+00:00",
+  "source_revision": "11e7900cdcac61bc4daf59e65feb238acda98fbf",
+  "files": [
+    {
+      "path": "attachments/E001/provenance.json",
+      "sha256": "a1025cf2747ed040eda79a5fff4a90a3f9f7ceb7222702c0390967fad564723f"
+    },
+    {
+      "path": "attachments/E001/raw-source.json",
+      "sha256": "1dc2117f5f1f6013df25199895623845fa1ff0028e00fd1ea531de686cbb7a78"
+    },
+    {
+      "path": "attachments/E002/provenance.json",
+      "sha256": "a310f220461a2539ffb0b484270a5de461c4745e087b820e219ef7b33875ddd9"
+    },
+    {
+      "path": "attachments/E002/raw-source.json",
+      "sha256": "09a44d8ad3b894345307232b732d1724327ad5233fea2ce2af585949d532054b"
+    },
+    {
+      "path": "attachments/E003/provenance.json",
+      "sha256": "5afd491be92c0cc3a12b971b28deb229e33c6e0cf01a1a819c495983578f76fb"
+    },
+    {
+      "path": "attachments/E003/raw-source.json",
+      "sha256": "83eeba06224e45aebbc8cd10b7e8c0f7214dd3ed84f99cc490b3b3d55c83ff4d"
+    },
+    {
+      "path": "attachments/E004/provenance.json",
+      "sha256": "65ee5dffad9c751971dfdff55b6d3926593af84b39c8c77278d74787f698cfb5"
+    },
+    {
+      "path": "attachments/E004/Quotations and volume projection for model I headlamp.docx",
+      "sha256": "787218a67c75e5c2f6dc405027a2f07c087f1c1260cdba6c2adc4465085adbb6"
+    },
+    {
+      "path": "attachments/E004/raw-source.json",
+      "sha256": "5f2292f492f534a4208db0484cf152d060079795d6c8e0c0faf5841ad673f050"
+    },
+    {
+      "path": "attachments/E005/Model A HL quotes_1.docx",
+      "sha256": "c41747c5d1641a515ac32263e9a697d601ed029d46110764218771ed2f58efb9"
+    },
+    {
+      "path": "attachments/E005/provenance.json",
+      "sha256": "d0fa23375ee14e7599ca1a3588b3fcb1a453986b9cbec7786da858cb4c23cc20"
+    },
+    {
+      "path": "attachments/E005/raw-source.json",
+      "sha256": "10493adeffe088867c9dadf843a3123bf14329f0e01b06277c862c2354a018f1"
+    },
+    {
+      "path": "attachments/E006/provenance.json",
+      "sha256": "dac52c2b93ee926a9ba78b8893fc36a5a6e4d48fa9eec653ca5d9650be445917"
+    },
+    {
+      "path": "attachments/E006/raw-source.json",
+      "sha256": "3fabc2c17d61f02f15817554ec6c5fdbb755b8815ff147a6acd12b92d9d88e2c"
+    },
+    {
+      "path": "notes/E001.md",
+      "sha256": "b17a9ee186cd73fa537b00df97b477a1f784572e8aa15618460d6c8f464dc95b"
+    },
+    {
+      "path": "notes/E002.md",
+      "sha256": "faf71a23aa85cf381341caa35910408975da3b7ace5d095791504995ed3572ea"
+    },
+    {
+      "path": "notes/E003.md",
+      "sha256": "5d913895c13bc86b91964271bd640d75d87f92cee6830e34ee75a9a0b9d690ad"
+    },
+    {
+      "path": "notes/E004.md",
+      "sha256": "b9aee7015a57f17ced817ad72738f9721c190d27e91b3c6f3a745f7ba2b1bd2e"
+    },
+    {
+      "path": "notes/E005.md",
+      "sha256": "5be5465e7ab7aac413447c731141711dd898e4a92f339a4e0c38668742df201f"
+    },
+    {
+      "path": "notes/E006.md",
+      "sha256": "0d088b0e0beea576c1ffe48b6d8dd203bcaa29873559d7d7a746d26a775113e1"
+    },
+    {
+      "path": "scenario.yaml",
+      "sha256": "0e817f687b7b9c224d808b01aa7fdeb6f420fd1d6484f1091bd6cd1ec6811d17"
+    },
+    {
+      "path": "v3-source-mapping.json",
+      "sha256": "348cac7c8942d042f784a636033d101e420928433d72d6228a310acde43222bf"
+    }
+  ]
+}
