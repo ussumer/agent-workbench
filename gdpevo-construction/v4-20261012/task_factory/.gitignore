@@ -3,3 +3,6 @@ scratch/runtime/tests-attempt*/
 scratch/runtime/staging*/
 scratch/calibration_runs/
 **/__pycache__/
+
+scratch/runtime/control-image-build*/
+scratch/runtime/staging-control-*/

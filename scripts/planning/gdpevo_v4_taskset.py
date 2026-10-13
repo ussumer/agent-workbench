@@ -34,7 +34,7 @@ using sourcing_read, reconcile versions, and perform financial analysis with
 computation_execute in OpenSandbox. You receive only the current task input.
 Return the complete answer JSON matching answer_template.json in your final message.
 Cite actual document IDs and versions. Do not invent missing records.'''
-EXCLUDED = frozenset({'ls', 'read_file', 'write_file', 'edit_file', 'delete', 'glob', 'grep', 'execute', 'task'})
+EXCLUDED = frozenset({'ls', 'read_file', 'write_file', 'edit_file', 'delete', 'glob', 'grep', 'execute', 'task', 'write_todos'})
 
 def write(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -92,7 +92,7 @@ def source_files(folder):
     return sorted(p.resolve() for p in folder.rglob('*') if p.is_file()
                   and not any(part in excluded for part in p.relative_to(folder).parts))
 
-def prepare(group=GROUP, output=DEFAULT_OUTPUT):
+def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None):
     data, tasks = load_formal(group)
     if output.exists():
         raise FileExistsError('staging already exists; preserve it and use a new --output')
@@ -107,9 +107,18 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT):
         inventories[str(folder.resolve())] = [str(p) for p in paths]
         frozen.update({str(p): digest(p) for p in paths})
     # Runtime/config identities are operator evidence, never copied into Actor inputs.
-    for path in (Path(__file__).resolve(), ROOT / 'uv.lock', CONFIG):
+    for path in (Path(__file__).resolve(), ROOT / 'uv.lock', CONFIG, ROOT / 'scripts/planning/gdpevo_v4_control.py'):
         if path.is_file():
             frozen[str(path)] = digest(path)
+    runtime_identity = {}
+    if config_path is not None:
+        config = read(config_path)
+        if not re.fullmatch('sha256:[a-f0-9]{64}', config.get('sandbox_control_image', '')):
+            raise ValueError('prepare requires immutable official control image')
+        if config.get('business_seed_sha256') != digest(group / 'env/seed.json'):
+            raise ValueError('operator seed identity differs from prepared environment')
+        frozen[str(config_path.resolve())] = digest(config_path)
+        runtime_identity = {key: config[key] for key in ('sandbox_control_image', 'business_image', 'business_seed_sha256')}
     supervision = []
     for task in tasks:
         entries = []
@@ -135,7 +144,7 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT):
         'tasks': tasks, 'schedule': schedule, 'skills_sessions': 3, 'sealed': False,
         'official_gpt_calibration': False, 'learning_gain_proven': False, 'runtime_versions': LOCKED,
         'max_model_calls_per_session': 30, 'max_tool_calls': 36, 'max_output_tokens': 8192,
-        'recursion_limit': 120, 'repairs_or_retries': 0})
+        'recursion_limit': 120, 'repairs_or_retries': 0, 'runtime_identity': runtime_identity})
     write(output / 'source-hashes.json', frozen)
     write(output / 'source-inventories.json', inventories)
     freeze_manifest(output)
@@ -190,53 +199,103 @@ def inspect_sandbox(sandbox_id, network_name):
     network = json.loads(docker('network', 'inspect', network_name))[0]
     validate_container_isolation(containers[0], network, network_name)
     return {'container_id': containers[0]['Id'], 'network_id': network['Id'], 'network': network_name,
-            'internal': network['Internal'], 'mounts': containers[0].get('Mounts', []), 'options': network.get('Options', {})}
+            'image_id': containers[0]['Image'], 'internal': network['Internal'],
+            'mounts': containers[0].get('Mounts', []), 'options': network.get('Options', {})}
 
 @contextlib.contextmanager
 def isolated_control(config, directory):
-    import httpx
+    """Delegate only T67 to the proved, locked official-server dual-NIC topology."""
+    from scripts.planning.gdpevo_v4_control import isolated_control as deployed_control
+    with deployed_control(config, directory) as network:
+        yield network
+
+def actor_tools(tools):
+    visible = {'sourcing_read', 'computation_execute', 'computation_status'}
+    if {t.name for t in tools} != visible | {'finish_session'}:
+        raise ValueError('unexpected MCP capability')
+    return [tool for tool in tools if tool.name in visible]
+
+def mcp_json(result):
+    if getattr(result, 'isError', False):
+        raise ValueError('MCP server returned a tool error')
+    structured = getattr(result, 'structuredContent', None)
+    if structured is not None:
+        return structured
+    text = ''.join(item.text for item in result.content if getattr(item, 'type', None) == 'text')
+    value = json.loads(text)
+    if not isinstance(value, dict):
+        raise ValueError('MCP tool result is not an object')
+    return value
+
+def validate_mcp_doctor(domain, execution, status, restored):
+    if not domain.get('data', {}).get('items'):
+        raise ValueError('authenticated real Java domain read missing')
+    if execution.get('status') != 'completed' or execution.get('stdout', '').strip() != '42':
+        raise ValueError('real OpenSandbox computation did not return 42')
+    if 'doctor_probe' not in execution.get('saved_names', []) or status.get('version', 0) < 1 or not status.get('data', {}).get('doctor_probe'):
+        raise ValueError('Mongo committed doctor state absent')
+    if restored.get('status') != 'completed' or restored.get('stdout', '').strip() != '42':
+        raise ValueError('OpenSandbox reloaded Mongo state did not return 42')
+    return {'passed': True, 'authenticated_java_read': True, 'sandbox_stdout': '42',
+            'mongo_version': status['version'], 'mongo_state_reloaded': True}
+
+def validate_business_identity(inspected, served_seed_sha256, config):
+    if not re.fullmatch('sha256:[a-f0-9]{64}', config.get('business_image', '')) or inspected.get('Image') != config['business_image']:
+        raise ValueError('actual served Java image differs from frozen operator image')
+    if served_seed_sha256 != config.get('business_seed_sha256'):
+        raise ValueError('actual served Java seed differs from frozen source seed')
+    return {'container_id': inspected['Id'], 'image_id': inspected['Image'], 'seed_sha256': served_seed_sha256}
+
+def business_identity(config):
+    inspected = json.loads(docker('inspect', config['business_container']))[0]
+    seed_sha = docker('exec', config['business_container'], 'sha256sum', '/opt/sourcing/seed.json').split()[0]
+    value = validate_business_identity(inspected, seed_sha, config)
+    if not inspected.get('State', {}).get('Running') or inspected['HostConfig'].get('PortBindings'):
+        raise ValueError('Java business environment not running privately')
+    value['app_sha256'] = docker('exec', config['business_container'], 'sha256sum', '/opt/sourcing/app.jar').split()[0]
+    return value
+
+def business_read(config, path, params=None):
+    from scripts.planning.gdpevo_v4_control import business_http
+    response = business_http(config, path, params or {}, os.environ[config['business_token_env']])
+    if response['status_code'] != 200:
+        raise ValueError('real Java HTTP failed status ' + str(response['status_code']))
+    return response['body']
+
+def mcp_client(config_path, output, owner, thread, network):
+    from langchain_mcp_adapters.client import MultiServerMCPClient
+    config = read(config_path)
+    return MultiServerMCPClient({'business': {'transport': 'stdio', 'command': sys.executable,
+        'args': [str(Path(__file__)), 'mcp-worker', '--runtime-config', str(config_path),
+                 '--output', str(output), '--owner', owner, '--thread', thread, '--network', network],
+        'env': {config['business_token_env']: os.environ[config['business_token_env']], 'PYTHONUTF8': '1',
+                'T67_CONTROL_CONTAINER': config['active_control_container']}}})
+
+async def mcp_doctor(config_path, directory, network):
+    """No model: same real MCP server and production computation protocol as Actor."""
+    owner, thread = 't67-doctor-' + uuid.uuid4().hex[:12], 't67-doctor-' + uuid.uuid4().hex[:12]
     directory.mkdir(parents=True, exist_ok=False)
-    name = 't67-' + uuid.uuid4().hex[:16]
-    docker('network', 'create', '--internal', '--opt', 'com.docker.network.bridge.gateway_mode_ipv4=isolated', '--label', 'purpose=t67', name)
-    process = None
-    try:
-        template = Path(config['sandbox_template']).read_text(encoding='utf-8')
-        template = template.replace('network_mode = "bridge"', f'network_mode = "{name}"')
-        port = config['sandbox_port']
-        template = template.replace('port = 18080', f'port = {port}')
-        template = template.replace('path = "~/.opensandbox/opensandbox.db"', 'path = "' + (directory / 'control.db').as_posix() + '"')
-        template = template.replace('allowed_host_paths = ["~/.opensandbox/mounts"]', 'allowed_host_paths = []')
-        path = directory / 'sandbox.toml'
-        path.write_text(template, encoding='utf-8')
-        with socket.socket() as probe:
-            probe.bind(('127.0.0.1', port))
-        with (directory / 'server.log').open('xb') as log:
-            process = subprocess.Popen([config['sandbox_server'], '--config', str(path)], cwd=directory,
-                stdout=log, stderr=subprocess.STDOUT,
-                env={**os.environ, 'OPENSANDBOX_INSECURE_SERVER': 'YES', 'PYTHONUTF8': '1'})
-            with httpx.Client(timeout=2, trust_env=False) as client:
-                deadline = time.monotonic() + 45
-                while True:
-                    if process.poll() is not None:
-                        raise RuntimeError('private OpenSandbox exited; see server.log')
-                    try:
-                        if client.get(f'http://127.0.0.1:{port}/health').status_code == 200:
-                            break
-                    except httpx.HTTPError:
-                        pass
-                    if time.monotonic() > deadline:
-                        raise RuntimeError('private OpenSandbox readiness timeout')
-                    time.sleep(.5)
-            yield name
-    finally:
-        if process is not None and process.poll() is None:
-            process.terminate()
-            try:
-                process.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=5)
-        docker('network', 'rm', name)
+    client = mcp_client(config_path, directory / 'mcp', owner, thread, network)
+    async with client.session('business') as session:
+        tools = await session.list_tools()
+        actor_tools(tools.tools)
+        try:
+            domain = mcp_json(await session.call_tool('sourcing_read', {'path': '/api/sourcing/programs', 'params': {'limit': 1}}))
+            execution = mcp_json(await session.call_tool('computation_execute',
+                {'code': 'value=6*7; save_state("doctor_probe", {"value": value}); print(value)'}))
+            status = mcp_json(await session.call_tool('computation_status', {}))
+            restored = mcp_json(await session.call_tool('computation_execute',
+                {'code': 'print(load_state("doctor_probe")["value"])', 'read_names': ['doctor_probe']}))
+            value = validate_mcp_doctor(domain, execution, status, restored)
+            write(directory / 'mcp-replies.json', {'domain': domain, 'execution': execution, 'status': status, 'restored': restored})
+        finally:
+            close = mcp_json(await session.call_tool('finish_session', {}))
+            if close.get('recycled') is not True or close.get('container_absent') is not True:
+                raise ValueError('explicit MCP doctor cleanup failed')
+    value.update(owner=owner, thread=thread, evidence=str(directory), stdio_closed=True,
+                 tool_names=['sourcing_read', 'computation_execute', 'computation_status'])
+    return value
+
 
 def model_config(config):
     from agent.config import ModelConfig
@@ -254,28 +313,40 @@ def sandbox_config(config):
         def connection_config(self):
             connection = super().connection_config()
             return connection.model_copy(update={'use_server_proxy': True,
-                'retry_policy': RetryPolicy(max_retries=0, per_attempt_timeout=timedelta(seconds=5))})
+                'retry_policy': RetryPolicy.disabled()})
     return ProxyConfig.from_env({**os.environ, 'OPENSANDBOX_DOMAIN': f"127.0.0.1:{config['sandbox_port']}",
         'OPENSANDBOX_BASE_URL': f"http://127.0.0.1:{config['sandbox_port']}", 'OPENSANDBOX_IMAGE': config['sandbox_image'],
         'OPENSANDBOX_READY_TIMEOUT_SECONDS': '30'})
+
+def isolation_ports(config):
+    from urllib.parse import urlparse
+    mongo = urlparse(config['mongo_uri'])
+    business = urlparse(config['business_url'])
+    if mongo.scheme != 'mongodb' or business.scheme not in {'http', 'https'}:
+        raise ValueError('probe requires explicit local Mongo and Java HTTP configuration')
+    return list(dict.fromkeys([config['sandbox_port'], mongo.port or 27017,
+                              business.port or (443 if business.scheme == 'https' else 80), 443]))
 
 def probe_isolation(config, output, network):
     from agent.backends.custom_opensandbox import create_backend
     backend, report = create_backend(sandbox_config(config), metadata={'purpose': 't67-isolation-doctor'})
     try:
         evidence = inspect_sandbox(backend.id, network)
-        code = '''import json,socket
+        control = read(output / 'control-runtime.json')
+        hosts = [control['management_ip'], control['execution_ip'], 'host.docker.internal', '1.1.1.1']
+        ports = isolation_ports(config)
+        code = 'hosts=' + repr(hosts) + '; ports=' + repr(ports) + '\n' + '''import json,socket
 results=[]
-for host in ('host.docker.internal','172.17.0.1','1.1.1.1'):
- for port in (27028,18081,9025,443):
+for host in hosts:
+ for port in ports:
   s=socket.socket();s.settimeout(.3)
   try: s.connect((host,port));results.append([host,port])
   except OSError: pass
   finally:s.close()
 print(json.dumps(results))
 '''
-        response = backend.execute('python -c ' + __import__('shlex').quote(code))
-        write(output / 'isolation-probe.json', {'inspection': evidence, 'response': dataclasses.asdict(response)})
+        response = backend.execute('python3 -c ' + __import__('shlex').quote(code))
+        write(output / 'isolation-probe.json', {'inspection': evidence, 'response': dataclasses.asdict(response), 'hosts': hosts, 'ports': ports})
         if response.exit_code != 0 or json.loads(response.output.strip()) != []:
             raise ValueError('sandbox can reach host/control/external network')
         return evidence
@@ -288,10 +359,15 @@ def doctor(output, config_path):
     try:
         check_frozen_sources(output)
         config = read(config_path)
-        required = {'model_config', 'env_file', 'mongo_uri', 'sandbox_template', 'sandbox_server',
-                    'sandbox_port', 'sandbox_image', 'business_url', 'business_token_env'}
+        required = {'model_config', 'env_file', 'mongo_uri', 'sandbox_template', 'sandbox_control_image',
+                    'sandbox_port', 'sandbox_image', 'business_url', 'business_token_env',
+                    'business_container', 'business_image', 'business_seed_sha256'}
         if not required <= set(config):
             raise ValueError('runtime config missing: ' + ','.join(sorted(required - set(config))))
+        protocol = read(output / 'protocol.json')
+        identity_keys = ('sandbox_control_image', 'business_image', 'business_seed_sha256')
+        if protocol.get('runtime_identity') != {key: config[key] for key in identity_keys}:
+            raise ValueError('immutable operator runtime identity was not frozen by prepare')
         versions = {name: importlib.metadata.version(name) for name in LOCKED}
         if versions != LOCKED:
             raise ValueError('installed runtime versions differ from inspected lock')
@@ -305,36 +381,48 @@ def doctor(output, config_path):
         with MongoClient(config['mongo_uri'], serverSelectionTimeoutMS=3000) as mongo:
             mongo.admin.command('ping')
         result['checks']['mongo_ping'] = True
-        import httpx
-        token = os.environ.get(config['business_token_env'], '')
-        if not token:
+        if not os.environ.get(config['business_token_env']):
             raise ValueError('business auth token missing')
-        with httpx.Client(timeout=5, trust_env=False) as client:
-            health = client.get(config['business_url'].rstrip('/') + '/health')
-            if health.status_code != 200:
-                raise ValueError('Java business service health failed')
-            expected = {'service': 'java-sourcing-erp', 'status': 'ready', 'database': 'up', 'state_mode': 'read_only'}
-            if any(health.json().get('data', {}).get(k) != v for k, v in expected.items()):
-                raise ValueError('Java business environment seed/database not ready')
-        result['checks']['business_health'] = health.json()
+        served = business_identity(config)
+        result['checks']['business_identity'] = served
         directory = output / ('doctor-' + uuid.uuid4().hex[:10])
         with isolated_control(config, directory) as network:
-            result['checks']['sandbox_isolation'] = probe_isolation(config, directory, network)
-        result['reasons'].append('runtime staging incomplete: real MCP doctor probe and independent sandbox fewshot generation not yet verified')
-        result['config_sha256'] = digest(config_path)
+            control = read(directory / 'control-runtime.json')
+            if control['image_id'] != config['sandbox_control_image']:
+                raise ValueError('actual official control image differs from frozen image')
+            result['checks']['control_identity'] = control
+            active = {**config, 'active_control_container': control['container_name'],
+                      'database': 'rush_harness_test_t67_doctor_' + uuid.uuid4().hex[:12]}
+            child = directory / 'runtime.json'
+            write(child, active)
+            health = business_read(active, '/health')
+            expected = {'service': 'java-sourcing-erp', 'status': 'ready', 'database': 'up', 'state_mode': 'read_only'}
+            if any(health.get('data', {}).get(k) != v for k, v in expected.items()):
+                raise ValueError('Java business environment seed/database not ready')
+            result['checks']['business_health'] = health
+            result['checks']['sandbox_isolation'] = probe_isolation(active, directory, network)
+            result['checks']['mcp_protocol'] = asyncio.run(mcp_doctor(child, directory / 'mcp-doctor', network))
+            if business_identity(config) != served:
+                raise ValueError('served Java boundary changed during doctor')
+        cleanup = read(directory / 'control-cleanup.json')
+        if cleanup.get('status') != 'passed' or cleanup.get('errors'):
+            raise ValueError('trusted control cleanup failed')
+        result['checks']['control_cleanup'] = cleanup
+        result.update(status='ready', config_sha256=digest(config_path), source_hashes_sha256=digest(output / 'source-hashes.json'))
     except Exception as error:
-        result['reasons'].append(type(error).__name__ + ': ' + str(error)[:600])
+        from agent.env_utils import redact, secret_values
+        result['reasons'].append(type(error).__name__ + ': ' + redact(str(error), secret_values(os.environ))[:600])
     write(output / ('doctor-result-' + uuid.uuid4().hex[:10] + '.json'), result)
     return result
 
+
 def mcp_worker(config_path, output, owner, thread, network):
-    """Real MCP stdio server. Owner/thread are process-bound, never tool arguments."""
+    """Owner/thread/control relay are process-bound. Actor never supplies trusted controls."""
     from mcp.server.fastmcp import FastMCP
     from api_view.web_config import MongoResources, PersistenceSettings
     from agent.persistence.repository import ApplicationRepository
     from agent.backends.sandbox_manager import SandboxManager, MongoSandboxRegistry, OpenSandboxFactory
     from agent.planning.computation import ComputationService
-    import httpx
     config = read(config_path)
     resources = MongoResources(PersistenceSettings(mongo_uri=config['mongo_uri'], database=config['database'])).start()
     manager = SandboxManager(factory=OpenSandboxFactory(sandbox_config(config), marker='t67-' + owner),
@@ -342,31 +430,42 @@ def mcp_worker(config_path, output, owner, thread, network):
     manager.start()
     service = ComputationService(resources.database, manager.get_or_create)
     ApplicationRepository(resources.database).ensure_thread(owner_user_id=owner, thread_id=thread, title='T67 isolated Actor')
-    server = FastMCP('t67-business-computation')
     output.mkdir(parents=True, exist_ok=True)
+    closed = False
+    sandbox_id = None
+    def cleanup():
+        nonlocal closed
+        if closed:
+            return read(output / 'cleanup.json')
+        write(output / 'executions.json', list(service.executions.find({'owner_user_id': owner, 'thread_id': thread}, {'_id': 0})))
+        recycled = manager.recycle(owner)
+        shutdown = manager.shutdown()
+        remaining = docker('ps', '-aq', '--filter', 'name=sandbox-' + str(sandbox_id)).strip() if sandbox_id else ''
+        value = {'recycled': recycled, 'shutdown': shutdown, 'container_absent': not remaining,
+                 'owner': owner, 'thread': thread, 'sandbox_id': sandbox_id}
+        write(output / 'cleanup.json', value)
+        resources.close()
+        closed = True
+        return value
     def trace(kind, request, response):
         with (output / 'tools.jsonl').open('a', encoding='utf-8') as log:
-            log.write(json.dumps({'kind': kind, 'request': request, 'response': response}, ensure_ascii=False, default=str) + '\n')
+            log.write(json.dumps({'kind': kind, 'request': request, 'response': response,
+                                 'owner': owner, 'thread': thread}, ensure_ascii=False, default=str) + '\n')
+    server = FastMCP('t67-business-computation')
     @server.tool()
     def sourcing_read(path: str, params: dict | None = None) -> dict:
-        """Read domain sourcing endpoints only; supports pagination and document/program IDs."""
+        """Read only domain sourcing endpoints; supports pagination and document/program IDs."""
         path, params = validate_domain_request(path, params or {})
-        with httpx.Client(timeout=20, trust_env=False, follow_redirects=False) as client:
-            response = client.get(config['business_url'].rstrip('/') + path, params=params,
-                headers={'X-Service-Token': os.environ[config['business_token_env']]})
-        if response.status_code != 200:
-            raise ValueError('domain request failed HTTP ' + str(response.status_code))
-        value = response.json()
+        value = business_read(config, path, params)
         trace('sourcing_read', {'path': path, 'params': params}, value)
         return value
     @server.tool()
     def computation_execute(code: str, read_names: list[str] | None = None, session: str = 'analysis', timeout: int = 60) -> dict:
         """Execute Python in OpenSandbox. load_state/save_state store declared JSON in Mongo."""
         proxy = manager.get_or_create(owner)
-        evidence = inspect_sandbox(proxy.id, network)
-        write(output / 'sandbox-inspection.json', evidence)
+        write(output / 'sandbox-inspection.json', inspect_sandbox(proxy.id, network))
         value = service.execute(owner, thread, code, read_names=read_names or [], session=session, timeout=timeout)
-        trace('computation_execute', {'code': code, 'read_names': read_names, 'session': session}, value)
+        trace('computation_execute', {'code': code, 'read_names': read_names, 'session': session, 'timeout': timeout}, value)
         write(output / 'executions.json', list(service.executions.find({'owner_user_id': owner, 'thread_id': thread}, {'_id': 0})))
         return value
     @server.tool()
@@ -375,12 +474,19 @@ def mcp_worker(config_path, output, owner, thread, network):
         value = service.status(owner, thread, session=session)
         trace('computation_status', {'session': session}, value)
         return value
+    @server.tool()
+    def finish_session() -> dict:
+        """Operator-only lifecycle cleanup; this tool is filtered out of Actor capabilities."""
+        return cleanup()
     try:
+        # Normal SDK readiness and actual isolated container exist before any model call.
+        proxy = manager.get_or_create(owner)
+        sandbox_id = proxy.id
+        write(output / 'sandbox-inspection.json', inspect_sandbox(sandbox_id, network))
         server.run('stdio')
     finally:
-        write(output / 'executions.json', list(service.executions.find({'owner_user_id': owner, 'thread_id': thread}, {'_id': 0})))
-        write(output / 'cleanup.json', {'recycled': manager.recycle(owner), 'shutdown': manager.shutdown()})
-        resources.close()
+        cleanup()
+
 
 def register_profile(model):
     from deepagents import HarnessProfile, GeneralPurposeSubagentProfile, register_harness_profile
@@ -393,8 +499,10 @@ def recorder_class():
         def __init__(self, path):
             self.path = path
         def save(self, kind, value):
+            from agent.env_utils import redact, secret_values
             with self.path.open('a', encoding='utf-8') as log:
-                log.write(json.dumps({'kind': kind, 'value': value}, ensure_ascii=False, default=str) + '\n')
+                raw = json.dumps({'kind': kind, 'value': value}, ensure_ascii=False, default=str)
+                log.write(redact(raw, secret_values(os.environ)) + '\n')
         def on_chat_model_start(self, serialized, messages, **kwargs):
             self.save('model_input', [[m.model_dump(mode='json') for m in batch] for batch in messages])
         def on_llm_end(self, response, **kwargs):
@@ -402,7 +510,8 @@ def recorder_class():
         def on_llm_error(self, error, **kwargs):
             self.save('model_error', type(error).__name__)
         def on_tool_start(self, serialized, input_str, **kwargs):
-            self.save('tool_start', {'name': serialized.get('name'), 'input': input_str})
+            self.save('tool_start', {'name': serialized.get('name'), 'input': input_str,
+                                    'inputs': kwargs.get('inputs')})
         def on_tool_end(self, output, **kwargs):
             self.save('tool_end', str(output))
         def on_tool_error(self, error, **kwargs):
@@ -428,69 +537,83 @@ def actor_input(output, task_id):
     return [{'path': str(p.relative_to(folder)), 'text': p.read_text(encoding='utf-8-sig')}
             for p in sorted(folder.rglob('*')) if p.is_file()]
 
-async def actor_session(model, config_path, directory, task_input, skill, network):
+async def actor_session(model, config_path, directory, task_input, skill, network, *, kind='solve'):
     from deepagents import create_deep_agent
     from deepagents.backends import StateBackend
     from langchain_core.messages import HumanMessage
     from langchain.agents.middleware import ModelCallLimitMiddleware, ToolCallLimitMiddleware
-    from langchain_mcp_adapters.client import MultiServerMCPClient
     from api_view.web_config import MongoResources, PersistenceSettings
     from agent.persistence.scoped_store import UserScopedStore
     owner, thread = 't67-' + uuid.uuid4().hex[:20], 't67-' + uuid.uuid4().hex[:20]
     config = read(config_path)
     resources = MongoResources(PersistenceSettings(mongo_uri=config['mongo_uri'], database=config['database'])).start()
     directory.mkdir(parents=True)
+    write(directory / 'scope.json', {'owner': owner, 'thread': thread, 'network': network, 'kind': kind})
     recorder = recorder_class()(directory / 'raw-trace.jsonl')
-    client = MultiServerMCPClient({'business': {'transport': 'stdio', 'command': sys.executable,
-        'args': [str(Path(__file__)), 'mcp-worker', '--runtime-config', str(config_path), '--output', str(directory / 'mcp'),
-                 '--owner', owner, '--thread', thread, '--network', network],
-        'env': {config['business_token_env']: os.environ[config['business_token_env']], 'PYTHONUTF8': '1'}}})
+    client = mcp_client(config_path, directory / 'mcp', owner, thread, network)
     messages = []
+    result = {'owner': owner, 'thread': thread}
+    closed = False
     try:
-        async with client.session('business') as session:
+        async with client.session('business') as mcp:
             from langchain_mcp_adapters.tools import load_mcp_tools
-            tools = await load_mcp_tools(session)
-            if {t.name for t in tools} != {'sourcing_read', 'computation_execute', 'computation_status'}:
-                raise ValueError('unexpected MCP capability')
-            graph = create_deep_agent(model=model, tools=tools, backend=StateBackend(), checkpointer=resources.checkpointer,
-                store=UserScopedStore(resources.store, owner), system_prompt=SYSTEM + ('\nTrain-derived skill:\n' + skill if skill else ''),
-                middleware=[ModelCallLimitMiddleware(run_limit=30, exit_behavior='end'), ToolCallLimitMiddleware(run_limit=36, exit_behavior='end')])
-            payload = {'messages': [HumanMessage(content=json.dumps(task_input, ensure_ascii=False))]}
-            scope = {'configurable': {'thread_id': thread, 'owner_user_id': owner}, 'recursion_limit': 120, 'callbacks': [recorder]}
-            async for state in graph.astream(payload, config=scope, stream_mode='values'):
-                messages = state.get('messages', [])
-                write(directory / 'messages.json', [m.model_dump(mode='json') for m in messages])
-            if not messages:
-                raise ValueError('Actor returned no messages')
-            content = text_content(messages[-1].content)
-            (directory / 'final-content.txt').write_text(content, encoding='utf-8')
-            write(directory / 'submission.json', parse_json_answer(content))
-            return {'owner': owner, 'thread': thread, 'submission': str(directory / 'submission.json')}
+            tools = actor_tools(await load_mcp_tools(mcp))
+            system = SYSTEM + ('\nTrain-derived skill:\n' + skill if skill else '')
+            if kind == 'skill':
+                system = SKILL_SYSTEM
+            try:
+                graph = create_deep_agent(model=model, tools=tools, backend=StateBackend(),
+                    checkpointer=resources.checkpointer, store=UserScopedStore(resources.store, owner),
+                    system_prompt=system, middleware=[ModelCallLimitMiddleware(run_limit=30, exit_behavior='end'),
+                    ToolCallLimitMiddleware(run_limit=36, exit_behavior='end')])
+                payload = {'messages': [HumanMessage(content=json.dumps(task_input, ensure_ascii=False))]}
+                scope = {'configurable': {'thread_id': thread, 'owner_user_id': owner}, 'recursion_limit': 120, 'callbacks': [recorder]}
+                async for state in graph.astream(payload, config=scope, stream_mode='values'):
+                    messages = state.get('messages', [])
+                    write(directory / 'messages.json', [m.model_dump(mode='json') for m in messages])
+                if not messages:
+                    raise ValueError('Actor returned no messages')
+                content = text_content(messages[-1].content)
+                (directory / 'final-content.txt').write_text(content, encoding='utf-8')
+                if kind == 'skill':
+                    body = normalize_skill_body(content)
+                    (directory / 'SKILL.md').write_text(body + '\n', encoding='utf-8')
+                    result['skill_sha256'] = digest(directory / 'SKILL.md')
+                else:
+                    write(directory / 'submission.json', parse_json_answer(content))
+                    result['submission'] = str(directory / 'submission.json')
+            finally:
+                cleanup = mcp_json(await mcp.call_tool('finish_session', {}))
+                if cleanup.get('recycled') is not True or cleanup.get('container_absent') is not True:
+                    raise ValueError('explicit Actor MCP cleanup failed')
+        closed = True
+        return result
     finally:
+        write(directory / 'stdio-cleanup.json', {'closed': closed, 'owner': owner, 'thread': thread})
         resources.close()
 
-def generate_skill(model, directory, supervision):
-    from deepagents import create_deep_agent
-    from deepagents.backends import StateBackend
-    from langchain_core.messages import HumanMessage
-    from langchain.agents.middleware import ModelCallLimitMiddleware
-    directory.mkdir(parents=True)
-    graph = create_deep_agent(model=model, tools=[], backend=StateBackend(),
-        system_prompt='''Generate a reusable SKILL.md package from the five complete train inputs and
+SKILL_SYSTEM = '''Generate a reusable SKILL.md package from the five complete train inputs and
 correct answers. Derive transferable procurement procedures and worked fewshot examples.
-Output only SKILL.md markdown, starting with YAML front matter containing name and description.
-No test input/answer is available. Do not invent source facts.''',
-        middleware=[ModelCallLimitMiddleware(run_limit=30, exit_behavior='end')])
-    result = graph.invoke({'messages': [HumanMessage(content=json.dumps(supervision, ensure_ascii=False))]},
-        config={'callbacks': [recorder_class()(directory / 'raw-trace.jsonl')], 'recursion_limit': 120})
-    write(directory / 'messages.json', [m.model_dump(mode='json') for m in result['messages']])
-    body = text_content(result['messages'][-1].content).strip()
+Use sourcing_read to inspect at least one actual source record and computation_execute to
+check a financial relationship before generalizing it. Use only the current supplied train
+examples and allowed business tools. No test input/answer, private evaluator, host/source
+filesystem or control API is available. Return only SKILL.md markdown starting with YAML
+front matter containing name and description. Preserve fact/convention distinctions.'''
+
+def normalize_skill_body(content):
+    import yaml
+    body = text_content(content).strip()
     if body.startswith('```'):
         body = re.sub(r'^\x60{3}(?:markdown|md)?\s*|\x60{3}\s*$', '', body).strip()
-    if not body.startswith('---') or 'description:' not in body or 'name:' not in body:
-        raise ValueError('generated skill lacks required front matter')
-    (directory / 'SKILL.md').write_text(body + '\n', encoding='utf-8')
+    parts = body.split('---', 2)
+    front = yaml.safe_load(parts[1]) if len(parts) == 3 and not parts[0] else None
+    if not isinstance(front, dict) or not front.get('name') or not front.get('description') or not parts[-1].strip():
+        raise ValueError('generated SKILL content/front matter missing')
     return body
+
+def generate_skill(model, directory, supervision, *, config_path, network):
+    return asyncio.run(actor_session(model, config_path, directory, supervision, None, network, kind='skill'))
+
 
 def evaluate_submission(task, submission, group, directory=None):
     script = inside(group, task['eval']['script'])
@@ -616,21 +739,51 @@ def verify_skills(output, result):
         final = re.sub(r'^\x60{3}(?:markdown|md)?\s*|\x60{3}\s*$', '', final).strip()
         if body != final:
             raise ValueError('SKILL file differs from actual model generation')
+        scope = read(directory / 'scope.json')
+        if scope.get('kind') != 'skill' or scope.get('owner') != skill.get('owner') or scope.get('thread') != skill.get('thread'):
+            raise ValueError('fresh independent skill runtime scope absent')
+        verify_mcp_attempt(directory, skill)
         scopes.append({**skill, 'directory': str(directory)})
     return scopes
 
+def normalized_tool_request(kind, request):
+    if not isinstance(request, dict):
+        raise ValueError('MCP callback tool arguments missing')
+    if kind == 'sourcing_read':
+        path, params = validate_domain_request(request['path'], request.get('params') or {})
+        return {'path': path, 'params': params}
+    if kind == 'computation_execute':
+        return {'code': request['code'], 'read_names': request.get('read_names') or [],
+                'session': request.get('session', 'analysis'), 'timeout': request.get('timeout', 60)}
+    if kind == 'computation_status':
+        return {'session': request.get('session', 'analysis')}
+    raise ValueError('forbidden/non-MCP capability in Actor trace')
+
 def verify_mcp_attempt(directory, row):
+    from collections import Counter
+    import ast
     tools = jsonl(directory / 'mcp/tools.jsonl')
     events = jsonl(directory / 'raw-trace.jsonl')
     starts = [e['value'] for e in events if e.get('kind') == 'tool_start']
     if not starts or len(starts) != len(tools):
         raise ValueError('MCP/callback tool trace counts differ or empty')
-    for call, callback in zip(tools, starts):
+    requests, observed = [], []
+    for call in tools:
         kind = call.get('kind')
-        if kind not in {'sourcing_read', 'computation_execute', 'computation_status'} or callback.get('name') != kind:
-            raise ValueError('forbidden/non-MCP capability in Actor trace')
-        if kind == 'sourcing_read':
-            validate_domain_request(call['request']['path'], call['request']['params'])
+        requests.append((kind, json.dumps(normalized_tool_request(kind, call['request']), sort_keys=True)))
+        if call.get('owner') != row.get('owner') or call.get('thread') != row.get('thread'):
+            raise ValueError('MCP tool scope differs from independent session')
+    for callback in starts:
+        arguments = callback.get('inputs')
+        if arguments is None:
+            try:
+                arguments = json.loads(callback.get('input', ''))
+            except ValueError:
+                arguments = ast.literal_eval(callback.get('input', ''))
+        kind = callback.get('name')
+        observed.append((kind, json.dumps(normalized_tool_request(kind, arguments), sort_keys=True)))
+    if Counter(requests) != Counter(observed):
+        raise ValueError('MCP/callback tool arguments differ')
     if not any(t['kind'] == 'sourcing_read' for t in tools):
         raise ValueError('no real domain discovery')
     executions = read(directory / 'mcp/executions.json')
@@ -640,8 +793,11 @@ def verify_mcp_attempt(directory, row):
     inspection = read(directory / 'mcp/sandbox-inspection.json')
     if not inspection.get('container_id') or not inspection.get('network_id') or inspection.get('internal') is not True:
         raise ValueError('actual sandbox isolation inspection absent')
-    if read(directory / 'mcp/cleanup.json').get('recycled') is not True:
+    cleanup = read(directory / 'mcp/cleanup.json')
+    if cleanup.get('recycled') is not True or cleanup.get('container_absent') is not True:
         raise ValueError('sandbox recycle failed/unverified')
+    if read(directory / 'stdio-cleanup.json').get('closed') is not True:
+        raise ValueError('MCP stdio session exit unverified')
     return {'completed_executions': len(completed), 'computation_contribution': 'unassessed'}
 
 def policy(identity):
@@ -678,17 +834,31 @@ def run(output, config_path):
                 model = dataclasses.replace(original, base_url=url, api_key='evaluation-proxy', max_tokens=8192).create_chat_model()
                 model.max_retries = 0
                 register_profile(model)
-                for repeat in range(1, 4):
-                    skill_dir = run_dir / 'skills' / f'session-{repeat}'
-                    before = budget.calls
-                    generate_skill(model, skill_dir, read(output / 'fewshot-input.json'))
-                    write(skill_dir / 'provenance.json', {'train_only': True,
-                          'supervision_sha256': digest(output / 'fewshot-input.json')})
-                    result['skills'].append({'session': repeat, 'path': str(skill_dir / 'SKILL.md'),
-                        'sha256': digest(skill_dir / 'SKILL.md'), 'model_calls_before': before, 'model_calls_after': budget.calls})
-                    write(run_dir / 'result.json', result)
                 with isolated_control(config, run_dir / 'sandbox-control') as network:
-                    probe_isolation(config, run_dir / 'sandbox-control', network)
+                    control = read(run_dir / 'sandbox-control/control-runtime.json')
+                    active = {**config, 'active_control_container': control['container_name']}
+                    write(run_config, active)
+                    result['served_business'] = business_identity(config)
+                    result['control_identity'] = control
+                    probe_isolation(active, run_dir / 'sandbox-control', network)
+                    for repeat in range(1, 4):
+                        skill_dir = run_dir / 'skills' / f'session-{repeat}'
+                        skill_row = {'session': repeat, 'status': 'started', 'model_calls_before': budget.calls}
+                        result['skills'].append(skill_row)
+                        write(run_dir / 'result.json', result)
+                        try:
+                            skill_row.update(generate_skill(model, skill_dir, read(output / 'fewshot-input.json'),
+                                                            config_path=run_config, network=network))
+                            verify_mcp_attempt(skill_dir, skill_row)
+                            write(skill_dir / 'provenance.json', {'train_only': True,
+                                  'supervision_sha256': digest(output / 'fewshot-input.json')})
+                            skill_row.update(status='generated', path=str(skill_dir / 'SKILL.md'),
+                                             sha256=digest(skill_dir / 'SKILL.md'), model_calls_after=budget.calls)
+                        except Exception as error:
+                            skill_row.update(status='failed', error={'type': type(error).__name__}, model_calls_after=budget.calls)
+                            raise
+                        finally:
+                            write(run_dir / 'result.json', result)
                     failures = 0
                     for entry in protocol['schedule']:
                         task = next(t for t in protocol['tasks'] if t['task_id'] == entry['task_id'])
@@ -698,6 +868,11 @@ def run(output, config_path):
                         try:
                             skill = None if entry['arm'] == 'base' else (run_dir / 'skills' / f"session-{entry['repeat']}" / 'SKILL.md').read_text(encoding='utf-8')
                             row.update(asyncio.run(actor_session(model, run_config, directory, actor_input(output, entry['task_id']), skill, network)))
+                            try:
+                                verify_mcp_attempt(directory, row)
+                            except Exception:
+                                row['mandatory_evidence_failed'] = True
+                                raise
                             row['grade'] = score(task, directory / 'submission.json', Path(protocol['task_group']), directory)
                             row['status'] = 'scored'
                             failures = 0
@@ -708,16 +883,26 @@ def run(output, config_path):
                         result['rows'].append(row)
                         write(directory / 'result.json', row)
                         write(run_dir / 'result.json', result)
+                        if row.get('mandatory_evidence_failed'):
+                            raise RuntimeError('mandatory session mechanism/cleanup evidence failed; stop before more paid calls')
                         if failures >= 2:
                             raise RuntimeError('two consecutive infrastructure/format failures; stop for discussion')
+                    if business_identity(config) != result['served_business']:
+                        raise ValueError('served Java seed/image changed during matched sessions')
                     result['status'] = 'completed'
+                result['control_cleanup'] = read(run_dir / 'sandbox-control/control-cleanup.json')
+                if result['control_cleanup']['status'] != 'passed':
+                    raise ValueError('trusted control cleanup failed')
     except Exception as error:
-        result.update(status='failed', error={'type': type(error).__name__, 'message': str(error)[:300]})
+        from agent.env_utils import redact, secret_values
+        result.update(status='failed', error={'type': type(error).__name__,
+                      'message': redact(str(error), secret_values(os.environ))[:300]})
     finally:
         result['usage'] = budget.summary() if budget else {'model_calls': 0, 'actual_cost_cny': None}
         write(run_dir / 'result.json', result)
         freeze_manifest(run_dir)
     return result
+
 
 def verify(output=DEFAULT_OUTPUT):
     value = {'status': 'blocked', 'calibration_complete': False, 'learning_gain_proven': False,
@@ -757,6 +942,19 @@ def verify(output=DEFAULT_OUTPUT):
         checks = ready.get('checks', {})
         if not checks.get('sandbox_isolation') or not checks.get('mcp_protocol', {}).get('passed'):
             raise ValueError('actual isolation and real MCP doctor evidence missing')
+        runtime_identity = protocol.get('runtime_identity', {})
+        if runtime_identity != {key: config[key] for key in ('sandbox_control_image', 'business_image', 'business_seed_sha256')}:
+            raise ValueError('run immutable runtime identity differs from frozen prepare')
+        control = result.get('control_identity', {})
+        if control.get('image_id') != config['sandbox_control_image'] or not re.fullmatch('[a-f0-9]{64}', control.get('source_snapshot_sha256', '')):
+            raise ValueError('actual locked official control image/source evidence absent')
+        if control.get('server_version') != '0.2.3' or result.get('control_cleanup', {}).get('status') != 'passed':
+            raise ValueError('official control version/cleanup not verified')
+        served = result.get('served_business', {})
+        if served.get('image_id') != config['business_image'] or served.get('seed_sha256') != config['business_seed_sha256']:
+            raise ValueError('actual served Java image/seed differs from frozen source')
+        if served != checks.get('business_identity'):
+            raise ValueError('served Java boundary differs from ready doctor')
         identity = read(Path(config['model_config']))
         if result.get('model_identity', {}).get('model_id') != identity['model_id']:
             raise ValueError('configured DS identity differs from run model')
@@ -772,11 +970,16 @@ def verify(output=DEFAULT_OUTPUT):
         scopes.extend(verify_skills(output, result))
     except (OSError, ValueError, KeyError, TypeError, StopIteration) as error:
         value['reasons'].append('real skill generation evidence blocked: ' + str(error))
+    session_identities = []
+    for skill in result.get('skills', []):
+        if skill.get('session') in {1, 2, 3}:
+            session_identities.append((skill, run_dir / 'skills' / f"session-{skill['session']}"))
     rescored = {'base': [], 'fewshot': []}
     mechanisms = []
     for row in rows:
         label = f"r{row.get('repeat')}-{row.get('task_id')}-{row.get('arm')}"
         directory = run_dir / 'attempts' / label
+        session_identities.append((row, directory))
         scopes.append({**row, 'directory': str(directory)})
         if row.get('status') != 'scored':
             value['reasons'].append('failed attempt retained in denominator: ' + label)
@@ -799,7 +1002,23 @@ def verify(output=DEFAULT_OUTPUT):
         value['reconciled_usage'] = verify_model_ledger(run_dir, result, scopes)
     except (OSError, ValueError, KeyError, TypeError, IndexError) as error:
         value['reasons'].append('real model call evidence blocked: ' + str(error))
-    value['denominator'] = {'base': 15, 'fewshot': 15, 'failed_or_unverified': 30 - sum(map(len, rescored.values()))}
+    try:
+        owners, threads, containers = set(), set(), set()
+        expected_image = ready['checks']['sandbox_isolation']['image_id']
+        for session, folder in session_identities:
+            inspector = read(folder / 'mcp/sandbox-inspection.json')
+            owner, thread, container = session.get('owner'), session.get('thread'), inspector.get('container_id')
+            if not owner or not thread or not container or owner in owners or thread in threads or container in containers:
+                raise ValueError('generation/Actor sessions reused owner/thread/sandbox identity')
+            if inspector.get('image_id') != expected_image:
+                raise ValueError('execution image changed between ready doctor and matched sessions')
+            owners.add(owner); threads.add(thread); containers.add(container)
+        if len(owners) != 33:
+            raise ValueError('all 33 independent runtime session identities missing')
+    except (OSError, ValueError, KeyError, TypeError, UnboundLocalError) as error:
+        value['reasons'].append('independent runtime identity blocked: ' + str(error))
+    value['denominator'] = {'base': 15, 'fewshot': 15, 'rescored': sum(map(len, rescored.values())),
+                            'failed_or_unverified_runtime': 30 - len(mechanisms)}
     value['means'] = {arm: sum(scores) / 15 for arm, scores in rescored.items()}
     value['mechanism_evidence'] = mechanisms
     base, fewshot = value['means']['base'], value['means']['fewshot']
@@ -825,7 +1044,7 @@ def main():
         return
     try:
         if args.command == 'prepare':
-            value = prepare(args.group, args.output)
+            value = prepare(args.group, args.output, args.runtime_config)
         elif args.command == 'verify':
             value = verify(args.output)
         elif args.command == 'doctor':

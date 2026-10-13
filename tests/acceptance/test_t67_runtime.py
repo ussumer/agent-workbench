@@ -230,3 +230,132 @@ def test_completed_arithmetic_source_does_not_claim_semantic_contribution(tmp_pa
     assert result["computation_contribution"] == "unassessed"
     assert result["learning_gain_proven"] is False
 
+
+
+def test_actor_tool_surface_excludes_operator_shutdown():
+    from types import SimpleNamespace
+    tools = [SimpleNamespace(name=name) for name in ("sourcing_read", "computation_execute", "computation_status", "finish_session")]
+    visible = runtime.actor_tools(tools)
+    assert {t.name for t in visible} == {"sourcing_read", "computation_execute", "computation_status"}
+    with pytest.raises(ValueError, match="capability"):
+        runtime.actor_tools(tools + [SimpleNamespace(name="read_host_file")])
+
+def test_doctor_validates_actual_committed_mongo_probe():
+    domain = {"data": {"items": [{"program_id": "PRG-021"}], "total": 150}}
+    execution = {"status": "completed", "version": 1, "saved_names": ["doctor_probe"], "stdout": "42\n"}
+    status = {"version": 1, "data": {"doctor_probe": {"sha256": "a" * 64}}, "last_commit": "operation"}
+    restored = {"status": "completed", "stdout": "42\n"}
+    assert runtime.validate_mcp_doctor(domain, execution, status, restored)["passed"] is True
+    with pytest.raises(ValueError, match="Mongo"):
+        runtime.validate_mcp_doctor(domain, execution, {**status, "data": {}}, restored)
+    with pytest.raises(ValueError, match="42"):
+        runtime.validate_mcp_doctor(domain, execution, status, {**restored, "stdout": "41\n"})
+
+def test_trusted_business_freeze_rejects_wrong_served_seed():
+    inspected = {"Id": "container", "Image": "sha256:" + "a" * 64}
+    expected = {"business_image": inspected["Image"], "business_seed_sha256": "b" * 64}
+    assert runtime.validate_business_identity(inspected, "b" * 64, expected)["image_id"] == inspected["Image"]
+    with pytest.raises(ValueError, match="seed"):
+        runtime.validate_business_identity(inspected, "c" * 64, expected)
+    with pytest.raises(ValueError, match="image"):
+        runtime.validate_business_identity({**inspected, "Image": "sha256:" + "c" * 64}, "b" * 64, expected)
+
+def test_mcp_json_result_rejects_server_error():
+    from types import SimpleNamespace
+    result = SimpleNamespace(isError=False, structuredContent=None, content=[SimpleNamespace(type="text", text='{"value":42}')])
+    assert runtime.mcp_json(result) == {"value": 42}
+    with pytest.raises(ValueError, match="MCP"):
+        runtime.mcp_json(SimpleNamespace(isError=True, content=[], structuredContent=None))
+
+
+def test_normalized_skill_requires_actual_body():
+    assert runtime.normalize_skill_body('---\nname: sourcing\ndescription: finance\n---\nWorked procurement method') == '---\nname: sourcing\ndescription: finance\n---\nWorked procurement method'
+    with pytest.raises(ValueError, match='content'):
+        runtime.normalize_skill_body('---\nname: sourcing\ndescription: finance\n---')
+
+
+def mcp_mechanism_fixture(tmp_path):
+    folder = tmp_path / "mechanism"
+    scope = {"owner": "owned", "thread": "thread"}
+    records = [
+        {"kind": "sourcing_read", "request": {"path": "/api/sourcing/programs/PRG-021", "params": {}}, "response": {}, **scope},
+        {"kind": "computation_execute", "request": {"code": "print(42)", "read_names": [], "session": "analysis", "timeout": 60}, "response": {}, **scope},
+    ]
+    (folder / "mcp").mkdir(parents=True)
+    (folder / "mcp/tools.jsonl").write_text("\n".join(json.dumps(x) for x in reversed(records)) + "\n")
+    events = [{"kind": "tool_start", "value": {"name": x["kind"], "inputs": x["request"],
+               "input": json.dumps(x["request"])}} for x in records]
+    (folder / "raw-trace.jsonl").write_text("\n".join(json.dumps(x) for x in events) + "\n")
+    runtime.write(folder / "mcp/executions.json", [{"status": "completed", "owner_user_id": scope["owner"], "thread_id": scope["thread"]}])
+    runtime.write(folder / "mcp/sandbox-inspection.json", {"container_id": "sandbox", "network_id": "private", "internal": True})
+    runtime.write(folder / "mcp/cleanup.json", {"recycled": True, "container_absent": True})
+    runtime.write(folder / "stdio-cleanup.json", {"closed": True})
+    return folder, scope, records
+
+def test_mcp_verifier_matches_parallel_completions_by_arguments(tmp_path):
+    folder, scope, records = mcp_mechanism_fixture(tmp_path)
+    assert runtime.verify_mcp_attempt(folder, scope)["completed_executions"] == 1
+
+def test_mcp_verifier_rejects_different_request_despite_same_tool_name(tmp_path):
+    folder, scope, records = mcp_mechanism_fixture(tmp_path)
+    records[0]["request"]["path"] = "/api/sourcing/programs/PRG-034"
+    (folder / "mcp/tools.jsonl").write_text("\n".join(json.dumps(x) for x in records) + "\n")
+    with pytest.raises(ValueError, match="arguments"):
+        runtime.verify_mcp_attempt(folder, scope)
+
+def test_run_stops_after_first_skill_missing_mandated_mechanism(tmp_path, monkeypatch):
+    from dataclasses import dataclass
+    from contextlib import contextmanager
+    from types import SimpleNamespace, ModuleType
+    import sys
+    group = formal(tmp_path)
+    output = tmp_path / "stage"
+    runtime.prepare(group, output)
+    config_path = tmp_path / "runtime.json"
+    runtime.write(config_path, {})
+    monkeypatch.setattr(runtime, "doctor", lambda *a: {"status": "ready", "reasons": []})
+    @dataclass
+    class FakeConfig:
+        base_url: str = "test"
+        api_key: str = "synthetic-test-key"
+        max_tokens: int = 1
+        def create_chat_model(self):
+            return SimpleNamespace()
+        def redacted(self):
+            return {"model_id": "synthetic-unit-model"}
+    budget = SimpleNamespace(calls=0, summary=lambda: {"model_calls": budget.calls})
+    @contextmanager
+    def fake_gateway(*a):
+        yield "unit", budget
+    fake_module = ModuleType("procurement_eval.budget_proxy")
+    fake_module.gateway = fake_gateway
+    monkeypatch.setitem(sys.modules, "procurement_eval", ModuleType("procurement_eval"))
+    monkeypatch.setitem(sys.modules, "procurement_eval.budget_proxy", fake_module)
+    monkeypatch.setattr(runtime, "model_config", lambda c: (FakeConfig(), {}))
+    monkeypatch.setattr(runtime, "policy", lambda c: {})
+    monkeypatch.setattr(runtime, "register_profile", lambda m: None)
+    @contextmanager
+    def fake_control(c, directory):
+        runtime.write(directory / "control-runtime.json", {"container_name": "unit-control"})
+        yield "unit-private"
+        runtime.write(directory / "control-cleanup.json", {"status": "passed"})
+    monkeypatch.setattr(runtime, "isolated_control", fake_control)
+    monkeypatch.setattr(runtime, "business_identity", lambda c: {})
+    monkeypatch.setattr(runtime, "probe_isolation", lambda *a: {})
+    def fake_generation(model, directory, supervision, **kwargs):
+        budget.calls += 1
+        directory.mkdir(parents=True)
+        (directory / "SKILL.md").write_text("---\nname: fixture\ndescription: fixture\n---\nsynthetic unit body")
+        return {"owner": "owner", "thread": "thread"}
+    monkeypatch.setattr(runtime, "generate_skill", fake_generation)
+    result = runtime.run(output, config_path)
+    assert len(result["skills"]) == 1
+    assert result["skills"][0]["status"] == "failed"
+    assert result["usage"]["model_calls"] == 1
+    assert result["rows"] == []
+
+
+def test_isolation_probe_uses_actual_configured_mongo_and_business_ports():
+    config = {'sandbox_port': 18125, 'mongo_uri': 'mongodb://127.0.0.1:27017', 'business_url': 'http://task-env:9025'}
+    assert runtime.isolation_ports(config) == [18125, 27017, 9025, 443]
+    assert runtime.isolation_ports({**config, 'mongo_uri': 'mongodb://127.0.0.1:27500', 'business_url': 'http://task-env:9033'}) == [18125, 27500, 9033, 443]

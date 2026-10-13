@@ -1,0 +1,282 @@
+{
+  "server_version": "0.2.3",
+  "base_image": "python@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea",
+  "source_snapshot_sha256": "5b561c21ce2e430cb75c25f6fd7c63c519c7de12530ae7ff1732b01a680d46bc",
+  "packages": [
+    {
+      "name": "aiohappyeyeballs",
+      "version": "2.7.1",
+      "files_sha256": "f153f5a8f7751a46f780f918538ae611296948c6253c2adeaa5b73ca739d4577"
+    },
+    {
+      "name": "aiohttp",
+      "version": "3.14.3",
+      "files_sha256": "ec6bc06ee5359ad576027bdebaaf6142368e8860270c8f2740b8f28a6ad3d2e4"
+    },
+    {
+      "name": "aiosignal",
+      "version": "1.4.0",
+      "files_sha256": "69d3f655b155212a81650dc6cb822a8e32259b7c3dc15b63e6b3e98d73fee9f7"
+    },
+    {
+      "name": "annotated-doc",
+      "version": "0.0.5",
+      "files_sha256": "43570b37428a0fb06574e92d12fa9b960c8a5ef620cb84dfe51c47f186319756"
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.8.0",
+      "files_sha256": "217ade4a2d3e4edfd0f9aaa5f58f5da210b7f07cfc9e898f8c71d1d27935f3ca"
+    },
+    {
+      "name": "anyio",
+      "version": "4.15.1",
+      "files_sha256": "72fc32ba26c036857ee6f0af1d7eb9fd4450bc198433a248680842f1812e92fd"
+    },
+    {
+      "name": "attrs",
+      "version": "26.1.0",
+      "files_sha256": "2764aca4350671332986c9504407df3f77dc6cc76f9919f595d956f6fa210590"
+    },
+    {
+      "name": "certifi",
+      "version": "2026.7.22",
+      "files_sha256": "7f45402d27f1da995db2f5e385dc595693a8067df846af8935ea578d939a235c"
+    },
+    {
+      "name": "charset-normalizer",
+      "version": "3.5.1",
+      "files_sha256": "55f3e6409f9aebb5fa772991f9b20c07bc7caad5b947b9cebd2ec63f3809a0b6"
+    },
+    {
+      "name": "click",
+      "version": "8.5.0",
+      "files_sha256": "6b5aea492a3d02d456289ff614868ea80cf013c3a2b5907dd18f32937704f91b"
+    },
+    {
+      "name": "docker",
+      "version": "7.2.0",
+      "files_sha256": "6c191b6bdb1a46609e97ab9245eb73630c6ddb3e6476796236f09ccc80f09b54"
+    },
+    {
+      "name": "durationpy",
+      "version": "0.11",
+      "files_sha256": "c9fbab81bb10ff120b668c187cd6def36a17ccd56da225cd701e7d8561f20806"
+    },
+    {
+      "name": "fastapi",
+      "version": "0.141.1",
+      "files_sha256": "d6a0f977937b9465b801cb02439a3bf886b783fd2607b9e717eb1b3a06b62535"
+    },
+    {
+      "name": "frozenlist",
+      "version": "1.8.0",
+      "files_sha256": "102cb1f4117b4f23c432495f3b99061de36f76518adc2791f93184ac34c9415c"
+    },
+    {
+      "name": "googleapis-common-protos",
+      "version": "1.75.3",
+      "files_sha256": "edc3169d03414a8a691b6e05a58b30bb1d705ab27775594eedd2897155a0ea47"
+    },
+    {
+      "name": "grpcio",
+      "version": "1.84.0",
+      "files_sha256": "dd3d911f98630f680e38c18a450ec0c8df248374984419a99aa1b3b9804f1ad7"
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0",
+      "files_sha256": "61bc36bdf2d3eb06c27642f650d067384589d9bccbc271b630c10c1926c4858b"
+    },
+    {
+      "name": "httpcore",
+      "version": "1.0.9",
+      "files_sha256": "97dceaf440bf7b688ae102ff061756e0a50370c36d6ec269bc4571c3f27181f2"
+    },
+    {
+      "name": "httptools",
+      "version": "0.8.0",
+      "files_sha256": "00be7c75d28a07369fe3ed5d5200267c5887463330527712a9998655b02d8044"
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1",
+      "files_sha256": "8b11bc8ef03b60b2542e94b732e6175ea922c5a35ab6cd603817488af8365f33"
+    },
+    {
+      "name": "idna",
+      "version": "3.19",
+      "files_sha256": "03a7a16a5a03f3ffbafebbff08fa60a793785d3eed21863865d09d2b4d772abc"
+    },
+    {
+      "name": "kubernetes",
+      "version": "36.0.3",
+      "files_sha256": "1181c5e943f570942d1bd7e1be9ac19c65ca3b7a14baf43b8fab7c9392aa21c3"
+    },
+    {
+      "name": "multidict",
+      "version": "6.8.0",
+      "files_sha256": "46102f18c18656c3c0ce640c75ba84f39079f1329c88001be5d4762b59be6a60"
+    },
+    {
+      "name": "oauthlib",
+      "version": "3.3.1",
+      "files_sha256": "3c975561f7e17738f92b6af09a5e6c3c85fc6ee0904504887bfbd1e34e6bb711"
+    },
+    {
+      "name": "opensandbox-server",
+      "version": "0.2.3",
+      "files_sha256": "1afdd485efd4bfd6a4f76e885d4b8d1ee05f83eb5c9a3326d2acf019d3f1dbc9"
+    },
+    {
+      "name": "opentelemetry-api",
+      "version": "1.44.0",
+      "files_sha256": "5e6f10a1f192bbcaf96a1e714c6353b719d260e0126b204ff0a480dd3ddc4c2a"
+    },
+    {
+      "name": "opentelemetry-exporter-otlp-proto-common",
+      "version": "1.44.0",
+      "files_sha256": "bb46b4644943e6465cfad687010065a664f4f3fa92f190600a431a29d3a80f72"
+    },
+    {
+      "name": "opentelemetry-exporter-otlp-proto-http",
+      "version": "1.44.0",
+      "files_sha256": "c773f7950facc74dc2db8f79955fa177e67a94732d694c0cf9bac5e85b95d582"
+    },
+    {
+      "name": "opentelemetry-proto",
+      "version": "1.44.0",
+      "files_sha256": "978c75d03a1934857a0f74ede5eb72061ca4fbdecaa77081d7e8dac43961ddbe"
+    },
+    {
+      "name": "opentelemetry-sdk",
+      "version": "1.44.0",
+      "files_sha256": "8b53bc52f92bfc26a3f20f1a0981d3ab45a71fa9d61cb685addf4c8ca88f1d6a"
+    },
+    {
+      "name": "opentelemetry-semantic-conventions",
+      "version": "0.65b0",
+      "files_sha256": "d6f4bb8658dae5fb454d61f8048e70cab0e8bffa79b2e65a715e4d015e6c2141"
+    },
+    {
+      "name": "propcache",
+      "version": "0.5.4",
+      "files_sha256": "b424327e07e4b046548b542de7ea90d437092a33b95d4175673854f7104a8614"
+    },
+    {
+      "name": "protobuf",
+      "version": "7.36.1",
+      "files_sha256": "16494eeed2e58ab3b1caf5de657f227f7cd63e9b1cf4180eb5e982633ce4223c"
+    },
+    {
+      "name": "pydantic",
+      "version": "2.13.5",
+      "files_sha256": "b09e79a5df748777ab2836137752d95f13677691235c032967f25711c2af9a27"
+    },
+    {
+      "name": "pydantic-core",
+      "version": "2.46.5",
+      "files_sha256": "1f1d6bc1f34a4897cdcaed3ad9abc0050d451051d2bef20b82a32b8f5c4d1640"
+    },
+    {
+      "name": "pydantic-settings",
+      "version": "2.15.0",
+      "files_sha256": "811520573be222b222552d9e1d6101551e9db82fc9bfd57ed8adf1352ea78c7a"
+    },
+    {
+      "name": "python-dateutil",
+      "version": "2.9.0.post0",
+      "files_sha256": "12aca829e894ad44b5d8f841cc4abf4836b93b32734b04f679df1f0c0cfbaa1b"
+    },
+    {
+      "name": "python-dotenv",
+      "version": "1.2.3",
+      "files_sha256": "aca1a8a09c73abf8f5ff26712d873a3e6765242108494a26267b7b17e883e8b3"
+    },
+    {
+      "name": "python-multipart",
+      "version": "0.0.32",
+      "files_sha256": "cca72a6374559d114c3d861ffb5f34e20586f0801a0ca70895571e74f62ced2c"
+    },
+    {
+      "name": "pyyaml",
+      "version": "6.0.3",
+      "files_sha256": "5f5c0b9bd044c56676ac2a86df25fe5a000c7c3c1deb17445daa3c5c4f2e6bce"
+    },
+    {
+      "name": "redis",
+      "version": "8.1.0",
+      "files_sha256": "ea2dccc6fe8eaf57b9dccd70013ec6ce28e9288f980a986823698bdff44df998"
+    },
+    {
+      "name": "requests",
+      "version": "2.34.2",
+      "files_sha256": "8a5567a645e909091c724f241e56dd61160a00eace8ce780320bc42f56d8bcb8"
+    },
+    {
+      "name": "requests-oauthlib",
+      "version": "2.0.0",
+      "files_sha256": "c6d3429ba6ff7ef2aaf525b9a443b2dac611e8653e7f882c70ac6031c32e4585"
+    },
+    {
+      "name": "six",
+      "version": "1.17.0",
+      "files_sha256": "6a9c121d1f10827ff17d597c2c8d64ddff2d144ead4388c93b39cfec5d95e0cc"
+    },
+    {
+      "name": "socksio",
+      "version": "1.0.0",
+      "files_sha256": "c5317a7e4a1ed18149aeb84e47cb67a7ea9f63888753d0155a28cec068977bf3"
+    },
+    {
+      "name": "starlette",
+      "version": "1.6.0",
+      "files_sha256": "78cfe65fc0eb4085bb4519e5a9c7d99dc171f2a135fff38d07ceaff68bfd6f73"
+    },
+    {
+      "name": "typing-extensions",
+      "version": "4.16.0",
+      "files_sha256": "84b704a425811e2e25ca6a56d00b09ecc74dc8600ae5f0e022f736f5be84818a"
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.4",
+      "files_sha256": "1c1f00f14eb458f2ee64d20ed29f8a7863422089bf1275e4b6771d9732ac41a5"
+    },
+    {
+      "name": "urllib3",
+      "version": "2.7.0",
+      "files_sha256": "1573048263bf72cf679bed6e4410df81c683e1b8e122c870a82f507f7854f174"
+    },
+    {
+      "name": "uvicorn",
+      "version": "0.53.0",
+      "files_sha256": "2e932c14440e7ca3665fd8f06eb6f9bb1f227792a4eac1fc1689f4fc76068b4d"
+    },
+    {
+      "name": "uvloop",
+      "version": "0.22.1",
+      "files_sha256": "83c899cc4c86c31980ee2cfa1fe808f9ae51fe2aa97048c98767bfe8c64e0ae3"
+    },
+    {
+      "name": "watchfiles",
+      "version": "1.2.0",
+      "files_sha256": "e184b5c28d3464a240ae81588f656041c4ce2a822f0e51a8928ccd62728a10b6"
+    },
+    {
+      "name": "websocket-client",
+      "version": "1.9.2",
+      "files_sha256": "c264a22f44f172b7e108c4aeec5ad74d7306e24ca848e39434b07ed0fbf7ccef"
+    },
+    {
+      "name": "websockets",
+      "version": "16.1.1",
+      "files_sha256": "3a49b49c40797433879ae53f113f89cc4f588ccebc3223e1511441170c0565db"
+    },
+    {
+      "name": "yarl",
+      "version": "1.25.1",
+      "files_sha256": "71003c202b39723326e4789a4376292904cd0d2f4a7a1d7e90e79970adece790"
+    }
+  ]
+}

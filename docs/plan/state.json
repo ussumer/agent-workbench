@@ -408,7 +408,7 @@
       "status": "in_progress",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T67/20261012T154907Z/receipt.json",
-      "notes": "2026-10-13 网络定位完成：内部/同网段ping200，WSL直连和原官方proxy均ReadTimeout；同版本官方控制服务改为临时双NIC容器后，正常SDK ready及真实代码42/exit0通过，反向16连接均拒绝，零模型，已清理。报告docs/runtime/t67-sandbox-network-diagnosis-2026-10-13.md。正式adapter仍待接入/锁版本，MCP doctor、3skills+30配对、Stage3六review未完成；T68不恢复。"
+      "notes": "控制服务正式接入：锁定官方server0.2.3+55依赖镜像，管理接口先ready再接业务网卡，actualdoctor13 READY/零模型，Java/Mongo/MCP真实计算42+存储重载及隔离清理通过；相关50测试通过、独立代码复查无重要剩余项。8-12失败和补丁应用失误保留。待原授权3skills+15base15fewshot/6Stage3review/完整gate，仍in_progress；T68不恢复。"
     },
     "T68": {
       "status": "blocked",
