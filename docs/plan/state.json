@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "blocked",
+      "status": "in_progress",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T67/20261012T154907Z/receipt.json",
-      "notes": "5train+5heldout候选已构造，未修改官方结构检查attempt2通过，真实train-only反馈9案例通过。Runtime verifier边界30项既有通过；SDK typed proxy attempt4真实创建后30秒/6次健康检查超时并清理，零付费调用，按止损暂停，不自动attempt5。MCP doctor/fewshot真实沙盒会话/3skills+15base15fewshot/6独立Stage3评审未完成，非正式校准或学习收益。Gate被MODEL配置预检阻塞，真实SDK入口阻塞另有证据。T68保持失败不恢复。"
+      "notes": "2026-10-13 网络定位完成：内部/同网段ping200，WSL直连和原官方proxy均ReadTimeout；同版本官方控制服务改为临时双NIC容器后，正常SDK ready及真实代码42/exit0通过，反向16连接均拒绝，零模型，已清理。报告docs/runtime/t67-sandbox-network-diagnosis-2026-10-13.md。正式adapter仍待接入/锁版本，MCP doctor、3skills+30配对、Stage3六review未完成；T68不恢复。"
     },
     "T68": {
       "status": "blocked",

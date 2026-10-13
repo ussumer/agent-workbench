@@ -1,3 +1,9 @@
+## T67 network boundary identified and candidate topology verified (2026-10-13)
+See docs/runtime/t67-sandbox-network-diagnosis-2026-10-13.md. Attempt6 isolated execd andsame-networkpeer /ping200;WSLdirect andSDKproxy ReadTimeout. Attempt7 SAMEofficialserver inmanagement+isolatedNICcontainer,management-onlyAPIbind/loopbackpublishedport,normalSDKready true,realcommand42exit0;Actor reverse16connections none,noActormounts;alltemporaryresourcescleaned. Zero modelcalls. Originaladapterunchanged: next integrate scopedcontainer-control deployment andlock trustedimage,then realMCPdoctor/fewshot tools. T67 in_progress,not done,nocalibration/Stage3result. Attempt5 diagnostic3sPOSTtimeout/python-path/TTL mistakes retained andcleaned; donot reuse asmodel failure. T68 remainsblocked. Userpckl untouched.
+
+## T67 network diagnosis resumed (2026-10-13)
+Human explicitly directed further network investigation. Reopen T67 only for zero-model boundary diagnosis and evidence-based routing repair; no paid calibration in this turn. Preserve attempts1-4 and prior blocked receipt, T68 stays blocked. Capture actual SDK request URL and underlying exception before any fix.
+
 ## T67 paused after actual isolation attempt4 (2026-10-12)
 T67 is blocked, not done. Five train and five held-out development task candidates are present. The unchanged upstream checker passed in scratch/official-structure-attempt2.yaml, including all ten gold evaluations. Actual trusted feedback HTTP integration passed nine cases in scratch/judge-actual-integration.json: five train golds, a one-point-volume error scored 11/13, test/traversal rejected, and disabled route absent. This is component evidence, not model calibration or learning benefit.
 
