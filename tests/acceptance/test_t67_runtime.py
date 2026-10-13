@@ -426,3 +426,32 @@ def test_callback_token_usage_still_rejects_invalid_tokens(bad):
              'generations': [[{'message': {'content': '', 'type': 'ai'}}]]}
     with pytest.raises(ValueError, match='usage'):
         runtime.callback_usage(value)
+
+
+def test_skill_normalizer_accepts_intro_with_nested_bare_code_pairs():
+    body = '---\nname: headlamp-sourcing-decision\ndescription: >\n  Compare sourcing evidence.\n---\n# Method\n\n```\nvalue = 6 * 7\n```\n\nPreserve the complete method.\n\n```\nprint(value)\n```\n\nFinal conclusion.'
+    raw = "Verified. Now I'll produce the SKILL.md.\n\n```markdown\n" + body + "\n```"
+    assert runtime.normalize_skill_body(raw).encode('utf-8') == body.encode('utf-8')
+def test_skill_normalizer_preserves_nested_python_fences_with_intro():
+    body = '---\nname: sourcing\ndescription: finance\n---\n# Method\n\n```python\nprint(42)\n```\n\nComplete conclusion.'
+    raw = "Verified output follows.\n\n```markdown\n" + body + "\n```\n"
+    assert runtime.normalize_skill_body(raw) == body
+
+def test_skill_normalizer_rejects_two_complete_valid_candidates():
+    body = "---\nname: sourcing\ndescription: finance\n---\nActual method."
+    raw = "Choose one:\n```markdown\n" + body + "\n```\nOr:\n```md\n" + body + "\n```"
+    with pytest.raises(ValueError, match="multiple"):
+        runtime.normalize_skill_body(raw)
+
+@pytest.mark.parametrize("raw", [
+    "Intro\n```markdown\n---\nname: sourcing\ndescription: finance\n---\n```",
+    "Intro\n```markdown\n---\nname: sourcing\ndescription: finance\n---\nUnterminated body.",
+    "Intro\n```markdown\nNo valid front matter.\n```",
+])
+def test_skill_normalizer_rejects_missing_body_or_incomplete_candidate(raw):
+    with pytest.raises(ValueError):
+        runtime.normalize_skill_body(raw)
+
+
+
+

@@ -407,8 +407,8 @@
     "T67": {
       "status": "blocked",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T67/20261013T055715Z/receipt.json",
-      "notes": "网络/MCP正式接入通过，bc880e4；run1首DS技能因公开接口说明缺失失败：34实际source调用全domainpathdenied，11HTTP200模型调用/442873in/1702out，估算4.031811CNY，实际账单未知，0技能成功/0heldout评分。失败/17证据hash/原源码CRLF/费用/清理已核对，非题目难度或学习结论。公开MCP路径说明及真实token_usage解析已修复；zero-modeldoctor14发布schema和实际协议通过，针对性回归通过。付费方向暂停不自动run2，需新freeze/明确resume；完整3skills+15base15fewshot/6Stage3/gate未完成。T68不恢复。 Gate20261013T055715Z failed因PATH缺python，修正启动环境后两次工具审批超时均未创建进程，未重复gate执行；不计通过。原run1verify源指纹变更blocked，独立forensics以Git原版本CRLF和17证据hash核验失败账本。"
+      "receipt": "artifacts/tasks/T67/20261013T093037Z/receipt.json",
+      "notes": "run2明确授权后已实际执行，firstskillgenerated/7calls，secondskill完整输出因前置说明+围栏解析失败；13HTTP200/763671in/11217out/7.175898CNY估算，0heldout评分。29manifesthash与13callback/ledger核对，所有沙盒/控制/网络已清理；历史stdiofalse不改。解析器两次有依据修复，第一次截断失败保留，第二次完整15995正文无改写提取成功，7针对性回归+便携case通过，独立复查无重要剩余。恢复文件scratch/runtime/run2-skill-recovery，仅审查非改写旧结果。付费续跑暂停，待讨论复用2skills只补第3+30配对的新协议；不自动run3。run1/run2总保守估11.207709CNY实际未知，T68不恢复。"
     },
     "T68": {
       "status": "blocked",

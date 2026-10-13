@@ -1,3 +1,15 @@
+## T67 run2 final blocked gate
+Receipt artifacts/tasks/T67/20261013T093037Z/receipt.json BLOCKED exit2,gateargvactualrun2. No modelcalls duringgate. Currentnormalizerfixchangesfrozenruntime;failedrun2isnotconvertedtoasuccess. Independentimmutable29file/hash/13call/token/cleanupreconciliationpreserved. Next requireshumanchoiceabout newcontinuationprotocol; twoexistingSKILLartifactsareavailable,notyetformal3-packagecalibration.
+
+## T67 run2 stopped, exact second skill recovered outside failed run (2026-10-13)
+Read docs/runtime/t67-run2-wrapper-failure-2026-10-13.md. run2FAILED afterskill1generated7callsandsecond6callswithcompleteactualSKILLinsideintro+markdownwrapper.13HTTP200/763671in11217out/7.175898CNYestimate/0testrows;29manifesthashes andcallbackledgerreconcile,allcontainers/networksremoved. Parserwrapperfixsecondattemptpreserves15995bodyexactly;firsttruncationfailurekept;7targeted+portabletestpassed, independentreviewclear. ScratchrecoveryskillSHA714fe8...rawa8d378...;run2manifest/status/stdiofalse/feesNOTrewritten. PaidcontinuationPAUSED,norun3;proposehumanapprovednewprotocolreuse2artifacts+generateonlythird+all30matchedtest. Do notautostartorregenerate2skills. Run1+run2est11.207709CNYactualunknown,T67blocked,T68unchanged,userpckluntouched.
+
+## T67 run2 process active (2026-10-13)
+Human explicitlyallowedrun2. Sourceedc9e63, directoryartifacts/experiments/t67-gdpevo-group025-ds-20261013-run2, configscratch/runtime/runtime.run2.json, logfull-calibration-run2.log, execsession50355onlycurrentappsession. Scriptguardsduplicate/configoverwrite; firstfreeze+actualdoctor beforefees. Readactualresult/ledger/statusandprocess; noautofailedretry. Gateargvpointsrun2. ThreeDSskills+15base15fewshot; nolearnedresultyet. Run1failed/all4.031811CNYestimate retained,T68blocked,pckluntouched.
+
+## T67 paid run2 explicitly authorized (2026-10-13)
+Human answered允许 toindependent修复后run2. Reopen T67in_progress; exact runtime sourceedc9e63, run1failed/4.031811estimate remainsimmutable. Newdirectory artifacts/experiments/t67-gdpevo-group025-ds-20261013-run2; freshfreeze/actualzero-modeldoctor mustpassbeforecalls;3skills+15base15fewshot samegroup/models/tools/limits. Gateoutputnowrun2. Do notduplicate/orautomaticallyresumeafailedrun2; noT68restart. No outcome claimedatregistration.
+
 ## T67 final failed-run checkpoint receipt
 Gate receipt artifacts/tasks/T67/20261013T055715Z/receipt.json FAILED because barepythonwasabsentfromPATH. The launcherwascorrectedtoincludeactualruntimebin; twoautomaticapprovaltimeouts creatednoprocess, so no successfulgate isclaimed. Existingrun1verify blocked aftersourcefix as expected; forensicreconciliation used originalGitBCsourceandWindowsCRLFmatchingfrozenSHA,17evidencehashes,tokens andcleanup. Runtimefixfocused6callbacktests andpublishedtooltests passed;zero-modeldoctor14 actualpublishedAPI+Java/MCP/compute/state/cleanup ready. Paidrun2 hasnotstarted.
 

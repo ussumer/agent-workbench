@@ -663,15 +663,58 @@ filesystem or control API is available. Return only SKILL.md markdown starting w
 front matter containing name and description. Preserve fact/convention distinctions.'''
 
 def normalize_skill_body(content):
+    """Remove one unambiguous output wrapper; never repair or rewrite the actual skill."""
     import yaml
-    body = text_content(content).strip()
-    if body.startswith('```'):
-        body = re.sub(r'^\x60{3}(?:markdown|md)?\s*|\x60{3}\s*$', '', body).strip()
-    parts = body.split('---', 2)
-    front = yaml.safe_load(parts[1]) if len(parts) == 3 and not parts[0] else None
-    if not isinstance(front, dict) or not front.get('name') or not front.get('description') or not parts[-1].strip():
-        raise ValueError('generated SKILL content/front matter missing')
-    return body
+    raw = text_content(content).strip()
+    def valid(body):
+        match = re.fullmatch(r'---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|$)(.*)', body, re.S)
+        if not match or not match[2].strip():
+            return False
+        try:
+            front = yaml.safe_load(match[1])
+        except yaml.YAMLError:
+            return False
+        return isinstance(front, dict) and bool(front.get('name')) and bool(front.get('description'))
+    candidates = [raw] if valid(raw) else []
+    lines = raw.splitlines(keepends=True)
+    fence = re.compile(r'[ \t]*(`{3,})([A-Za-z0-9_-]*)[ \t]*')
+    markers = [fence.fullmatch(line.rstrip('\r\n')) for line in lines]
+    openers = []
+    for index, marker in enumerate(markers):
+        if not marker or marker[2].lower() not in {'markdown', 'md', ''}:
+            continue
+        following = next((line.strip() for line in lines[index + 1:] if line.strip()), '')
+        if following == '---':
+            openers.append(index)
+    def balanced(inner):
+        stack = []
+        for marker in inner:
+            if marker:
+                size, tag = len(marker[1]), marker[2]
+                if tag or not stack:
+                    stack.append(size)
+                elif size >= stack[-1]:
+                    stack.pop()
+        return not stack
+    for number, opening in enumerate(openers):
+        boundary = openers[number + 1] if number + 1 < len(openers) else len(lines)
+        closes = [index for index in range(opening + 1, boundary) if markers[index]
+                  and not markers[index][2] and len(markers[index][1]) >= len(markers[opening][1])]
+        if not closes:
+            continue
+        closing = closes[-1]
+        # The last outer close preserves both labelled and unlabeled nested code blocks.
+        if not balanced(markers[opening + 1:closing]):
+            continue
+        body = ''.join(lines[opening + 1:closing]).strip()
+        if valid(body):
+            candidates.append(body)
+    if len(candidates) > 1:
+        raise ValueError('multiple valid SKILL candidates; generation is ambiguous')
+    if not candidates:
+        raise ValueError('generated SKILL content/front matter missing or wrapper incomplete')
+    return candidates[0]
+
 
 def generate_skill(model, directory, supervision, *, config_path, network):
     return asyncio.run(actor_session(model, config_path, directory, supervision, None, network, kind='skill'))
@@ -771,7 +814,6 @@ def verify_model_ledger(run_dir, result, scopes):
     return {**totals, 'unknown_usage_calls': 0, 'actual_cost_cny': result['usage'].get('actual_cost_cny')}
 
 def verify_skills(output, result):
-    import yaml
     skills = result.get('skills', [])
     if len(skills) != 3 or {s.get('session') for s in skills} != {1, 2, 3}:
         raise ValueError('three actual generated SKILL packages absent')
@@ -782,11 +824,7 @@ def verify_skills(output, result):
         path = directory / 'SKILL.md'
         if not path.is_file() or skill.get('sha256') != digest(path):
             raise ValueError('generated SKILL file/hash missing')
-        body = path.read_text(encoding='utf-8').strip()
-        parts = body.split('---', 2)
-        front = yaml.safe_load(parts[1]) if len(parts) == 3 and not parts[0] else None
-        if not isinstance(front, dict) or not front.get('name') or not front.get('description') or not parts[-1].strip():
-            raise ValueError('generated SKILL content/front matter missing')
+        body = normalize_skill_body(path.read_text(encoding='utf-8'))
         provenance = read(directory / 'provenance.json')
         if provenance.get('train_only') is not True or provenance.get('supervision_sha256') != digest(output / 'fewshot-input.json'):
             raise ValueError('skill train-only provenance missing')
@@ -798,8 +836,7 @@ def verify_skills(output, result):
         messages = read(directory / 'messages.json')
         if not messages or messages[-1].get('type') != 'ai':
             raise ValueError('successful skill generation messages absent')
-        final = text_content(messages[-1].get('content', '')).strip()
-        final = re.sub(r'^\x60{3}(?:markdown|md)?\s*|\x60{3}\s*$', '', final).strip()
+        final = normalize_skill_body(messages[-1].get('content', ''))
         if body != final:
             raise ValueError('SKILL file differs from actual model generation')
         scope = read(directory / 'scope.json')
