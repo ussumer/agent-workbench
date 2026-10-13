@@ -3654,7 +3654,9 @@
           "argv": [
             "python",
             "scripts/planning/gdpevo_v4_taskset.py",
-            "verify"
+            "verify",
+            "--output",
+            "artifacts/experiments/t67-gdpevo-group025-ds-20261013-run1"
           ],
           "cwd": "."
         }

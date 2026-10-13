@@ -359,3 +359,70 @@ def test_isolation_probe_uses_actual_configured_mongo_and_business_ports():
     config = {'sandbox_port': 18125, 'mongo_uri': 'mongodb://127.0.0.1:27017', 'business_url': 'http://task-env:9025'}
     assert runtime.isolation_ports(config) == [18125, 27017, 9025, 443]
     assert runtime.isolation_ports({**config, 'mongo_uri': 'mongodb://127.0.0.1:27500', 'business_url': 'http://task-env:9033'}) == [18125, 27500, 9033, 443]
+
+
+def test_published_mcp_description_lists_actual_routes_and_query_contract():
+    from types import SimpleNamespace
+    description = runtime.SOURCING_READ_DESCRIPTION
+    tool = SimpleNamespace(name="sourcing_read", description=description,
+        inputSchema={"properties": {"path": {"type": "string"}, "params": {"type": ["object", "null"]}}})
+    evidence = runtime.validate_published_sourcing_tool([tool])
+    assert evidence["passed"] is True
+    for route in ("programs", "forecasts", "quotes", "documents", "engineering", "contracts", "payments", "suppliers"):
+        assert "/api/sourcing/" + route in description
+    assert "/api/sourcing/programs/PRG-021" in description
+    assert "1 <= limit <= 100" in description
+    assert "request_id" in description and "items" in description
+
+def test_published_mcp_description_rejects_old_undocumented_surface():
+    from types import SimpleNamespace
+    tool = SimpleNamespace(name="sourcing_read", description="Read only domain sourcing endpoints.",
+        inputSchema={"properties": {"path": {}, "params": {}}})
+    with pytest.raises(ValueError, match="description"):
+        runtime.validate_published_sourcing_tool([tool])
+
+def test_failure_details_preserve_unwrapped_leaf_and_redact_secret(monkeypatch):
+    monkeypatch.setenv("T67_TEST_SECRET_TOKEN", "synthetic-secret-value")
+    leaf = ValueError("generated SKILL content/front matter missing synthetic-secret-value")
+    outer = ExceptionGroup("unhandled errors in a TaskGroup", [leaf])
+    result = runtime.failure_details(outer)
+    assert result["type"] == "ExceptionGroup"
+    assert any(x["type"] == "ValueError" and "front matter" in x["message"] for x in result["causes"])
+    assert "front matter" in result["traceback"]
+    assert "synthetic-secret-value" not in json.dumps(result)
+
+def test_public_description_does_not_accept_undocumented_aliases():
+    assert runtime.validate_domain_request("/api/sourcing/programs/PRG-021", {})[0].startswith("/api/sourcing/")
+    with pytest.raises(ValueError):
+        runtime.validate_domain_request("/sourcing/programs/PRG-021", {})
+
+
+def test_actual_mcp_registration_publishes_exact_documented_read_surface():
+    import asyncio
+    from mcp.server.fastmcp import FastMCP
+    server = FastMCP('t67-schema-registration-test')
+    runtime.register_sourcing_read(server, {}, lambda *args: None)
+    tools = asyncio.run(server.list_tools())
+    assert runtime.validate_published_sourcing_tool(tools)['passed'] is True
+    assert tools[0].description == runtime.SOURCING_READ_DESCRIPTION
+    assert {'path', 'params'} <= set(tools[0].inputSchema['properties'])
+
+def test_callback_usage_reads_actual_run1_langchain_token_usage():
+    value = {'llm_output': {'token_usage': {'prompt_tokens': 41384, 'completion_tokens': 338,
+        'total_tokens': 41722, 'prompt_cache_hit_tokens': 41216}},
+        'generations': [[{'message': {'content': '', 'type': 'ai'}}]]}
+    assert runtime.callback_usage(value) == (41384, 338)
+
+@pytest.mark.parametrize('value', [
+    {'llm_output': {'usage': {'prompt_tokens': 5, 'completion_tokens': 7}}},
+    {'llm_output': {}, 'generations': [[{'message': {'usage_metadata': {'input_tokens': 5, 'output_tokens': 7}}}]]}
+])
+def test_callback_usage_retains_existing_wire_schema_compatibility(value):
+    assert runtime.callback_usage(value) == (5, 7)
+
+@pytest.mark.parametrize('bad', [-1, '338', None])
+def test_callback_token_usage_still_rejects_invalid_tokens(bad):
+    value = {'llm_output': {'token_usage': {'prompt_tokens': 41384, 'completion_tokens': bad}},
+             'generations': [[{'message': {'content': '', 'type': 'ai'}}]]}
+    with pytest.raises(ValueError, match='usage'):
+        runtime.callback_usage(value)

@@ -35,6 +35,63 @@ computation_execute in OpenSandbox. You receive only the current task input.
 Return the complete answer JSON matching answer_template.json in your final message.
 Cite actual document IDs and versions. Do not invent missing records.'''
 EXCLUDED = frozenset({'ls', 'read_file', 'write_file', 'edit_file', 'delete', 'glob', 'grep', 'execute', 'task', 'write_todos'})
+SOURCING_READ_DESCRIPTION = '''Read the real Java sourcing environment with HTTP GET. Pass an exact
+relative path below; do not pass a base URL or append query strings to path.
+Allowed GET paths:
+/api/sourcing/programs
+/api/sourcing/programs/{program_id}
+/api/sourcing/forecasts
+/api/sourcing/quotes
+/api/sourcing/documents/{document_id}
+/api/sourcing/engineering
+/api/sourcing/contracts
+/api/sourcing/payments
+/api/sourcing/suppliers
+List-query params: program_id, supplier_id, query (strings), offset (integer >= 0),
+limit (integer, 1 <= limit <= 100). Pass these in the params object. Pagination
+defaults are offset=0 and limit=50; use total to determine whether another page exists.
+List response: {"data":{"items":[...],"total":...,"offset":...,"limit":...},"request_id":...}.
+Detail response: {"data":{...},"request_id":...}. Document details contain raw
+records and source versions. No answer, score, or financial aggregate endpoint exists.
+Example call: path="/api/sourcing/programs/PRG-021", params={}.
+Example filtered list: path="/api/sourcing/quotes", params={"program_id":"PRG-021","offset":0,"limit":50}.
+Use only these paths; aliases such as /programs or /sourcing are not accepted.'''
+
+def validate_published_sourcing_tool(tools):
+    tool = next((item for item in tools if item.name == 'sourcing_read'), None)
+    description = getattr(tool, 'description', '') or ''
+    required = ['/api/sourcing/' + name for name in ('programs', 'forecasts', 'quotes', 'documents',
+                'engineering', 'contracts', 'payments', 'suppliers')]
+    required += ['program_id', 'supplier_id', 'query', 'offset', 'limit', '1 <= limit <= 100',
+                 'items', 'total', 'request_id', '/api/sourcing/programs/PRG-021']
+    if any(item not in description for item in required):
+        raise ValueError('published sourcing_read description omits exact route/query contract')
+    properties = getattr(tool, 'inputSchema', {}).get('properties', {})
+    if not {'path', 'params'} <= set(properties):
+        raise ValueError('published sourcing_read argument schema incomplete')
+    return {'passed': True, 'description_sha256': hashlib.sha256(description.encode()).hexdigest(),
+            'documented_routes': required[:8]}
+
+def failure_details(error, known_secrets=()):
+    import traceback
+    from agent.env_utils import redact, secret_values
+    secrets = set(secret_values(os.environ)) | set(known_secrets)
+    causes, seen = [], set()
+    def unwrap(current):
+        if id(current) in seen:
+            return
+        seen.add(id(current))
+        nested = getattr(current, 'exceptions', ())
+        if nested:
+            for child in nested:
+                unwrap(child)
+        elif current.__cause__ is not None:
+            unwrap(current.__cause__)
+        else:
+            causes.append({'type': type(current).__name__, 'message': redact(str(current), secrets)[:1600]})
+    unwrap(error)
+    return {'type': type(error).__name__, 'message': redact(str(error), secrets)[:1600],
+            'causes': causes, 'traceback': redact(''.join(traceback.format_exception(error)), secrets)[-12000:]}
 
 def write(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -262,6 +319,14 @@ def business_read(config, path, params=None):
         raise ValueError('real Java HTTP failed status ' + str(response['status_code']))
     return response['body']
 
+def register_sourcing_read(server, config, trace):
+    @server.tool(description=SOURCING_READ_DESCRIPTION)
+    def sourcing_read(path: str, params: dict | None = None) -> dict:
+        path, params = validate_domain_request(path, params or {})
+        value = business_read(config, path, params)
+        trace('sourcing_read', {'path': path, 'params': params}, value)
+        return value
+
 def mcp_client(config_path, output, owner, thread, network):
     from langchain_mcp_adapters.client import MultiServerMCPClient
     config = read(config_path)
@@ -280,6 +345,8 @@ async def mcp_doctor(config_path, directory, network):
         tools = await session.list_tools()
         actor_tools(tools.tools)
         try:
+            description = validate_published_sourcing_tool(tools.tools)
+            write(directory / 'published-mcp-tools.json', [tool.model_dump(mode='json') for tool in tools.tools])
             domain = mcp_json(await session.call_tool('sourcing_read', {'path': '/api/sourcing/programs', 'params': {'limit': 1}}))
             execution = mcp_json(await session.call_tool('computation_execute',
                 {'code': 'value=6*7; save_state("doctor_probe", {"value": value}); print(value)'}))
@@ -287,6 +354,7 @@ async def mcp_doctor(config_path, directory, network):
             restored = mcp_json(await session.call_tool('computation_execute',
                 {'code': 'print(load_state("doctor_probe")["value"])', 'read_names': ['doctor_probe']}))
             value = validate_mcp_doctor(domain, execution, status, restored)
+            value['sourcing_description'] = description
             write(directory / 'mcp-replies.json', {'domain': domain, 'execution': execution, 'status': status, 'restored': restored})
         finally:
             close = mcp_json(await session.call_tool('finish_session', {}))
@@ -452,13 +520,7 @@ def mcp_worker(config_path, output, owner, thread, network):
             log.write(json.dumps({'kind': kind, 'request': request, 'response': response,
                                  'owner': owner, 'thread': thread}, ensure_ascii=False, default=str) + '\n')
     server = FastMCP('t67-business-computation')
-    @server.tool()
-    def sourcing_read(path: str, params: dict | None = None) -> dict:
-        """Read only domain sourcing endpoints; supports pagination and document/program IDs."""
-        path, params = validate_domain_request(path, params or {})
-        value = business_read(config, path, params)
-        trace('sourcing_read', {'path': path, 'params': params}, value)
-        return value
+    register_sourcing_read(server, config, trace)
     @server.tool()
     def computation_execute(code: str, read_names: list[str] | None = None, session: str = 'analysis', timeout: int = 60) -> dict:
         """Execute Python in OpenSandbox. load_state/save_state store declared JSON in Mongo."""
@@ -645,7 +707,8 @@ def jsonl(path):
     return [json.loads(line) for line in path.read_text(encoding='utf-8-sig').splitlines() if line.strip()]
 
 def callback_usage(value):
-    usage = (value.get('llm_output') or {}).get('usage')
+    output = value.get('llm_output') or {}
+    usage = output.get('token_usage') or output.get('usage')
     if usage:
         pair = (usage.get('prompt_tokens'), usage.get('completion_tokens'))
     else:
@@ -855,7 +918,7 @@ def run(output, config_path):
                             skill_row.update(status='generated', path=str(skill_dir / 'SKILL.md'),
                                              sha256=digest(skill_dir / 'SKILL.md'), model_calls_after=budget.calls)
                         except Exception as error:
-                            skill_row.update(status='failed', error={'type': type(error).__name__}, model_calls_after=budget.calls)
+                            skill_row.update(status='failed', error=failure_details(error, [original.api_key]), model_calls_after=budget.calls)
                             raise
                         finally:
                             write(run_dir / 'result.json', result)
@@ -877,7 +940,7 @@ def run(output, config_path):
                             row['status'] = 'scored'
                             failures = 0
                         except Exception as error:
-                            row.update(status='failed', error={'type': type(error).__name__})
+                            row.update(status='failed', error=failure_details(error, [original.api_key]))
                             failures += 1
                         row.update(model_calls_after=budget.calls, elapsed_seconds=round(time.monotonic() - started, 3))
                         result['rows'].append(row)
@@ -894,9 +957,7 @@ def run(output, config_path):
                 if result['control_cleanup']['status'] != 'passed':
                     raise ValueError('trusted control cleanup failed')
     except Exception as error:
-        from agent.env_utils import redact, secret_values
-        result.update(status='failed', error={'type': type(error).__name__,
-                      'message': redact(str(error), secret_values(os.environ))[:300]})
+        result.update(status='failed', error=failure_details(error, [original.api_key]))
     finally:
         result['usage'] = budget.summary() if budget else {'model_calls': 0, 'actual_cost_cny': None}
         write(run_dir / 'result.json', result)
@@ -1059,5 +1120,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
