@@ -455,3 +455,92 @@ def test_skill_normalizer_rejects_missing_body_or_incomplete_candidate(raw):
 
 
 
+
+
+def test_continuation_generates_only_third_with_exact_two_bound_skills():
+    assert runtime.remaining_skill_sessions([]) == [1, 2, 3]
+    reused = [{"session": 1, "ledger_source": "reused-run2"},
+              {"session": 2, "ledger_source": "reused-run2"}]
+    assert runtime.remaining_skill_sessions(reused) == [3]
+    with pytest.raises(ValueError, match="two"):
+        runtime.remaining_skill_sessions(reused[:1])
+
+def test_historical_recovery_cannot_relax_fresh_actor_stdio(tmp_path):
+    folder, scope, _ = mcp_mechanism_fixture(tmp_path)
+    runtime.write(folder / "stdio-cleanup.json", {"closed": False})
+    with pytest.raises(ValueError, match="historical"):
+        runtime.verify_mcp_attempt(folder, scope, recovery=tmp_path)
+
+def test_historical_stdio_recovery_requires_strict_helper_validation(tmp_path, monkeypatch):
+    import sys
+    from types import ModuleType
+    folder, scope, _ = mcp_mechanism_fixture(tmp_path)
+    runtime.write(folder / "stdio-cleanup.json", {"closed": False})
+    runtime.write(folder / 'mcp/cleanup.json', {'recycled': True, 'container_absent': True, 'sandbox_id': 'old-sandbox'})
+    row = {**scope, 'session': 2, 'source_session': 2, 'ledger_source': 'reused-run2', 'status': 'reused_recovered'}
+    helper = ModuleType("scripts.planning.gdpevo_v4_reuse")
+    helper.verify_reused_skill = lambda *a: {'kind': 'operator-observed-postprocessing-recovery', 'owner': scope['owner'], 'thread': scope['thread'], 'sandbox_id': 'old-sandbox', 'historical_stdio_closed': False, 'process_absent': True, 'container_absent': True}
+    monkeypatch.setitem(sys.modules, helper.__name__, helper)
+    evidence = runtime.verify_mcp_attempt(folder, row, recovery=tmp_path)
+    assert evidence["historical_stdio_recovery"] is True
+    assert runtime.read(folder / "stdio-cleanup.json")["closed"] is False
+    helper.verify_reused_skill = lambda *a: {'kind': 'operator-observed-postprocessing-recovery', 'owner': scope['owner'], 'thread': scope['thread'], 'sandbox_id': 'old-sandbox', 'historical_stdio_closed': False, 'process_absent': False, 'container_absent': True}
+    with pytest.raises(ValueError, match="recovery"):
+        runtime.verify_mcp_attempt(folder, row, recovery=tmp_path)
+
+def test_continuation_ledgers_cover_scopes_separately_without_renumbering(tmp_path):
+    current = tmp_path / "current"
+    current.mkdir()
+    historical = tmp_path / "historical"
+    source_run = historical / "run"
+    source_run.mkdir(parents=True)
+    result, scope = ledger_fixture(current)
+    old_result, old_scope = ledger_fixture(source_run)
+    old_folder = source_run / 'skills/session-1'
+    old_folder.mkdir(parents=True)
+    (old_folder / 'raw-trace.jsonl').write_bytes((Path(old_scope['directory']) / 'raw-trace.jsonl').read_bytes())
+    old_scope.update(session=1, source_session=1)
+    runtime.write(source_run / "result.json", old_result)
+    stage = tmp_path / "stage"
+    runtime.write(stage / "reuse-source.json", {"source_stage": str(historical), "reused_usage": old_result["usage"],
+                                               "prior_failed_usage": [{"source_stage": "prior-failed", "model_calls": 11}]})
+    result["reused_usage"] = old_result["usage"]
+    result["prior_failed_usage"] = [{"source_stage": "prior-failed", "model_calls": 11}]
+    scopes = [{**scope, "ledger_source": "current"}, {**old_scope, "ledger_source": "reused-run2"}]
+    from scripts.planning.gdpevo_v4_reuse import accounting
+    result['usage_accounting'] = accounting(result['usage'], result['reused_usage'], result['prior_failed_usage'])
+    observed = runtime.verify_origin_ledgers(stage, current, result, scopes)
+    assert observed["current"]["model_calls"] == 1
+    assert observed["reused-run2"]["model_calls"] == 1
+    assert observed["prior_failed_usage"][0]["model_calls"] == 11
+    assert result["usage"]["model_calls"] == 1
+    assert {row["call"] for row in runtime.jsonl(current / "model-calls.jsonl")} == {1}
+    assert {row["call"] for row in runtime.jsonl(source_run / "model-calls.jsonl")} == {1}
+
+def test_prepare_binds_explicit_reuse_before_manifest(tmp_path, monkeypatch):
+    import sys
+    from types import ModuleType
+    group = formal(tmp_path)
+    evidence_env(group)
+    config = tmp_path / "config.json"
+    runtime.write(config, {"sandbox_control_image": "sha256:" + "a" * 64,
+                          "business_image": "sha256:" + "b" * 64,
+                          "business_seed_sha256": runtime.digest(group / "env/seed.json")})
+    helper = ModuleType("scripts.planning.gdpevo_v4_reuse")
+    def bind(output, source, configured, normalize, current_runtime):
+        assert normalize is runtime.normalize_skill_body
+        assert Path(current_runtime).name == "gdpevo_v4_taskset.py"
+        runtime.write(output / "reuse-source.json", {"source_stage": str(source)})
+        protocol = runtime.read(output / "protocol.json")
+        protocol["reuse"] = {"source_stage": str(source)}
+        runtime.write(output / "protocol.json", protocol)
+    helper.bind_reuse = bind
+    monkeypatch.setitem(sys.modules, helper.__name__, helper)
+    output = tmp_path / "stage"
+    runtime.prepare(group, output, config, reuse_from=tmp_path / "old")
+    assert "reuse-source.json" in runtime.read(output / "manifest.json")
+    assert len(runtime.read(output / "protocol.json")["schedule"]) == 30
+    runtime.check_frozen_sources(output)
+
+
+

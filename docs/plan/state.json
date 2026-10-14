@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "blocked",
+      "status": "in_progress",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T67/20261013T093037Z/receipt.json",
-      "notes": "run2明确授权后已实际执行，firstskillgenerated/7calls，secondskill完整输出因前置说明+围栏解析失败；13HTTP200/763671in/11217out/7.175898CNY估算，0heldout评分。29manifesthash与13callback/ledger核对，所有沙盒/控制/网络已清理；历史stdiofalse不改。解析器两次有依据修复，第一次截断失败保留，第二次完整15995正文无改写提取成功，7针对性回归+便携case通过，独立复查无重要剩余。恢复文件scratch/runtime/run2-skill-recovery，仅审查非改写旧结果。付费续跑暂停，待讨论复用2skills只补第3+30配对的新协议；不自动run3。run1/run2总保守估11.207709CNY实际未知，T68不恢复。"
+      "notes": "2026-10-14用户明确继续，采用推荐复用run2两份真实技能输出、只补第3份和完整15base15fewshot的新cont1协议；原run1/run2failed/费用/stdiofalse不改，独立来源观察及分开ledger核验。先代码最小测试/review/freshfreeze/zero-modeldoctor，尚无新增费用/业务结果，T68不恢复。"
     },
     "T68": {
       "status": "blocked",

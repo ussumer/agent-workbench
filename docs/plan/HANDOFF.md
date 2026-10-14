@@ -1,3 +1,9 @@
+## T67 cont1 即将启动，2026-10-14
+原 run1/run2 failed 保留。两份旧技能原文、13 次调用、真实 MCP/计算证据已预先验证；69 项相关测试通过，独立复审无重要剩余项。新协议见 docs/runtime/t67-continuation-2026-10-14.md；运行入口 scratch/runtime/run_full_calibration_cont1.py，先真实 doctor，再只生成第三份和 30 匹配 Actor。新目录 artifacts/experiments/t67-gdpevo-group025-ds-20261014-cont1，gate 已指向此目录。未有新增付费调用或业务分数；无失败自动重试。T68 保持 blocked，用户 pckl 不纳入提交。
+
+## T67 continuation explicitly resumed, 2026-10-14
+User said继续 afterrecommendedreuse2/onlythird+all30matchedActoroption. In_progress,newprotocol docs/superpowers/plans/2026-10-14-t67-continuation.md. Keep originalrun1/run2immutablefailed,oldfeesandstdiofalse. Separatecurrent/reusedledgers andoperatorcleanupobservation. No newlypaidworkyet;parent+runtime fileownership,scopedreviewbeforecont1 launch. T68notresumed,pcklunchanged.
+
 ## T67 run2 final blocked gate
 Receipt artifacts/tasks/T67/20261013T093037Z/receipt.json BLOCKED exit2,gateargvactualrun2. No modelcalls duringgate. Currentnormalizerfixchangesfrozenruntime;failedrun2isnotconvertedtoasuccess. Independentimmutable29file/hash/13call/token/cleanupreconciliationpreserved. Next requireshumanchoiceabout newcontinuationprotocol; twoexistingSKILLartifactsareavailable,notyetformal3-packagecalibration.
 

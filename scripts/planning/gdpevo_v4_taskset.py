@@ -149,7 +149,7 @@ def source_files(folder):
     return sorted(p.resolve() for p in folder.rglob('*') if p.is_file()
                   and not any(part in excluded for part in p.relative_to(folder).parts))
 
-def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None):
+def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None, reuse_from=None):
     data, tasks = load_formal(group)
     if output.exists():
         raise FileExistsError('staging already exists; preserve it and use a new --output')
@@ -164,7 +164,8 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None):
         inventories[str(folder.resolve())] = [str(p) for p in paths]
         frozen.update({str(p): digest(p) for p in paths})
     # Runtime/config identities are operator evidence, never copied into Actor inputs.
-    for path in (Path(__file__).resolve(), ROOT / 'uv.lock', CONFIG, ROOT / 'scripts/planning/gdpevo_v4_control.py'):
+    for path in (Path(__file__).resolve(), ROOT / 'uv.lock', CONFIG, ROOT / 'scripts/planning/gdpevo_v4_control.py',
+                 ROOT / 'scripts/planning/gdpevo_v4_reuse.py'):
         if path.is_file():
             frozen[str(path)] = digest(path)
     runtime_identity = {}
@@ -204,6 +205,11 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None):
         'recursion_limit': 120, 'repairs_or_retries': 0, 'runtime_identity': runtime_identity})
     write(output / 'source-hashes.json', frozen)
     write(output / 'source-inventories.json', inventories)
+    if reuse_from is not None:
+        if config_path is None:
+            raise ValueError('explicit skill reuse requires a frozen runtime config')
+        from scripts.planning.gdpevo_v4_reuse import bind_reuse
+        bind_reuse(output, Path(reuse_from).resolve(), config, normalize_skill_body, Path(__file__).resolve())
     freeze_manifest(output)
     return {'status': 'prepared', 'model_calls': 0, 'calibration_complete': False, 'schedule_attempts': 30}
 
@@ -813,6 +819,41 @@ def verify_model_ledger(run_dir, result, scopes):
         raise ValueError('usage summary differs from actual gateway ledger')
     return {**totals, 'unknown_usage_calls': 0, 'actual_cost_cny': result['usage'].get('actual_cost_cny')}
 
+def verify_origin_ledgers(output, run_dir, result, scopes):
+    origins = {scope.get('ledger_source', 'current') for scope in scopes}
+    if origins - {'current', 'reused-run2'}:
+        raise ValueError('unrecognized model ledger origin')
+    current = [scope for scope in scopes if scope.get('ledger_source', 'current') == 'current']
+    observed = {'current': verify_model_ledger(run_dir, result, current)}
+    historical = [scope for scope in scopes if scope.get('ledger_source') == 'reused-run2']
+    if historical:
+        bound = read(output / 'reuse-source.json')
+        source_run = Path(bound['source_stage']) / 'run'
+        old_result = read(source_run / 'result.json')
+        if result.get('reused_usage') != bound['reused_usage'] or bound['reused_usage'] != old_result['usage']:
+            raise ValueError('historical usage differs from bound immutable ledger')
+        if result.get('prior_failed_usage') != bound['prior_failed_usage']:
+            raise ValueError('prior failed usage differs from bound source')
+        old_scopes = [{**scope, 'directory': str(source_run / 'skills' / f"session-{scope.get('source_session', scope['session'])}")}
+                      for scope in historical]
+        observed['reused-run2'] = verify_model_ledger(source_run, old_result, old_scopes)
+        observed['prior_failed_usage'] = bound['prior_failed_usage']
+        from scripts.planning.gdpevo_v4_reuse import accounting
+        expected_accounting = accounting(result['usage'], result['reused_usage'], result['prior_failed_usage'])
+        if result.get('usage_accounting') != expected_accounting:
+            raise ValueError('current/reused/prior failed cost accounting differs')
+        observed['usage_accounting'] = expected_accounting
+    elif read(output / 'protocol.json').get('reuse'):
+        raise ValueError('bound reused skill ledger scopes absent')
+    return observed
+
+def remaining_skill_sessions(skills):
+    if not skills:
+        return [1, 2, 3]
+    if len(skills) != 2 or {row.get('session') for row in skills} != {1, 2} or any(row.get('ledger_source') != 'reused-run2' for row in skills):
+        raise ValueError('continuation requires exactly two bound reused skills')
+    return [3]
+
 def verify_skills(output, result):
     skills = result.get('skills', [])
     if len(skills) != 3 or {s.get('session') for s in skills} != {1, 2, 3}:
@@ -826,7 +867,11 @@ def verify_skills(output, result):
             raise ValueError('generated SKILL file/hash missing')
         body = normalize_skill_body(path.read_text(encoding='utf-8'))
         provenance = read(directory / 'provenance.json')
-        if provenance.get('train_only') is not True or provenance.get('supervision_sha256') != digest(output / 'fewshot-input.json'):
+        reused = skill.get('ledger_source') == 'reused-run2'
+        if reused:
+            from scripts.planning.gdpevo_v4_reuse import verify_reused_skill
+            verify_reused_skill(output, directory, skill, normalize_skill_body)
+        elif provenance.get('train_only') is not True or provenance.get('supervision_sha256') != digest(output / 'fewshot-input.json'):
             raise ValueError('skill train-only provenance missing')
         events = jsonl(directory / 'raw-trace.jsonl')
         first = next(e['value'][0] for e in events if e.get('kind') == 'model_input')
@@ -842,7 +887,7 @@ def verify_skills(output, result):
         scope = read(directory / 'scope.json')
         if scope.get('kind') != 'skill' or scope.get('owner') != skill.get('owner') or scope.get('thread') != skill.get('thread'):
             raise ValueError('fresh independent skill runtime scope absent')
-        verify_mcp_attempt(directory, skill)
+        verify_mcp_attempt(directory, skill, recovery=output if reused else None)
         scopes.append({**skill, 'directory': str(directory)})
     return scopes
 
@@ -859,7 +904,7 @@ def normalized_tool_request(kind, request):
         return {'session': request.get('session', 'analysis')}
     raise ValueError('forbidden/non-MCP capability in Actor trace')
 
-def verify_mcp_attempt(directory, row):
+def verify_mcp_attempt(directory, row, recovery=None):
     from collections import Counter
     import ast
     tools = jsonl(directory / 'mcp/tools.jsonl')
@@ -896,9 +941,22 @@ def verify_mcp_attempt(directory, row):
     cleanup = read(directory / 'mcp/cleanup.json')
     if cleanup.get('recycled') is not True or cleanup.get('container_absent') is not True:
         raise ValueError('sandbox recycle failed/unverified')
+    recovered = False
     if read(directory / 'stdio-cleanup.json').get('closed') is not True:
-        raise ValueError('MCP stdio session exit unverified')
-    return {'completed_executions': len(completed), 'computation_contribution': 'unassessed'}
+        if recovery is None:
+            raise ValueError('MCP stdio session exit unverified')
+        if row.get('ledger_source') != 'reused-run2' or row.get('source_session') != 2 or row.get('status') != 'reused_recovered':
+            raise ValueError('historical recovery cannot relax fresh Actor/runtime cleanup')
+        from scripts.planning.gdpevo_v4_reuse import verify_reused_skill
+        proof = verify_reused_skill(Path(recovery), directory, row, normalize_skill_body)
+        if (proof.get('kind') != 'operator-observed-postprocessing-recovery' or proof.get('historical_stdio_closed') is not False
+                or proof.get('process_absent') is not True or proof.get('container_absent') is not True
+                or proof.get('owner') != row.get('owner') or proof.get('thread') != row.get('thread')
+                or proof.get('sandbox_id') != cleanup.get('sandbox_id')):
+            raise ValueError('strict historical postprocessing recovery evidence absent')
+        recovered = True
+    return {'completed_executions': len(completed), 'computation_contribution': 'unassessed',
+            'historical_stdio_recovery': recovered}
 
 def policy(identity):
     pricing = identity['budget']
@@ -927,8 +985,19 @@ def run(output, config_path):
     result = {'status': 'running', 'rows': [], 'skills': [], 'model_identity': original.redacted(),
               'kind': protocol['kind'], 'sealed': False, 'learning_gain_proven': False,
               'source_hashes_sha256': digest(output / 'source-hashes.json')}
+    if protocol.get('reuse'):
+        bound = read(output / 'reuse-source.json')
+        result['reused_usage'] = bound['reused_usage']
+        result['prior_failed_usage'] = bound['prior_failed_usage']
     budget = None
     try:
+        if protocol.get('reuse'):
+            from scripts.planning.gdpevo_v4_reuse import import_skills
+            result['skills'] = import_skills(output, run_dir, normalize_skill_body)
+            for imported in result['skills']:
+                verify_mcp_attempt(run_dir / 'skills' / f"session-{imported['session']}", imported, recovery=output)
+            write(run_dir / 'result.json', result)
+        remaining = remaining_skill_sessions(result['skills'])
         with (run_dir / 'model-calls.jsonl').open('x', encoding='utf-8') as log:
             with gateway(original, policy(identity), log, identity.get('model_extra_body')) as (url, budget):
                 model = dataclasses.replace(original, base_url=url, api_key='evaluation-proxy', max_tokens=8192).create_chat_model()
@@ -941,9 +1010,9 @@ def run(output, config_path):
                     result['served_business'] = business_identity(config)
                     result['control_identity'] = control
                     probe_isolation(active, run_dir / 'sandbox-control', network)
-                    for repeat in range(1, 4):
+                    for repeat in remaining:
                         skill_dir = run_dir / 'skills' / f'session-{repeat}'
-                        skill_row = {'session': repeat, 'status': 'started', 'model_calls_before': budget.calls}
+                        skill_row = {'session': repeat, 'status': 'started', 'ledger_source': 'current', 'model_calls_before': budget.calls}
                         result['skills'].append(skill_row)
                         write(run_dir / 'result.json', result)
                         try:
@@ -963,7 +1032,8 @@ def run(output, config_path):
                     for entry in protocol['schedule']:
                         task = next(t for t in protocol['tasks'] if t['task_id'] == entry['task_id'])
                         directory = run_dir / 'attempts' / f"r{entry['repeat']}-{entry['task_id']}-{entry['arm']}"
-                        row = {**entry, 'status': 'started', 'grade': {'score': 0.0, 'points': []}, 'model_calls_before': budget.calls}
+                        row = {**entry, 'status': 'started', 'ledger_source': 'current',
+                               'grade': {'score': 0.0, 'points': []}, 'model_calls_before': budget.calls}
                         started = time.monotonic()
                         try:
                             skill = None if entry['arm'] == 'base' else (run_dir / 'skills' / f"session-{entry['repeat']}" / 'SKILL.md').read_text(encoding='utf-8')
@@ -997,6 +1067,9 @@ def run(output, config_path):
         result.update(status='failed', error=failure_details(error, [original.api_key]))
     finally:
         result['usage'] = budget.summary() if budget else {'model_calls': 0, 'actual_cost_cny': None}
+        if protocol.get('reuse'):
+            from scripts.planning.gdpevo_v4_reuse import accounting
+            result['usage_accounting'] = accounting(result['usage'], result['reused_usage'], result['prior_failed_usage'])
         write(run_dir / 'result.json', result)
         freeze_manifest(run_dir)
     return result
@@ -1097,7 +1170,11 @@ def verify(output=DEFAULT_OUTPUT):
             value['reasons'].append('attempt evidence blocked ' + label + ': ' + str(error))
     value['usage'] = result.get('usage', {})
     try:
-        value['reconciled_usage'] = verify_model_ledger(run_dir, result, scopes)
+        value['reconciled_usage_by_origin'] = verify_origin_ledgers(output, run_dir, result, scopes)
+        value['reconciled_usage'] = value['reconciled_usage_by_origin']['current']
+        value['reused_usage'] = result.get('reused_usage')
+        value['prior_failed_usage'] = result.get('prior_failed_usage')
+        value['usage_accounting'] = result.get('usage_accounting')
     except (OSError, ValueError, KeyError, TypeError, IndexError) as error:
         value['reasons'].append('real model call evidence blocked: ' + str(error))
     try:
@@ -1133,6 +1210,7 @@ def main():
     parser.add_argument('--group', type=Path, default=GROUP)
     parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument('--runtime-config', type=Path)
+    parser.add_argument('--reuse-skills-from', type=Path)
     parser.add_argument('--owner')
     parser.add_argument('--thread')
     parser.add_argument('--network')
@@ -1142,7 +1220,7 @@ def main():
         return
     try:
         if args.command == 'prepare':
-            value = prepare(args.group, args.output, args.runtime_config)
+            value = prepare(args.group, args.output, args.runtime_config, args.reuse_skills_from)
         elif args.command == 'verify':
             value = verify(args.output)
         elif args.command == 'doctor':
