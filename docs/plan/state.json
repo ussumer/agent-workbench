@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "in_progress",
+      "status": "blocked",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T67/20261013T093037Z/receipt.json",
-      "notes": "2026-10-14用户明确继续，采用推荐复用run2两份真实技能输出、只补第3份和完整15base15fewshot的新cont1协议；原run1/run2failed/费用/stdiofalse不改，独立来源观察及分开ledger核验。先代码最小测试/review/freshfreeze/zero-modeldoctor，尚无新增费用/业务结果，T68不恢复。"
+      "receipt": "artifacts/tasks/T67/20261014T140612Z/receipt.json",
+      "notes": "cont1 failed：第三份技能9calls/6compute成功；首题base38/36限额、fewshot完整JSON包裹解析拒绝，2连失败停止。base并发rawtrace2行损坏，严格证据失败。只读单题fewshot诊断6/13不补入原运行；26新calls估13.199643，总50calls估24.407352，actual未知。所有专用资源已清理，未补跑、无Stage3，T68不恢复。报告t67-cont1-failure-2026-10-14.md。"
     },
     "T68": {
       "status": "blocked",

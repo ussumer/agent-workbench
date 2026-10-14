@@ -1,3 +1,9 @@
+## T67 cont1 已止损，2026-10-14
+阅读 docs/runtime/t67-cont1-failure-2026-10-14.md。运行source5916f77，目录 artifacts/experiments/t67-gdpevo-group025-ds-20261014-cont1 原始failed/63hash保留。3份技能已齐；首题base工具38/36限额（17Java成功/15个404/6限额）、fewshot完整JSON包裹解析错误，2连失败自动停止，只2/30行。Base rawtrace第37/38行并发交错损坏；全26对可解析模型回调/gateway用量核对，严格全轨迹失败。新26calls估13.199643CNY，全历史50calls估24.407352，actual未知。独立诊断仅提取原fewshotJSON、原评估器得6/13；原failed不重写，不拼提升。所有本次worker/container/network已观察不存在。严禁补跑/重复启动，T68不恢复。新增最终只读gate需完整校准+六原票至少五过，目前必须blocked；最终 gate receipt artifacts/tasks/T67/20261014T140612Z/receipt.json BLOCKED（exit2），指向cont1和最终acceptance脚本。后续问题已列T67任务，不修改本轮冻结代码，待人讨论修订协议。用户pckl保留。
+
+## T67 cont1 正在执行，2026-10-14
+代码提交 5916f77；exec session 45852（仅本应用会话有效）。输出 artifacts/experiments/t67-gdpevo-group025-ds-20261014-cont1；日志 gdpevo-construction/v4-20261012/task_factory/scratch/runtime/full-calibration-cont1.log。真实 doctor ready，Java/MCP/OpenSandbox42/Mongo回读/隔离/清理通过；已复用两份技能，第三份生成正在进行，已见真实完成计算。新运行不自动重试，不启动重复进程；旧 run1/run2 failed/stdiofalse/费用保留。当前只读检查实际 result/ledger/进程，完成后 verify 当前cont1、独立评分、6 clean-context Stage3 votes，再最终 gate。正在补最终 gate 的独立新脚本，禁止编辑已冻结 taskset/helper/control/任务组。T68 不恢复，用户 pckl 保留。
+
 ## T67 cont1 即将启动，2026-10-14
 原 run1/run2 failed 保留。两份旧技能原文、13 次调用、真实 MCP/计算证据已预先验证；69 项相关测试通过，独立复审无重要剩余项。新协议见 docs/runtime/t67-continuation-2026-10-14.md；运行入口 scratch/runtime/run_full_calibration_cont1.py，先真实 doctor，再只生成第三份和 30 匹配 Actor。新目录 artifacts/experiments/t67-gdpevo-group025-ds-20261014-cont1，gate 已指向此目录。未有新增付费调用或业务分数；无失败自动重试。T68 保持 blocked，用户 pckl 不纳入提交。
 

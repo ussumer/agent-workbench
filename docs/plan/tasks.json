@@ -3653,10 +3653,11 @@
           "required": true,
           "argv": [
             "python",
-            "scripts/planning/gdpevo_v4_taskset.py",
-            "verify",
+            "scripts/planning/gdpevo_v4_acceptance.py",
             "--output",
-            "artifacts/experiments/t67-gdpevo-group025-ds-20261014-cont1"
+            "artifacts/experiments/t67-gdpevo-group025-ds-20261014-cont1",
+            "--review",
+            "gdpevo-construction/v4-20261012/review/reports/task_group_025.yaml"
           ],
           "cwd": "."
         }
