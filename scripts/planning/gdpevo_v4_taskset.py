@@ -18,6 +18,7 @@ import socket
 import subprocess
 import sys
 import time
+import threading
 import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -201,8 +202,9 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None, reuse_from=Non
         'actor_input': 'only target input and domain MCP access; no facts bundle or evaluator',
         'tasks': tasks, 'schedule': schedule, 'skills_sessions': 3, 'sealed': False,
         'official_gpt_calibration': False, 'learning_gain_proven': False, 'runtime_versions': LOCKED,
-        'max_model_calls_per_session': 30, 'max_tool_calls': 36, 'max_output_tokens': 8192,
-        'recursion_limit': 120, 'repairs_or_retries': 0, 'runtime_identity': runtime_identity})
+        'max_model_calls_per_session': session_limits('solve')['model_calls'], 'max_tool_calls': session_limits('solve')['tool_calls'], 'max_output_tokens': 8192,
+        'recursion_limit': session_limits('solve')['recursion_limit'], 'skill_generation_limits': session_limits('skill'),
+        'no_progress_rule': '8 completed rounds repeating identical request/result pairs; distinct discoveries reset', 'repairs_or_retries': 0, 'runtime_identity': runtime_identity})
     write(output / 'source-hashes.json', frozen)
     write(output / 'source-inventories.json', inventories)
     if reuse_from is not None:
@@ -325,13 +327,25 @@ def business_read(config, path, params=None):
         raise ValueError('real Java HTTP failed status ' + str(response['status_code']))
     return response['body']
 
+def trace_tool_call(trace, kind, request, operation):
+    try:
+        value = operation()
+    except Exception as error:
+        trace(kind, request, {'status': 'failed', 'error': failure_details(error)})
+        raise
+    trace(kind, request, value)
+    return value
+
+
 def register_sourcing_read(server, config, trace):
     @server.tool(description=SOURCING_READ_DESCRIPTION)
     def sourcing_read(path: str, params: dict | None = None) -> dict:
-        path, params = validate_domain_request(path, params or {})
-        value = business_read(config, path, params)
-        trace('sourcing_read', {'path': path, 'params': params}, value)
-        return value
+        request = {'path': path, 'params': params or {}}
+        def operation():
+            validated_path, validated_params = validate_domain_request(path, params or {})
+            return business_read(config, validated_path, validated_params)
+        return trace_tool_call(trace, 'sourcing_read', request, operation)
+
 
 def mcp_client(config_path, output, owner, thread, network):
     from langchain_mcp_adapters.client import MultiServerMCPClient
@@ -359,9 +373,19 @@ async def mcp_doctor(config_path, directory, network):
             status = mcp_json(await session.call_tool('computation_status', {}))
             restored = mcp_json(await session.call_tool('computation_execute',
                 {'code': 'print(load_state("doctor_probe")["value"])', 'read_names': ['doctor_probe']}))
+            failed_path = '/api/sourcing/documents/T67-DOCTOR-ABSENT-' + uuid.uuid4().hex
+            failed = await session.call_tool('sourcing_read', {'path': failed_path, 'params': {}})
+            if getattr(failed, 'isError', False) is not True:
+                raise ValueError('missing-source failure did not remain an MCP error')
+            failures = jsonl(directory / 'mcp/tools.jsonl')
+            recorded = [c for c in failures if c.get('request', {}).get('path') == failed_path]
+            if len(recorded) != 1 or recorded[0].get('response', {}).get('status') != 'failed':
+                raise ValueError('real failed MCP call was not durably recorded')
             value = validate_mcp_doctor(domain, execution, status, restored)
             value['sourcing_description'] = description
-            write(directory / 'mcp-replies.json', {'domain': domain, 'execution': execution, 'status': status, 'restored': restored})
+            value['failed_read_recorded'] = True
+            write(directory / 'mcp-replies.json', {'domain': domain, 'execution': execution, 'status': status, 'restored': restored,
+                                                 'failed_read': failed.model_dump(mode='json')})
         finally:
             close = mcp_json(await session.call_tool('finish_session', {}))
             if close.get('recycled') is not True or close.get('container_absent') is not True:
@@ -521,27 +545,28 @@ def mcp_worker(config_path, output, owner, thread, network):
         resources.close()
         closed = True
         return value
+    append_tool_event = jsonl_writer(output / 'tools.jsonl')
     def trace(kind, request, response):
-        with (output / 'tools.jsonl').open('a', encoding='utf-8') as log:
-            log.write(json.dumps({'kind': kind, 'request': request, 'response': response,
-                                 'owner': owner, 'thread': thread}, ensure_ascii=False, default=str) + '\n')
+        append_tool_event({'kind': kind, 'request': request, 'response': response,
+                           'owner': owner, 'thread': thread})
     server = FastMCP('t67-business-computation')
     register_sourcing_read(server, config, trace)
     @server.tool()
     def computation_execute(code: str, read_names: list[str] | None = None, session: str = 'analysis', timeout: int = 60) -> dict:
         """Execute Python in OpenSandbox. load_state/save_state store declared JSON in Mongo."""
-        proxy = manager.get_or_create(owner)
-        write(output / 'sandbox-inspection.json', inspect_sandbox(proxy.id, network))
-        value = service.execute(owner, thread, code, read_names=read_names or [], session=session, timeout=timeout)
-        trace('computation_execute', {'code': code, 'read_names': read_names, 'session': session, 'timeout': timeout}, value)
-        write(output / 'executions.json', list(service.executions.find({'owner_user_id': owner, 'thread_id': thread}, {'_id': 0})))
-        return value
+        request = {'code': code, 'read_names': read_names, 'session': session, 'timeout': timeout}
+        def operation():
+            proxy = manager.get_or_create(owner)
+            write(output / 'sandbox-inspection.json', inspect_sandbox(proxy.id, network))
+            value = service.execute(owner, thread, code, read_names=read_names or [], session=session, timeout=timeout)
+            write(output / 'executions.json', list(service.executions.find({'owner_user_id': owner, 'thread_id': thread}, {'_id': 0})))
+            return value
+        return trace_tool_call(trace, 'computation_execute', request, operation)
     @server.tool()
     def computation_status(session: str = 'analysis') -> dict:
         """Inspect your committed computation data version and metadata."""
-        value = service.status(owner, thread, session=session)
-        trace('computation_status', {'session': session}, value)
-        return value
+        return trace_tool_call(trace, 'computation_status', {'session': session},
+                               lambda: service.status(owner, thread, session=session))
     @server.tool()
     def finish_session() -> dict:
         """Operator-only lifecycle cleanup; this tool is filtered out of Actor capabilities."""
@@ -561,16 +586,26 @@ def register_profile(model):
     register_harness_profile('openai:' + model.model_name,
         HarnessProfile(excluded_tools=EXCLUDED, general_purpose_subagent=GeneralPurposeSubagentProfile(enabled=False)))
 
+def jsonl_writer(path):
+    lock = threading.Lock()
+    def append(value):
+        from agent.env_utils import redact, secret_values
+        raw = json.dumps(value, ensure_ascii=False, default=str)
+        line = redact(raw, secret_values(os.environ)) + '\n'
+        # One file belongs to one session/process; callback threads share this lock.
+        with lock:
+            with path.open('a', encoding='utf-8') as log:
+                log.write(line)
+    return append
+
+
 def recorder_class():
     from langchain_core.callbacks import BaseCallbackHandler
     class Recorder(BaseCallbackHandler):
         def __init__(self, path):
-            self.path = path
+            self.append = jsonl_writer(path)
         def save(self, kind, value):
-            from agent.env_utils import redact, secret_values
-            with self.path.open('a', encoding='utf-8') as log:
-                raw = json.dumps({'kind': kind, 'value': value}, ensure_ascii=False, default=str)
-                log.write(redact(raw, secret_values(os.environ)) + '\n')
+            self.append({'kind': kind, 'value': value})
         def on_chat_model_start(self, serialized, messages, **kwargs):
             self.save('model_input', [[m.model_dump(mode='json') for m in batch] for batch in messages])
         def on_llm_end(self, response, **kwargs):
@@ -586,6 +621,7 @@ def recorder_class():
             self.save('tool_error', type(error).__name__)
     return Recorder
 
+
 def text_content(content):
     if isinstance(content, str):
         return content
@@ -593,23 +629,117 @@ def text_content(content):
 
 def parse_json_answer(content):
     text = text_content(content).strip()
-    if text.startswith('```'):
-        text = re.sub(r'^\x60{3}(?:json)?\s*|\x60{3}\s*$', '', text).strip()
-    value = json.loads(text)
+    try:
+        value = json.loads(text)
+    except ValueError:
+        # A single complete wrapper is transport formatting, never an answer repair.
+        blocks = list(re.finditer(r'(?m)^[ \t]*(`{3,})(?:json)?[ \t]*\r?\n(.*?)^[ \t]*\1[ \t]*$', text, re.S))
+        if len(blocks) != 1:
+            raise ValueError('answer must contain one complete, unambiguous JSON object')
+        value = json.loads(blocks[0][2])
+        decoder, candidates, cursor = json.JSONDecoder(), [], 0
+        while cursor < len(text):
+            opener = re.search(r'[\[{]', text[cursor:])
+            if opener is None:
+                break
+            start = cursor + opener.start()
+            try:
+                candidate, end = decoder.raw_decode(text, start)
+            except ValueError:
+                cursor = start + 1
+                continue
+            candidates.append((candidate, start, end))
+            cursor = end
+        if len(candidates) != 1 or not (blocks[0].start(2) <= candidates[0][1] < candidates[0][2] <= blocks[0].end(2)):
+            raise ValueError('multiple or competing JSON candidates; answer is ambiguous')
     if not isinstance(value, dict):
         raise ValueError('answer must be a JSON object')
     return value
+
 
 def actor_input(output, task_id):
     folder = output / 'actor-inputs' / task_id
     return [{'path': str(p.relative_to(folder)), 'text': p.read_text(encoding='utf-8-sig')}
             for p in sorted(folder.rglob('*')) if p.is_file()]
 
+def session_limits(kind):
+    if kind == 'skill':
+        return {'model_calls': 30, 'tool_calls': 36, 'recursion_limit': 120}
+    if kind != 'solve':
+        raise ValueError('unknown Actor session kind')
+    return {'model_calls': 60, 'tool_calls': 120, 'recursion_limit': 600}
+
+
+def no_progress_reason(messages, stale_rounds=8):
+    """Stop repeated request/result pairs; distinct discoveries and revised facts reset it."""
+    rows = [m if isinstance(m, dict) else m.model_dump(mode='json') for m in messages]
+    seen, consecutive = set(), 0
+    for index, row in enumerate(rows):
+        calls = row.get('tool_calls') or []
+        if row.get('type') != 'ai' or not calls:
+            continue
+        replies = {}
+        for following in rows[index + 1:]:
+            if following.get('type') == 'ai':
+                break
+            if following.get('type') == 'tool':
+                replies[following.get('tool_call_id')] = following
+        if any(call.get('id') not in replies for call in calls):
+            continue
+        new_result = False
+        for call in calls:
+            reply = replies[call['id']]
+            content = reply.get('content', '')
+            if not isinstance(content, str):
+                content = text_content(content)
+            try:
+                value = json.loads(content)
+                if isinstance(value, dict):
+                    ignored = {'request_id'}
+                    if call.get('name') == 'computation_execute':
+                        ignored |= {'operation_id', 'worker_pid', 'terminated_pids'}
+                        if not value.get('saved_names') and not value.get('deleted_names'):
+                            ignored |= {'base_version', 'version'}
+                    value = {k: v for k, v in value.items() if k not in ignored}
+            except ValueError:
+                value = content
+            key = json.dumps([call.get('name'), call.get('args'), reply.get('status'), value], sort_keys=True, default=str)
+            if key not in seen:
+                new_result = True
+                seen.add(key)
+        consecutive = 0 if new_result else consecutive + 1
+        if consecutive >= stale_rounds:
+            return f'repeated tool requests produced no new results for {consecutive} rounds'
+    return None
+
+
+def actor_middlewares(kind, directory):
+    from langchain.agents.middleware import ModelCallLimitMiddleware, ToolCallLimitMiddleware, AgentMiddleware
+    from langchain.agents.middleware.types import hook_config
+    from langchain_core.messages import AIMessage
+    limits = session_limits(kind)
+    middlewares = [ModelCallLimitMiddleware(run_limit=limits['model_calls'], exit_behavior='end'),
+                   ToolCallLimitMiddleware(run_limit=limits['tool_calls'], exit_behavior='end')]
+    if kind == 'solve':
+        class NoProgressMiddleware(AgentMiddleware):
+            @hook_config(can_jump_to=['end'])
+            def before_model(self, state, runtime):
+                reason = no_progress_reason(state.get('messages', []))
+                if reason is None:
+                    return None
+                write(directory / 'termination.json', {'kind': 'no_progress', 'message': reason})
+                return {'messages': [AIMessage(content='Execution stopped: ' + reason)], 'jump_to': 'end'}
+            @hook_config(can_jump_to=['end'])
+            async def abefore_model(self, state, runtime):
+                return self.before_model(state, runtime)
+        middlewares.append(NoProgressMiddleware())
+    return middlewares
+
+
 async def actor_session(model, config_path, directory, task_input, skill, network, *, kind='solve'):
     from deepagents import create_deep_agent
     from deepagents.backends import StateBackend
     from langchain_core.messages import HumanMessage
-    from langchain.agents.middleware import ModelCallLimitMiddleware, ToolCallLimitMiddleware
     from api_view.web_config import MongoResources, PersistenceSettings
     from agent.persistence.scoped_store import UserScopedStore
     owner, thread = 't67-' + uuid.uuid4().hex[:20], 't67-' + uuid.uuid4().hex[:20]
@@ -622,39 +752,51 @@ async def actor_session(model, config_path, directory, task_input, skill, networ
     messages = []
     result = {'owner': owner, 'thread': thread}
     closed = False
+    pending_error = None
     try:
         async with client.session('business') as mcp:
-            from langchain_mcp_adapters.tools import load_mcp_tools
-            tools = actor_tools(await load_mcp_tools(mcp))
-            system = SYSTEM + ('\nTrain-derived skill:\n' + skill if skill else '')
-            if kind == 'skill':
-                system = SKILL_SYSTEM
             try:
-                graph = create_deep_agent(model=model, tools=tools, backend=StateBackend(),
-                    checkpointer=resources.checkpointer, store=UserScopedStore(resources.store, owner),
-                    system_prompt=system, middleware=[ModelCallLimitMiddleware(run_limit=30, exit_behavior='end'),
-                    ToolCallLimitMiddleware(run_limit=36, exit_behavior='end')])
-                payload = {'messages': [HumanMessage(content=json.dumps(task_input, ensure_ascii=False))]}
-                scope = {'configurable': {'thread_id': thread, 'owner_user_id': owner}, 'recursion_limit': 120, 'callbacks': [recorder]}
-                async for state in graph.astream(payload, config=scope, stream_mode='values'):
-                    messages = state.get('messages', [])
-                    write(directory / 'messages.json', [m.model_dump(mode='json') for m in messages])
-                if not messages:
-                    raise ValueError('Actor returned no messages')
-                content = text_content(messages[-1].content)
-                (directory / 'final-content.txt').write_text(content, encoding='utf-8')
-                if kind == 'skill':
-                    body = normalize_skill_body(content)
-                    (directory / 'SKILL.md').write_text(body + '\n', encoding='utf-8')
-                    result['skill_sha256'] = digest(directory / 'SKILL.md')
-                else:
-                    write(directory / 'submission.json', parse_json_answer(content))
-                    result['submission'] = str(directory / 'submission.json')
-            finally:
-                cleanup = mcp_json(await mcp.call_tool('finish_session', {}))
-                if cleanup.get('recycled') is not True or cleanup.get('container_absent') is not True:
-                    raise ValueError('explicit Actor MCP cleanup failed')
+                try:
+                    from langchain_mcp_adapters.tools import load_mcp_tools
+                    tools = actor_tools(await load_mcp_tools(mcp))
+                    system = SYSTEM + ('\nTrain-derived skill:\n' + skill if skill else '')
+                    if kind == 'skill':
+                        system = SKILL_SYSTEM
+                    graph = create_deep_agent(model=model, tools=tools, backend=StateBackend(),
+                        checkpointer=resources.checkpointer, store=UserScopedStore(resources.store, owner),
+                        system_prompt=system, middleware=actor_middlewares(kind, directory))
+                    payload = {'messages': [HumanMessage(content=json.dumps(task_input, ensure_ascii=False))]}
+                    scope = {'configurable': {'thread_id': thread, 'owner_user_id': owner},
+                             'recursion_limit': session_limits(kind)['recursion_limit'], 'callbacks': [recorder]}
+                    async for state in graph.astream(payload, config=scope, stream_mode='values'):
+                        messages = state.get('messages', [])
+                        write(directory / 'messages.json', [m.model_dump(mode='json') for m in messages])
+                    if not messages:
+                        raise ValueError('Actor returned no messages')
+                    content = text_content(messages[-1].content)
+                    (directory / 'final-content.txt').write_text(content, encoding='utf-8')
+                finally:
+                    cleanup = mcp_json(await mcp.call_tool('finish_session', {}))
+                    if cleanup.get('recycled') is not True or cleanup.get('container_absent') is not True:
+                        raise ValueError('explicit Actor MCP cleanup failed')
+            except Exception as error:
+                pending_error = error
+        # Mark only an actual successful context exit, independent of answer parsing.
         closed = True
+        if pending_error is not None:
+            raise pending_error
+        if content.startswith(('Tool call limit reached:', 'Model call limits exceeded:')):
+            write(directory / 'termination.json', {'kind': 'budget', 'message': content, 'limits': session_limits(kind)})
+        if (directory / 'termination.json').is_file():
+            reason = read(directory / 'termination.json')
+            raise RuntimeError('Actor stopped (' + reason['kind'] + '): ' + reason['message'])
+        if kind == 'skill':
+            body = normalize_skill_body(content)
+            (directory / 'SKILL.md').write_text(body + '\n', encoding='utf-8')
+            result['skill_sha256'] = digest(directory / 'SKILL.md')
+        else:
+            write(directory / 'submission.json', parse_json_answer(content))
+            result['submission'] = str(directory / 'submission.json')
         return result
     finally:
         write(directory / 'stdio-cleanup.json', {'closed': closed, 'owner': owner, 'thread': thread})
@@ -895,8 +1037,7 @@ def normalized_tool_request(kind, request):
     if not isinstance(request, dict):
         raise ValueError('MCP callback tool arguments missing')
     if kind == 'sourcing_read':
-        path, params = validate_domain_request(request['path'], request.get('params') or {})
-        return {'path': path, 'params': params}
+        return {'path': request['path'], 'params': request.get('params') or {}}
     if kind == 'computation_execute':
         return {'code': request['code'], 'read_names': request.get('read_names') or [],
                 'session': request.get('session', 'analysis'), 'timeout': request.get('timeout', 60)}
@@ -915,6 +1056,8 @@ def verify_mcp_attempt(directory, row, recovery=None):
     requests, observed = [], []
     for call in tools:
         kind = call.get('kind')
+        if kind == 'sourcing_read' and call.get('response', {}).get('status') != 'failed':
+            validate_domain_request(call['request']['path'], call['request'].get('params') or {})
         requests.append((kind, json.dumps(normalized_tool_request(kind, call['request']), sort_keys=True)))
         if call.get('owner') != row.get('owner') or call.get('thread') != row.get('thread'):
             raise ValueError('MCP tool scope differs from independent session')
@@ -929,7 +1072,7 @@ def verify_mcp_attempt(directory, row, recovery=None):
         observed.append((kind, json.dumps(normalized_tool_request(kind, arguments), sort_keys=True)))
     if Counter(requests) != Counter(observed):
         raise ValueError('MCP/callback tool arguments differ')
-    if not any(t['kind'] == 'sourcing_read' for t in tools):
+    if not any(t['kind'] == 'sourcing_read' and t.get('response', {}).get('status') != 'failed' for t in tools):
         raise ValueError('no real domain discovery')
     executions = read(directory / 'mcp/executions.json')
     completed = [e for e in executions if e.get('status') == 'completed']
@@ -960,7 +1103,7 @@ def verify_mcp_attempt(directory, row, recovery=None):
 
 def policy(identity):
     pricing = identity['budget']
-    return {'enforce_cost_limit': False, 'total_cny': None, 'per_attempt_cny': None, 'max_model_calls': 990,
+    return {'enforce_cost_limit': False, 'total_cny': None, 'per_attempt_cny': None, 'max_model_calls': 30 * session_limits('solve')['model_calls'] + 3 * session_limits('skill')['model_calls'],
         'max_output_tokens': 8192, 'max_request_bytes': 1000000, 'timeout_seconds': 240,
         'input_cny_per_million': pricing['input_cny_per_million'], 'output_cny_per_million': pricing['output_cny_per_million'],
         'pricing_kind': pricing['pricing_kind'], 'pricing_source': pricing['pricing_source']}

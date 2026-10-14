@@ -1,0 +1,131 @@
+The appraisal is complete. Here is the final answer JSON:
+
+```json
+{
+  "program_id": "PRG-084",
+  "as_of": "2026-10-12",
+  "approved_volume": {
+    "uom": "vehicle_set",
+    "quantity_scope": "full_fiscal_year",
+    "annual": [
+      {"fiscal_period": 2027, "base_sets": 20300, "premium_sets": 8700, "total_sets": 29000},
+      {"fiscal_period": 2028, "base_sets": 23800, "premium_sets": 10200, "total_sets": 34000},
+      {"fiscal_period": 2029, "base_sets": 32900, "premium_sets": 14100, "total_sets": 47000},
+      {"fiscal_period": 2030, "base_sets": 32900, "premium_sets": 14100, "total_sets": 47000}
+    ],
+    "program_total_sets": 157000
+  },
+  "commercial_coverage": [
+    {"supplier_id": "SUP-001", "fiscal_period": 2027, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"},
+    {"supplier_id": "SUP-001", "fiscal_period": 2028, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"},
+    {"supplier_id": "SUP-001", "fiscal_period": 2029, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"},
+    {"supplier_id": "SUP-001", "fiscal_period": 2030, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"},
+    {"supplier_id": "SUP-002", "fiscal_period": 2027, "base_covered": true, "premium_covered": true, "source_resolution": "approved_original"},
+    {"supplier_id": "SUP-002", "fiscal_period": 2028, "base_covered": true, "premium_covered": true, "source_resolution": "approved_original"},
+    {"supplier_id": "SUP-002", "fiscal_period": 2029, "base_covered": true, "premium_covered": true, "source_resolution": "approved_original"},
+    {"supplier_id": "SUP-002", "fiscal_period": 2030, "base_covered": true, "premium_covered": true, "source_resolution": "approved_original"},
+    {"supplier_id": "SUP-003", "fiscal_period": 2027, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"},
+    {"supplier_id": "SUP-003", "fiscal_period": 2028, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"},
+    {"supplier_id": "SUP-003", "fiscal_period": 2029, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"},
+    {"supplier_id": "SUP-003", "fiscal_period": 2030, "base_covered": true, "premium_covered": true, "source_resolution": "approved_amendment"}
+  ],
+  "technical_admissibility": [
+    {"supplier_id": "SUP-001", "qualification_status": "qualified", "technical_coverage": ["base", "premium"], "required_actions": []},
+    {"supplier_id": "SUP-002", "qualification_status": "qualified", "technical_coverage": ["base", "premium"], "required_actions": []},
+    {"supplier_id": "SUP-003", "qualification_status": "conditional", "technical_coverage": ["base", "premium"], "required_actions": ["photometry_validation"]}
+  ],
+  "capacity_shortfall": [
+    {"supplier_id": "SUP-001", "fiscal_period": 2027, "available_sets": 24000, "shortfall_sets": 8000},
+    {"supplier_id": "SUP-001", "fiscal_period": 2028, "available_sets": 28000, "shortfall_sets": 6000},
+    {"supplier_id": "SUP-001", "fiscal_period": 2029, "available_sets": 32000, "shortfall_sets": 15000},
+    {"supplier_id": "SUP-001", "fiscal_period": 2030, "available_sets": 36000, "shortfall_sets": 11000},
+    {"supplier_id": "SUP-002", "fiscal_period": 2027, "available_sets": 41000, "shortfall_sets": 0},
+    {"supplier_id": "SUP-002", "fiscal_period": 2028, "available_sets": 47000, "shortfall_sets": 0},
+    {"supplier_id": "SUP-002", "fiscal_period": 2029, "available_sets": 53000, "shortfall_sets": 0},
+    {"supplier_id": "SUP-002", "fiscal_period": 2030, "available_sets": 59000, "shortfall_sets": 0},
+    {"supplier_id": "SUP-003", "fiscal_period": 2027, "available_sets": 23000, "shortfall_sets": 9000},
+    {"supplier_id": "SUP-003", "fiscal_period": 2028, "available_sets": 30000, "shortfall_sets": 4000},
+    {"supplier_id": "SUP-003", "fiscal_period": 2029, "available_sets": 37000, "shortfall_sets": 10000},
+    {"supplier_id": "SUP-003", "fiscal_period": 2030, "available_sets": 44000, "shortfall_sets": 3000}
+  ],
+  "launch_gap": [
+    {"supplier_id": "SUP-001", "ready_date": "2026-11-16", "launch_gap_days": 0, "on_time": true},
+    {"supplier_id": "SUP-002", "ready_date": "2026-12-07", "launch_gap_days": 0, "on_time": true},
+    {"supplier_id": "SUP-003", "ready_date": "2027-02-08", "launch_gap_days": 38, "on_time": false}
+  ],
+  "financial_exposure": {
+    "currency": "CNY",
+    "candidates": [
+      {"supplier_id": "SUP-001",
+       "annual_variant_cash": [
+         {"fiscal_period": 2027, "variant": "base", "operating_minor": 1282960000, "tooling_minor": 81200000, "discounted_cash_minor": 1282960000},
+         {"fiscal_period": 2027, "variant": "premium", "operating_minor": 619440000, "tooling_minor": 34800000, "discounted_cash_minor": 619440000},
+         {"fiscal_period": 2028, "variant": "base", "operating_minor": 1539384000, "tooling_minor": 95200000, "discounted_cash_minor": 1399440000},
+         {"fiscal_period": 2028, "variant": "premium", "operating_minor": 743376000, "tooling_minor": 40800000, "discounted_cash_minor": 675796364},
+         {"fiscal_period": 2029, "variant": "base", "operating_minor": 2176664000, "tooling_minor": 131600000, "discounted_cash_minor": 1798895868},
+         {"fiscal_period": 2029, "variant": "premium", "operating_minor": 1051296000, "tooling_minor": 56400000, "discounted_cash_minor": 868839669},
+         {"fiscal_period": 2030, "variant": "base", "operating_minor": 2224916000, "tooling_minor": 131600000, "discounted_cash_minor": 1671942900},
+         {"fiscal_period": 2030, "variant": "premium", "operating_minor": 1074744000, "tooling_minor": 56400000, "discounted_cash_minor": 807651390}
+       ],
+       "upfront_rd_minor": {"base": 30000000, "premium": 30000000},
+       "variant_npv_minor": {"base": 6183238768, "premium": 3001727423},
+       "total_npv_minor": 9184966191},
+      {"supplier_id": "SUP-002",
+       "annual_variant_cash": [
+         {"fiscal_period": 2027, "variant": "base", "operating_minor": 419213332, "tooling_minor": 5394406, "discounted_cash_minor": 419213332},
+         {"fiscal_period": 2027, "variant": "premium", "operating_minor": 339540836, "tooling_minor": 2311888, "discounted_cash_minor": 339540836},
+         {"fiscal_period": 2028, "variant": "base", "operating_minor": 488207494, "tooling_minor": 6324476, "discounted_cash_minor": 443824994},
+         {"fiscal_period": 2028, "variant": "premium", "operating_minor": 395406166, "tooling_minor": 2710490, "discounted_cash_minor": 359460150},
+         {"fiscal_period": 2029, "variant": "base", "operating_minor": 670167282, "tooling_minor": 8742657, "discounted_cash_minor": 553857259},
+         {"fiscal_period": 2029, "variant": "premium", "operating_minor": 542754414, "tooling_minor": 3746853, "discounted_cash_minor": 448557367},
+         {"fiscal_period": 2030, "variant": "base", "operating_minor": 665291366, "tooling_minor": 8742657, "discounted_cash_minor": 499843250},
+         {"fiscal_period": 2030, "variant": "premium", "operating_minor": 538780936, "tooling_minor": 3746853, "discounted_cash_minor": 404794092}
+       ],
+       "upfront_rd_minor": {"base": 65272727, "premium": 65272727},
+       "variant_npv_minor": {"base": 1982011562, "premium": 1617625172},
+       "total_npv_minor": 3599636734},
+      {"supplier_id": "SUP-003",
+       "annual_variant_cash": [
+         {"fiscal_period": 2027, "variant": "base", "operating_minor": 703083096, "tooling_minor": 5205128, "discounted_cash_minor": 703083096},
+         {"fiscal_period": 2027, "variant": "premium", "operating_minor": 312558377, "tooling_minor": 2230769, "discounted_cash_minor": 312558377},
+         {"fiscal_period": 2028, "variant": "base", "operating_minor": 837817845, "tooling_minor": 6102564, "discounted_cash_minor": 761652586},
+         {"fiscal_period": 2028, "variant": "premium", "operating_minor": 372456855, "tooling_minor": 2615385, "discounted_cash_minor": 338597141},
+         {"fiscal_period": 2029, "variant": "base", "operating_minor": 1157096257, "tooling_minor": 8435898, "discounted_cash_minor": 956277898},
+         {"fiscal_period": 2029, "variant": "premium", "operating_minor": 514393893, "tooling_minor": 3615385, "discounted_cash_minor": 425118920},
+         {"fiscal_period": 2030, "variant": "base", "operating_minor": 1100957421, "tooling_minor": 8435898, "discounted_cash_minor": 827165605},
+         {"fiscal_period": 2030, "variant": "premium", "operating_minor": 489330706, "tooling_minor": 3615385, "discounted_cash_minor": 367716533}
+       ],
+       "upfront_rd_minor": {"base": 59615383, "premium": 59615383},
+       "variant_npv_minor": {"base": 3307794568, "premium": 1503606355},
+       "total_npv_minor": 4811400923}
+    ]
+  },
+  "evidence_document_ids": ["PRG-084", "F-084-2027-base-r1", "F-084-2027-premium-r1", "F-084-2028-base-r1", "F-084-2028-premium-r1", "F-084-2029-base-r1", "F-084-2029-premium-r1", "F-084-2030-base-r1", "F-084-2030-premium-r1", "Q-084-0-base-r2", "Q-084-0-premium-r2", "Q-084-1-base-r1", "Q-084-1-premium-r1", "Q-084-2-base-r2", "Q-084-2-premium-r2", "E-084-0-r2", "E-084-1-r2", "E-084-2-r2", "POL-084", "FX-084"],
+  "recommendation": {
+    "supplier_id": "SUP-002",
+    "rationale": "SUP-002 is the only candidate that is technically admissible (qualified, both variants), capacity-feasible with zero shortfall in every fiscal year, and on time for launch (ready 2026-12-07). It also has the lowest full-award total NPV (3,599,636,734 fen) versus SUP-003 (4,811,400,923 fen) and SUP-001 (9,184,966,191 fen).",
+    "risks": [
+      "SUP-002's binding terms are the approved original revision r1; its r2 revision remains draft and is not binding.",
+      "SUP-002 quotes in USD (headlamp_piece), exposing the program to FX movement across 2027-2030.",
+      "SUP-001 and SUP-003 cannot cover full program demand (shortfalls in all years); SUP-003 is also conditional with photometry validation open and 38 days late."
+    ],
+    "assumptions": [
+      "Approved demand uses the highest approved forecast revision per year/variant (r1; r2 drafts excluded).",
+      "Binding commercial terms are the approved quote revision whose effective_period covers the fiscal period.",
+      "Graduated tiers for SUP-003 applied against cumulative supplier award across program variants per POL-084 tier_quantity_scope.",
+      "Tooling recovered on vehicle_set basis over 100000 sets; R&D paid at award and split 50/50 per POL-084.",
+      "Discounting: 2027 undiscounted, later periods divided by 1.10^n per POL-084.",
+      "No contracts or payments exist for PRG-084; no historic exposure applies."
+    ]
+  }
+}
+```
+
+**Key conclusions:**
+- **Approved demand** (highest approved revision = r1; r2 forecasts are drafts): 29,000 / 34,000 / 47,000 / 47,000 sets; lifecycle **157,000 sets**.
+- **Commercial coverage**: SUP-001 (r2 approved, amendment) and SUP-003 (r2 approved, amendment) bind all years; SUP-002's binding terms are its approved original r1 (its r2 is draft).
+- **Technical**: SUP-001 and SUP-002 qualified with no open actions; SUP-003 is **conditional** with `photometry_validation` open.
+- **Capacity**: SUP-002 has zero shortfall in all years; SUP-001 and SUP-003 fall short every year.
+- **Launch**: SUP-001 (2026-11-16) and SUP-002 (2026-12-07) on time; SUP-003 (2027-02-08) is **38 days late**.
+- **Financial (full-award NPV, CNY fen)**: SUP-002 **3,599,636,734** < SUP-003 4,811,400,923 < SUP-001 9,184,966,191.
+- **Recommendation: SUP-002** — the only candidate that is admissible, capacity-feasible, on time, and lowest NPV.

@@ -1,3 +1,9 @@
+## T67 本轮代码修复与零模型检查完成，2026-10-14
+见 docs/runtime/t67-runtime-repairs-2026-10-14.md。用户授权提高业务预算并修其余执行缺口；同solve120tools/60model/600步，skill30/36保留，8轮同请求同结果无进展停止。JSON完整包装/多候选严格拒绝、并发callback/MCP日志、失败调用、拒绝路径后修正的验证、真实stdio退出均修复。121 tests passed0failed0skipped（含真实DeepAgents测试模型50轮）；actualdoctor READY/modelcalls0/failedreadrecorded true，Java/OpenSandbox/Mongo/隔离/清理通过。独立review无重要残留，旧cont1的63hash原样保留。未补跑真实模型、未生成Stage3票，T67整体仍blocked；预算变更下一次需新freeze和明确三份旧skill复用协议，不能skip pre-model绑定。T68不恢复，用户pckl不提交。整体gate receipt artifacts/tasks/T67/20261014T152504Z/receipt.json BLOCKED，保留旧失败，不把修复组件当校准通过。
+
+## T67 预算与证据修复获授权，2026-10-14
+用户要求预算不要过低、除重复死循环外继续，并修复其他问题。本轮只修现有runtime，不启动新模型实验。业务solve放宽120tools/60model，8轮工具重复无新结果停止；skill阶段维持30model/36tools。修复唯一完整JSON包装、callback/MCP并发追加、失败MCP调用记录及真实退出标志；旧cont1/rawtrace/hash/失败/费用不变，T68不恢复。目标是code+零模型最小验证，完整业务校准与Stage3仍未完成。
+
 ## T67 cont1 已止损，2026-10-14
 阅读 docs/runtime/t67-cont1-failure-2026-10-14.md。运行source5916f77，目录 artifacts/experiments/t67-gdpevo-group025-ds-20261014-cont1 原始failed/63hash保留。3份技能已齐；首题base工具38/36限额（17Java成功/15个404/6限额）、fewshot完整JSON包裹解析错误，2连失败自动停止，只2/30行。Base rawtrace第37/38行并发交错损坏；全26对可解析模型回调/gateway用量核对，严格全轨迹失败。新26calls估13.199643CNY，全历史50calls估24.407352，actual未知。独立诊断仅提取原fewshotJSON、原评估器得6/13；原failed不重写，不拼提升。所有本次worker/container/network已观察不存在。严禁补跑/重复启动，T68不恢复。新增最终只读gate需完整校准+六原票至少五过，目前必须blocked；最终 gate receipt artifacts/tasks/T67/20261014T140612Z/receipt.json BLOCKED（exit2），指向cont1和最终acceptance脚本。后续问题已列T67任务，不修改本轮冻结代码，待人讨论修订协议。用户pckl保留。
 

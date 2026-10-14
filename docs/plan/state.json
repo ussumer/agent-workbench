@@ -407,8 +407,8 @@
     "T67": {
       "status": "blocked",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T67/20261014T140612Z/receipt.json",
-      "notes": "cont1 failed：第三份技能9calls/6compute成功；首题base38/36限额、fewshot完整JSON包裹解析拒绝，2连失败停止。base并发rawtrace2行损坏，严格证据失败。只读单题fewshot诊断6/13不补入原运行；26新calls估13.199643，总50calls估24.407352，actual未知。所有专用资源已清理，未补跑、无Stage3，T68不恢复。报告t67-cont1-failure-2026-10-14.md。"
+      "receipt": "artifacts/tasks/T67/20261014T152504Z/receipt.json",
+      "notes": "2026-10-14用户授权修复已交付：同solve120tools60model600步+8轮重复无进展；skill30/36保留。JSON包装严格完整/多候选拒绝、并发日志、全部失败工具记录/拒绝后修正核对、真实stdio退出修复。121tests passed，真实doctor ready/modelcalls0/404落盘/全隔离清理通过，独立reviewclear。旧cont1/63hash/fee不改；未新付费校准或Stage3，T67整体blocked，三技能新reuse协议及完整30次仍待后续；T68不恢复。"
     },
     "T68": {
       "status": "blocked",
