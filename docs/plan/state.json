@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "in_progress",
+      "status": "blocked",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T67/20261014T152504Z/receipt.json",
-      "notes": "2026-10-15cont2在skill旧36工具上限失败，24calls估13.617162/0业务题/清理passed；本轮预算遗漏一次修正：skill/solve均120tool60model600步+8轮重复保护。122回归green；独立cont3完整3fresh+30，旧74calls估38.024514单列保留，再同类失败止损，T68不恢复。"
+      "receipt": "artifacts/tasks/T67/20261015T040106Z/receipt.json",
+      "notes": "2026-10-15cont3止损：3skills生成；首题base128/120失败0，83个404/0成功计算；fewshot独立8/13。SIGINT主进程已退出，全资源观察清理，74manifest hash一致。原stale running不改，独立operator审计stopped。81请求77known/4HTTP503未知usage，已知估41.149440；累计155请求已知79.173954。真正SDK retries仍2、变换ID停滞判定/发现及中断收据未解决；等讨论不补跑，无Stage3，T68blocked。"
     },
     "T68": {
       "status": "blocked",

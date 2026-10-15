@@ -1,3 +1,12 @@
+## T67 cont3 已主动停止，2026-10-15
+读docs/runtime/t67-cont3-stopped-2026-10-15.md。source78695e2，exec48288已exit，目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont3。3skills生成（9/2/10计算）；首题base128/120预算fail0、83个404，fewshot独立8/13。SIGINT止损后原result仍stale running，不改manifest；scratch/runtime/cont3-stopped-audit.json明确operator_stopped_incomplete，74hash/所有scope及控制资源清理已核对。81网关请求，4个503无usage，已知估41.149440；总155请求已知79.173954，actual未知。SDK表层retry0而sync/async底层2已零模型确认。变换ID探索停滞、可发现性、真实retry和原生终止收据缺口未修，全落T67；等讨论，不继续补丁/模型/Stage3，T68不恢复，pckl不动。最终gate artifacts/tasks/T67/20261015T040106Z/receipt.json BLOCKED exit2，指向cont3。
+
+## T67 cont3 三份技能完成，2026-10-15
+source78695e2，进程exec48288仍运行；run/result显示3generated、技能共44模型调用，0业务rows时已进入30匹配Actor。目录/日志见下条。保持冻结源码不变，不重复启动；完成后只读verify cont3/结构/六票评审/gate。新旧费用完整单列，T68不恢复，用户pckl不动。
+
+## T67 cont3 已启动，2026-10-15
+代码78695e2，execsession48288仅本应用会话有效。目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont3；log scratch/runtime/full-calibration-cont3.log。实际源码快照runtime-source.py+SHA保留，付费前与Git规范化内容相同；新freeze/actualdoctor后3fresh+30。skill/solve同120tools60model600步+8重复保护；旧cont2原24调用13.617162估算和19hash/cleanup已audit，旧总74calls38.024514估算单列。不得重复启动、覆盖或失败后自动重试；若同类机制再失败立即停止讨论。完成后verify当前cont3，六独立Stage3票和最终gate。尚在预检，暂无业务成绩；T68blocked，用户pckl保留。
+
 ## T67 cont2已停止，阶段预算遗漏修正，2026-10-15
 读docs/runtime/t67-cont3-protocol-2026-10-15.md。cont2 skill1实际37/36限额，24新calls估13.617162CNY/15completed计算/0业务rows，19manifest+callbackledger+真实stdio及资源清理通过。上一轮只放宽solve遗漏skill，现两个阶段同120tools60model600步+8轮重复无新结果停止，122回归green；独立review待结论。接下来cont3独立3fresh+30，旧74calls估38.024514全部保留，不混分/费用。此为有证据的一次预算遗漏修正，再次同类失败即停止，不叠补丁。T68不恢复，用户pckl保留。cont3尚未启动。
 
