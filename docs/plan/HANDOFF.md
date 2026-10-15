@@ -1,3 +1,9 @@
+## T67 网关修复通过，cont4准备，2026-10-15
+读docs/runtime/t67-gateway-drain-2026-10-15.md和t67-cont4-protocol-2026-10-15.md。70本地HTTP/runtime/termination回归green、独立review通过；网关代码纳入本仓库，排空回包后关账本，503unknown保留。旧cont3 skill1/3有隐藏重试/unknownusage，严格reuse不能过，不跳guard；按原完整3fresh+30协议准备新cont4，gate已指向cont4。旧155calls/已知估79.173954/4unknown全部保留，不复活旧failed。尚未启动新模型；先commit实际源码，再新freeze/actualdoctor。T68不恢复，用户pckl不提交。
+
+## T67 网关迟到用量修复继续，2026-10-15
+用户“继续吧”。先本地延迟HTTP证明网关退出需等待在飞回包落盘；现用外部未追踪gateway移入仓库版本管理再做最小生命周期修复，保留费用算法/请求协议。零模型验证后检查新运行协议/续校准条件，不恢复原失败，T68不恢复。
+
 ## T67 无效探索/真实重试/中断修复交付，2026-10-15
 读 docs/runtime/t67-discovery-retry-stop-repairs-2026-10-15.md。授权代码修复及组件验证已完成：cont3原轨迹128请求在46处离线停；真实SDK sync/async重试0，本地503各1请求；同值状态哈希、中断收据、终末成绩保留、取消优先均修复。115回归+后续受影响38通过，共117不同用例；独立定点复审通过。真实零模型doctor READY：Java/MCP/OpenSandbox/Mongo/实际哈希/隔离/清理通过，modelcalls0。本轮无新模型费用，原failed/hash/账目不动。
 整体T67仍blocked：最终gate artifacts/tasks/T67/20261015T055339Z/receipt.json，实际阻塞为原cont3冻结源码变化；完整30校准/六票Stage3仍缺。外部budget_proxy daemon在飞请求迟到usage归档尚未修，stop收据标unverified，已登记续付费前检查/处置；保持付费暂停、不自动新实验/重生成技能。T68不恢复；用户pckl SHA DEB5009D0F95F8E7BBC02B7CB171E9CD1E0D581EF838CC7FC63D33DBDE0F686D保留且不提交。下一步需讨论新运行协议及迟到用量边界，当前没有付费进程。

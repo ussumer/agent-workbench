@@ -171,7 +171,7 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None, reuse_from=Non
         frozen.update({str(p): digest(p) for p in paths})
     # Runtime/config identities are operator evidence, never copied into Actor inputs.
     for path in (Path(__file__).resolve(), ROOT / 'uv.lock', CONFIG, ROOT / 'scripts/planning/gdpevo_v4_control.py',
-                 ROOT / 'scripts/planning/gdpevo_v4_reuse.py', ROOT / 'src/agent/config.py'):
+                 ROOT / 'scripts/planning/gdpevo_v4_reuse.py', ROOT / 'scripts/planning/gdpevo_v4_gateway.py', ROOT / 'src/agent/config.py'):
         if path.is_file():
             frozen[str(path)] = digest(path)
     runtime_identity = {}
@@ -1179,7 +1179,7 @@ def run(output, config_path):
     run_config = run_dir / 'runtime.json'
     write(run_config, config)
     write(run_dir / 'doctor-receipt.json', readiness)
-    from procurement_eval.budget_proxy import gateway
+    from scripts.planning.gdpevo_v4_gateway import gateway
     original, identity = model_config(config)
     protocol = read(output / 'protocol.json')
     result = {'status': 'running', 'rows': [], 'skills': [], 'model_identity': original.redacted(),
@@ -1301,7 +1301,8 @@ def run(output, config_path):
                 actor_cleanup[kind] = read(path) if path and path.is_file() else {'status': 'unverified'}
             write(run_dir / 'stop-receipt.json', {**result['stop'], 'status': 'stopped',
                   'source_hashes_sha256': result['source_hashes_sha256'], 'usage': result['usage'],
-                  'actor_cleanup': actor_cleanup, 'late_gateway_results': 'unverified',
+                  'actor_cleanup': actor_cleanup,
+                  'late_gateway_results': 'drained' if result['usage'].get('gateway_requests_drained') is True else 'unverified',
                   'control_cleanup': result.get('control_cleanup', {'status': 'unverified'})})
         write(run_dir / 'result.json', result)
         freeze_manifest(run_dir)

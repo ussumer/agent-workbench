@@ -99,3 +99,7 @@ T67 sourcing_read只公开实际域接口与通用导航：documents必须用记
 run捕获KeyboardInterrupt/CancelledError，记stopped（CLI退出2），保留当前scope及调用区间、终末scored/generated/failed，只有started改interrupted。stop-receipt.json纳入manifest，分列真实控制容器/MCP/stdio清理；缺失标unverified。取消优先普通异常，清理/退出异常另存且不伪造清理成功。本协议覆盖可处理的中断，不承诺SIGKILL/宿主断电下自动收据。
 
 未完成边界：外部procurement_eval.budget_proxy现有daemon HTTP线程不等待在飞请求，迟到回包的用量不能保证在关闭账本后落盘；stop receipt显式late_gateway_results=unverified。必须保留已预留调用和未知usage，不能称停止即完整费用归档；完整付费续跑前须在T67解决或明确处置，不能以组件通过视为整体验收。
+
+
+## T67 网关排空修订（2026-10-15，覆盖上条未完成边界）
+T67改用本仓库版本化gdpevo_v4_gateway，保留原请求/预算/未知usage语义。gateway退出先停止接入，再等待非daemon请求线程完成finish写账；外层才关闭log及写usage/manifest。source freeze含该模块。gateway_requests_drained与pending_model_requests独立于usage_complete；503仍unknown，drained不冒充已知账单。stop receipt仅真实drained才标drained，未证实仍unverified。旧外部代码和旧运行不回写；SIGKILL/断电/再次强杀仍不承诺完整收据。

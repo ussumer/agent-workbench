@@ -3655,7 +3655,7 @@
             "python",
             "scripts/planning/gdpevo_v4_acceptance.py",
             "--output",
-            "artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont3",
+            "artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont4",
             "--review",
             "gdpevo-construction/v4-20261012/review/reports/task_group_025.yaml"
           ],

@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "blocked",
+      "status": "in_progress",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T67/20261015T055339Z/receipt.json",
-      "notes": "2026-10-15已授权代码修复交付：真实cont3轨迹128工具请求在46处离线停止；SDK构造retry0、sync/async本地503各1请求；同值状态哈希与原生中断/取消优先、终末成绩保留。115回归+后续受影响38通过（117不同用例）；真实doctor READY/model0/Java/Mongo/OpenSandbox/隔离清理通过，新增模型费0。整体gate blocked冻结源码变化，完整校准/六票Stage3未完成；外部网关迟到usage归档未解决，付费保持暂停，原失败/hash/历史费用保留，T68不恢复。详见t67-discovery-retry-stop-repairs-2026-10-15.md。"
+      "notes": "2026-10-15用户“继续吧”恢复T67：先补网关在飞请求迟到用量归档，真实本地HTTP零模型red/green；再检查新冻结协议与校准条件，旧失败不恢复，T68不恢复。"
     },
     "T68": {
       "status": "blocked",

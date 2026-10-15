@@ -328,10 +328,8 @@ def unit_run_fixture(tmp_path, monkeypatch):
     @contextmanager
     def fake_gateway(*a):
         yield "unit", budget
-    fake_module = ModuleType("procurement_eval.budget_proxy")
-    fake_module.gateway = fake_gateway
-    monkeypatch.setitem(sys.modules, "procurement_eval", ModuleType("procurement_eval"))
-    monkeypatch.setitem(sys.modules, "procurement_eval.budget_proxy", fake_module)
+    from scripts.planning import gdpevo_v4_gateway
+    monkeypatch.setattr(gdpevo_v4_gateway, "gateway", fake_gateway)
     monkeypatch.setattr(runtime, "model_config", lambda c: (FakeConfig(), {}))
     monkeypatch.setattr(runtime, "policy", lambda c: {})
     monkeypatch.setattr(runtime, "register_profile", lambda m: None)

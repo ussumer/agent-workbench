@@ -1,0 +1,9 @@
+# T67 网关在飞请求落账修复
+
+用户“继续吧”恢复。原procurement_eval.budget_proxy快照SHA888574da7217d99de035c28f30684e9b0bbe4046dfe1d5831cbee04a86252599已纳入scripts/planning/gdpevo_v4_gateway.py；原预算reserve/finish算法AST逐项相同。now/digest实现与原core相同，无栈替换、无依赖升级。
+
+ThreadingHTTPServer默认daemon请求线程使server_close不等待回包；现仅改请求线程非daemon，先shutdown停止接受，再server_close等待在飞处理，所有finish落账后才离开gateway、关闭log、输出usage/manifest。summary分列gateway_requests_drained和pending_model_requests；stop收据只有真实排空才标drained。排空不代表usage已知，503仍unknown/actual_cost=null。prepare新增冻结本仓库gateway源码，避免外部未跟踪补丁。
+
+真实本地延迟HTTP三例先red：普通退出200、中断200、中断503全部复现closed ledger；green70 passed、0 failed/errors/skipped，包括直接受影响runtime/termination。报告scratch/runtime/gateway-drain-{red,green}.xml，green SHA34bc63bb8552b794fa6fd466dbc7a8b15b8144c8675d9ae018d6a593b532d984。独立定点review无重要发现。本轮检查modelcalls0。单次可处理Python中断等待现有网络超时/回包；不承诺SIGKILL、断电、再次强杀仍能收齐provider用量。
+
+cont3旧技能复用核查：session1 gateway16/logical15，unknownusage[6]；session2 8/8无unknown；session3 20/17，unknownusage[27,29,36]。三份terminal均stop且body完整，但严格复用需要完整原调用账本及pre-model来源相符，当前条件不满足；不跳过guard或重写旧running。按原完整验收路线，在独立cont4下3fresh+30，旧155requests/已知部分估79.173954及4unknown单列，新费用另算。没有把旧skill失败转成pass。
