@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "blocked",
+      "status": "in_progress",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T67/20261014T152504Z/receipt.json",
-      "notes": "2026-10-14用户授权修复已交付：同solve120tools60model600步+8轮重复无进展；skill30/36保留。JSON包装严格完整/多候选拒绝、并发日志、全部失败工具记录/拒绝后修正核对、真实stdio退出修复。121tests passed，真实doctor ready/modelcalls0/404落盘/全隔离清理通过，独立reviewclear。旧cont1/63hash/fee不改；未新付费校准或Stage3，T67整体blocked，三技能新reuse协议及完整30次仍待后续；T68不恢复。"
+      "notes": "2026-10-15明确继续完整校准；三技能复用probe在历史源码SHA不匹配时拒绝，未降标准，归档零模型路径，改走3fresh技能+15base15fewshot独立cont2。原50calls/24.407352估算费用保留，先freeze/实际doctor，再新调用；业务120/60/600，T68不恢复。"
     },
     "T68": {
       "status": "blocked",

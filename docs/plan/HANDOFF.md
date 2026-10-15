@@ -1,3 +1,9 @@
+## T67 cont2 改走完整新生成，2026-10-15
+读 docs/runtime/t67-cont2-protocol-2026-10-15.md。严格probe1发现run2 runtime冻结SHA不能从edc提交重建，未放松guard，bundle代码/测试归档scratch/runtime/abandoned-bundle-20261015；全部零模型。当前已恢复d3c596c原运行行为，将3fresh独立技能+15base15fewshot，新目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont2，gate已指向本目录。旧50调用/24.407352估算费用与失败原样；新费用单列；先freeze/actualdoctor再调用。T68不恢复，pckl不提交。尚未启动新模型。
+
+## T67 完整校准明确恢复，2026-10-15
+用户“那就是继续”明确授权完整30业务校准和后续六票Stage3。将复用run2技能1/2、cont1技能3，先核对原输出/同train输入及scoped ledger，明确d3c596c修复的纯记录/后处理/solve额度差异，不跳过绑定。父代理新skill_bundle控制模块，runtime代理拥有taskset/test_runtime最小分流。独立cont2新目录、旧失败原样、无自动失败重试；尚无新费用。T68不恢复，用户pckl保留。
+
 ## T67 本轮代码修复与零模型检查完成，2026-10-14
 见 docs/runtime/t67-runtime-repairs-2026-10-14.md。用户授权提高业务预算并修其余执行缺口；同solve120tools/60model/600步，skill30/36保留，8轮同请求同结果无进展停止。JSON完整包装/多候选严格拒绝、并发callback/MCP日志、失败调用、拒绝路径后修正的验证、真实stdio退出均修复。121 tests passed0failed0skipped（含真实DeepAgents测试模型50轮）；actualdoctor READY/modelcalls0/failedreadrecorded true，Java/OpenSandbox/Mongo/隔离/清理通过。独立review无重要残留，旧cont1的63hash原样保留。未补跑真实模型、未生成Stage3票，T67整体仍blocked；预算变更下一次需新freeze和明确三份旧skill复用协议，不能skip pre-model绑定。T68不恢复，用户pckl不提交。整体gate receipt artifacts/tasks/T67/20261014T152504Z/receipt.json BLOCKED，保留旧失败，不把修复组件当校准通过。
 
