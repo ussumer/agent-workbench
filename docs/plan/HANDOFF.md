@@ -1,3 +1,6 @@
+## T67 cont4 已启动，2026-10-15
+源码d7c7dfb07250f05240a3776a6e76419c5c090941；exec session52497（仅本应用会话有效）。目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont4，日志scratch/runtime/full-calibration-cont4.log；runtime/gateway/modelconfig实际快照及SHA已保存，新prepare30匹配行，正在真实零模型doctor，当前未见业务结果。不重复启动、不修改冻结代码、不失败自动重试；完成后只读verify当前cont4/六票Stage3/gate。旧155请求/79.173954已知部分估/4unknown单列，新费用另算。T68不恢复，用户pckl不提交。
+
 ## T67 网关修复通过，cont4准备，2026-10-15
 读docs/runtime/t67-gateway-drain-2026-10-15.md和t67-cont4-protocol-2026-10-15.md。70本地HTTP/runtime/termination回归green、独立review通过；网关代码纳入本仓库，排空回包后关账本，503unknown保留。旧cont3 skill1/3有隐藏重试/unknownusage，严格reuse不能过，不跳guard；按原完整3fresh+30协议准备新cont4，gate已指向cont4。旧155calls/已知估79.173954/4unknown全部保留，不复活旧failed。尚未启动新模型；先commit实际源码，再新freeze/actualdoctor。T68不恢复，用户pckl不提交。
 
