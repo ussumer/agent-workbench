@@ -1,3 +1,7 @@
+## T67 cont5结束，正式valid缺4，2026-10-15
+读docs/runtime/t67-cont5-results-2026-10-15.md。exec13071已exit0，源码cbaea2b，3fresh+30全尝试：base有效11/15、fewshot15/15；四次base no_progress无JSON计诊断0，开发均分40.6227%/64.7619%（差24.1392pp），不是formal avg@3。26实际答案重评分、33独立scope、424hash、675MCP、330模型请求回调用量/真实清理全过，330全200/usage完整/pending0/drained；新费保守估119.879577，actual未知。旧155calls/79.173954部分估/4unknown保留，总485calls/已知部分估199.053531；cont4零调用失败原样。
+最终gate artifacts/tasks/T67/20261015T100631Z/receipt.json BLOCKED，精准cont5，原因仅4无有效提交。官方guides/calibration_runtime.md197/206与calibration_and_review.md190有效提交要求未被DS/栈适配覆盖，因此不启动Stage3六票、不mark done、不自动补跑。下一步先讨论/设计原总额度内no_progress/预算停止后的真实Actor收尾提交；不得宿主造答案/改评分/阈值。tool_error一律否决静态分支缺口已登记，当前账本已过，非本轮阻塞；下次可核验这3份clean技能复用，不能擅跳绑定或重生成。当前无付费进程，T68不恢复，用户pckl保持DEB5009D0F95F8E7BBC02B7CB171E9CD1E0D581EF838CC7FC63D33DBDE0F686D，不提交。
+
 ## T67 cont5 已启动，2026-10-15
 源码cbaea2b0dc09ced8c7588285315160603b063547；exec13071（仅本应用会话有效）。目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont5，log scratch/runtime/full-calibration-cont5.log。runtime/gateway/control/modelconfig实际snapshot已存，新prepare30匹配行，正actualdoctor；通过再3fresh+30。禁止重复启动/修改冻结代码/失败自动重试，同端口/同类再失败立即停讨论。原cont4 zero-call失败和6hash不动；新旧费用独立，旧155calls/已知79.173954/4unknown保留，T68不恢复，用户pckl不提交。完成只读verify cont5/六票Stage3/gate（已指cont5）。
 

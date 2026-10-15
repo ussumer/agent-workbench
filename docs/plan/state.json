@@ -405,10 +405,10 @@
       "notes": "Stage 1完成：GDPval六原题、两原始附件、四组v3来源映射；v4为exploratory/intermediate候选，原v3仍合成。零模型调用。Stage 2/3与训练未完成，登记T67。"
     },
     "T67": {
-      "status": "in_progress",
+      "status": "blocked",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T67/20261015T065802Z/receipt.json",
-      "notes": "2026-10-15cont5已独立启动，源码cbaea2b，exec13071，prepare后actualdoctor中；3fresh+30原完整开发协议。网关70回归review通过；cont4零调用TIME_WAIT误报失败保留，最小修复12控制回归/review及真实同端口两次生命周期通过。禁止重复/自动失败重试，同类再失败即停。旧155calls/已知79.173954/4unknown独立，T68blocked，完整校准/Stage3未完成。"
+      "receipt": "artifacts/tasks/T67/20261015T100631Z/receipt.json",
+      "notes": "cont5完整3技能+30开发尝试结束：base11/15有效/few15/15，含4失败0开发均分40.6227%/64.7619%，差24.1392pp，非formal avg@3。26重评分/33scope/424hash/675工具/330模型回调用量及真实清理通过，新费估119.879577CNY，全部200/usage完整/pending0；旧155calls/79.173954已知部分估/4unknown保留。4个base no_progress无终末JSON，原valid要求未满足，最终gate blocked指cont5，Stage3未启动。后续需受限真实Actor收尾、可恢复tool_error核验/clean技能复用协议；不自动补跑/改标准，T68不恢复。"
     },
     "T68": {
       "status": "blocked",
