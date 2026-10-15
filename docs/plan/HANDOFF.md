@@ -1,3 +1,9 @@
+## T67 cont2已停止，阶段预算遗漏修正，2026-10-15
+读docs/runtime/t67-cont3-protocol-2026-10-15.md。cont2 skill1实际37/36限额，24新calls估13.617162CNY/15completed计算/0业务rows，19manifest+callbackledger+真实stdio及资源清理通过。上一轮只放宽solve遗漏skill，现两个阶段同120tools60model600步+8轮重复无新结果停止，122回归green；独立review待结论。接下来cont3独立3fresh+30，旧74calls估38.024514全部保留，不混分/费用。此为有证据的一次预算遗漏修正，再次同类失败即停止，不叠补丁。T68不恢复，用户pckl保留。cont3尚未启动。
+
+## T67 cont2 已启动，2026-10-15
+source480dfd2，actual运行代码逐字节等同已验证d3c596c；exec session23806仅本应用会话有效。目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont2；日志gdpevo-construction/v4-20261012/task_factory/scratch/runtime/full-calibration-cont2.log。3freshskill+30匹配业务attempt，先真实doctor，120tools60model600步。旧run1/run2/cont1失败50calls/24.407352估算单列。不要重复启动或失败后自动重试；只读result/ledger/进程，完成后verify当前cont2、结构检查/六票Stage3/最终gate。初始预检运行中、暂未业务分数。T68不恢复，用户pckl保留。
+
 ## T67 cont2 改走完整新生成，2026-10-15
 读 docs/runtime/t67-cont2-protocol-2026-10-15.md。严格probe1发现run2 runtime冻结SHA不能从edc提交重建，未放松guard，bundle代码/测试归档scratch/runtime/abandoned-bundle-20261015；全部零模型。当前已恢复d3c596c原运行行为，将3fresh独立技能+15base15fewshot，新目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont2，gate已指向本目录。旧50调用/24.407352估算费用与失败原样；新费用单列；先freeze/actualdoctor再调用。T68不恢复，pckl不提交。尚未启动新模型。
 

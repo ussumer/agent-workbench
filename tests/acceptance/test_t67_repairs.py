@@ -78,11 +78,10 @@ def tool_history(rounds,*,unique=False,failed=False):
     return rows
 
 
-def test_budget_allows_more_than_old_cap_and_preserves_skill_limits():
+def test_budget_allows_full_discovery_in_both_phases():
     limits=runtime.session_limits('solve')
     assert limits['tool_calls']>=120 and limits['model_calls']>=60
-    assert runtime.session_limits('skill')['tool_calls']==36
-    assert runtime.session_limits('skill')['model_calls']==30
+    assert runtime.session_limits('skill')==limits
 
 
 def test_no_progress_detects_repeated_results_but_allows_new_documents():
@@ -197,3 +196,10 @@ def test_real_graph_can_use_fifty_model_rounds_without_hidden_recursion_cap(tmp_
         config={'recursion_limit':runtime.session_limits('solve')['recursion_limit']}))
     assert seen==list(range(50))
     assert runtime.parse_json_answer(result['messages'][-1].content)=={'answer':42}
+
+
+def test_skill_generation_has_the_same_no_progress_protection(tmp_path):
+    middleware=runtime.actor_middlewares('skill',tmp_path)[-1]
+    result=asyncio.run(middleware.abefore_model({'messages':tool_history(10)},None))
+    assert result['jump_to']=='end'
+    assert runtime.read(tmp_path/'termination.json')['kind']=='no_progress'

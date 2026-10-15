@@ -408,7 +408,7 @@
       "status": "in_progress",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T67/20261014T152504Z/receipt.json",
-      "notes": "2026-10-15明确继续完整校准；三技能复用probe在历史源码SHA不匹配时拒绝，未降标准，归档零模型路径，改走3fresh技能+15base15fewshot独立cont2。原50calls/24.407352估算费用保留，先freeze/实际doctor，再新调用；业务120/60/600，T68不恢复。"
+      "notes": "2026-10-15cont2在skill旧36工具上限失败，24calls估13.617162/0业务题/清理passed；本轮预算遗漏一次修正：skill/solve均120tool60model600步+8轮重复保护。122回归green；独立cont3完整3fresh+30，旧74calls估38.024514单列保留，再同类失败止损，T68不恢复。"
     },
     "T68": {
       "status": "blocked",

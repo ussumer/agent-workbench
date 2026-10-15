@@ -663,9 +663,7 @@ def actor_input(output, task_id):
             for p in sorted(folder.rglob('*')) if p.is_file()]
 
 def session_limits(kind):
-    if kind == 'skill':
-        return {'model_calls': 30, 'tool_calls': 36, 'recursion_limit': 120}
-    if kind != 'solve':
+    if kind not in {'skill', 'solve'}:
         raise ValueError('unknown Actor session kind')
     return {'model_calls': 60, 'tool_calls': 120, 'recursion_limit': 600}
 
@@ -720,19 +718,18 @@ def actor_middlewares(kind, directory):
     limits = session_limits(kind)
     middlewares = [ModelCallLimitMiddleware(run_limit=limits['model_calls'], exit_behavior='end'),
                    ToolCallLimitMiddleware(run_limit=limits['tool_calls'], exit_behavior='end')]
-    if kind == 'solve':
-        class NoProgressMiddleware(AgentMiddleware):
-            @hook_config(can_jump_to=['end'])
-            def before_model(self, state, runtime):
-                reason = no_progress_reason(state.get('messages', []))
-                if reason is None:
-                    return None
-                write(directory / 'termination.json', {'kind': 'no_progress', 'message': reason})
-                return {'messages': [AIMessage(content='Execution stopped: ' + reason)], 'jump_to': 'end'}
-            @hook_config(can_jump_to=['end'])
-            async def abefore_model(self, state, runtime):
-                return self.before_model(state, runtime)
-        middlewares.append(NoProgressMiddleware())
+    class NoProgressMiddleware(AgentMiddleware):
+        @hook_config(can_jump_to=['end'])
+        def before_model(self, state, runtime):
+            reason = no_progress_reason(state.get('messages', []))
+            if reason is None:
+                return None
+            write(directory / 'termination.json', {'kind': 'no_progress', 'message': reason})
+            return {'messages': [AIMessage(content='Execution stopped: ' + reason)], 'jump_to': 'end'}
+        @hook_config(can_jump_to=['end'])
+        async def abefore_model(self, state, runtime):
+            return self.before_model(state, runtime)
+    middlewares.append(NoProgressMiddleware())
     return middlewares
 
 
