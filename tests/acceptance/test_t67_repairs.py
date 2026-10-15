@@ -156,7 +156,11 @@ def test_computation_transport_ids_do_not_hide_repeated_no_state_results():
     assert runtime.no_progress_reason(rows) is not None
     for row in rows:
         if row.get('type')=='tool':
-            value=json.loads(row['content']);value['saved_names']=['iteration'];row['content']=json.dumps(value)
+            value=json.loads(row['content']);value['saved_names']=['iteration'];value['state_hashes']={'iteration':{'sha256':'constant','bytes':2}};row['content']=json.dumps(value)
+    assert runtime.no_progress_reason(rows) is not None
+    for n,row in enumerate(rows):
+        if row.get('type')=='tool':
+            value=json.loads(row['content']);value['state_hashes']['iteration']['sha256']=str(n);row['content']=json.dumps(value)
     assert runtime.no_progress_reason(rows) is None
 
 
@@ -203,3 +207,68 @@ def test_skill_generation_has_the_same_no_progress_protection(tmp_path):
     result=asyncio.run(middleware.abefore_model({'messages':tool_history(10)},None))
     assert result['jump_to']=='end'
     assert runtime.read(tmp_path/'termination.json')['kind']=='no_progress'
+
+
+@pytest.mark.parametrize('cleanup_failure',[False,True])
+def test_cancelled_graph_records_actual_context_exit_and_preserves_interrupt(tmp_path,monkeypatch,cleanup_failure):
+    from contextlib import asynccontextmanager
+    from types import SimpleNamespace
+    from langgraph.store.memory import InMemoryStore
+    import deepagents,api_view.web_config,langchain_mcp_adapters.tools
+    config=tmp_path/'config.json';runtime.write(config,{'mongo_uri':'mongodb://unit','database':'unit'})
+    resources=SimpleNamespace(store=InMemoryStore(),checkpointer=None,close=lambda:None)
+    resources.start=lambda:resources
+    monkeypatch.setattr(api_view.web_config,'MongoResources',lambda settings:resources)
+    class Graph:
+        async def astream(self,*args,**kwargs):
+            raise asyncio.CancelledError('operator stop')
+            yield
+    monkeypatch.setattr(deepagents,'create_deep_agent',lambda **kwargs:Graph())
+    async def tools(session):return [SimpleNamespace(name=n) for n in ['sourcing_read','computation_execute','computation_status','finish_session']]
+    monkeypatch.setattr(langchain_mcp_adapters.tools,'load_mcp_tools',tools)
+    class Client:
+        @asynccontextmanager
+        async def session(self,name):yield self
+        async def call_tool(self,name,args):
+            if cleanup_failure:raise ValueError('cleanup failed')
+            return SimpleNamespace(isError=False,structuredContent={'recycled':True,'container_absent':True})
+    monkeypatch.setattr(runtime,'mcp_client',lambda *args:Client())
+    folder=tmp_path/'actor'
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(runtime.actor_session(None,config,folder,[],None,'private'))
+    assert runtime.read(folder/'stdio-cleanup.json')['closed'] is True
+    if cleanup_failure:assert runtime.read(folder/'actor-cleanup-error.json')['type']=='ValueError'
+
+
+@pytest.mark.parametrize('stop_phase',['cleanup','context_exit'])
+def test_operator_stop_wins_over_ordinary_actor_or_context_error(tmp_path,monkeypatch,stop_phase):
+    from contextlib import asynccontextmanager
+    from types import SimpleNamespace
+    from langgraph.store.memory import InMemoryStore
+    import deepagents,api_view.web_config,langchain_mcp_adapters.tools
+    config=tmp_path/'config.json';runtime.write(config,{'mongo_uri':'mongodb://unit','database':'unit'})
+    resources=SimpleNamespace(store=InMemoryStore(),checkpointer=None,close=lambda:None)
+    resources.start=lambda:resources
+    monkeypatch.setattr(api_view.web_config,'MongoResources',lambda settings:resources)
+    class Graph:
+        async def astream(self,*args,**kwargs):
+            if stop_phase=='cleanup':raise ValueError('Actor failed before operator stop')
+            raise asyncio.CancelledError('operator stop')
+            yield
+    monkeypatch.setattr(deepagents,'create_deep_agent',lambda **kwargs:Graph())
+    async def tools(session):return [SimpleNamespace(name=n) for n in ['sourcing_read','computation_execute','computation_status','finish_session']]
+    monkeypatch.setattr(langchain_mcp_adapters.tools,'load_mcp_tools',tools)
+    class Client:
+        @asynccontextmanager
+        async def session(self,name):
+            yield self
+            if stop_phase=='context_exit':raise RuntimeError('stdio exit failed after stop')
+        async def call_tool(self,name,args):
+            if stop_phase=='cleanup':raise asyncio.CancelledError('operator stop during cleanup')
+            return SimpleNamespace(isError=False,structuredContent={'recycled':True,'container_absent':True})
+    monkeypatch.setattr(runtime,'mcp_client',lambda *args:Client())
+    folder=tmp_path/'actor'
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(runtime.actor_session(None,config,folder,[],None,'private'))
+    assert runtime.read(folder/'stdio-cleanup.json')['closed'] is (stop_phase=='cleanup')
+    assert runtime.read(folder/('actor-error.json' if stop_phase=='cleanup' else 'context-exit-error.json'))['type'] in {'ValueError','RuntimeError'}

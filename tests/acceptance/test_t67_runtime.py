@@ -303,7 +303,7 @@ def test_mcp_verifier_rejects_different_request_despite_same_tool_name(tmp_path)
     with pytest.raises(ValueError, match="arguments"):
         runtime.verify_mcp_attempt(folder, scope)
 
-def test_run_stops_after_first_skill_missing_mandated_mechanism(tmp_path, monkeypatch):
+def unit_run_fixture(tmp_path, monkeypatch):
     from dataclasses import dataclass
     from contextlib import contextmanager
     from types import SimpleNamespace, ModuleType
@@ -319,8 +319,9 @@ def test_run_stops_after_first_skill_missing_mandated_mechanism(tmp_path, monkey
         base_url: str = "test"
         api_key: str = "synthetic-test-key"
         max_tokens: int = 1
-        def create_chat_model(self):
-            return SimpleNamespace()
+        def create_chat_model(self, *, max_retries=None):
+            return SimpleNamespace(root_client=SimpleNamespace(max_retries=max_retries),
+                                   root_async_client=SimpleNamespace(max_retries=max_retries))
         def redacted(self):
             return {"model_id": "synthetic-unit-model"}
     budget = SimpleNamespace(calls=0, summary=lambda: {"model_calls": budget.calls})
@@ -337,8 +338,10 @@ def test_run_stops_after_first_skill_missing_mandated_mechanism(tmp_path, monkey
     @contextmanager
     def fake_control(c, directory):
         runtime.write(directory / "control-runtime.json", {"container_name": "unit-control"})
-        yield "unit-private"
-        runtime.write(directory / "control-cleanup.json", {"status": "passed"})
+        try:
+            yield "unit-private"
+        finally:
+            runtime.write(directory / "control-cleanup.json", {"status": "passed"})
     monkeypatch.setattr(runtime, "isolated_control", fake_control)
     monkeypatch.setattr(runtime, "business_identity", lambda c: {})
     monkeypatch.setattr(runtime, "probe_isolation", lambda *a: {})
@@ -348,6 +351,11 @@ def test_run_stops_after_first_skill_missing_mandated_mechanism(tmp_path, monkey
         (directory / "SKILL.md").write_text("---\nname: fixture\ndescription: fixture\n---\nsynthetic unit body")
         return {"owner": "owner", "thread": "thread"}
     monkeypatch.setattr(runtime, "generate_skill", fake_generation)
+    return runtime, output, config_path, budget
+
+
+def test_run_stops_after_first_skill_missing_mandated_mechanism(tmp_path, monkeypatch):
+    runtime, output, config_path, budget = unit_run_fixture(tmp_path, monkeypatch)
     result = runtime.run(output, config_path)
     assert len(result["skills"]) == 1
     assert result["skills"][0]["status"] == "failed"

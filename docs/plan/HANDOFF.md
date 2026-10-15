@@ -1,3 +1,10 @@
+## T67 无效探索/真实重试/中断修复交付，2026-10-15
+读 docs/runtime/t67-discovery-retry-stop-repairs-2026-10-15.md。授权代码修复及组件验证已完成：cont3原轨迹128请求在46处离线停；真实SDK sync/async重试0，本地503各1请求；同值状态哈希、中断收据、终末成绩保留、取消优先均修复。115回归+后续受影响38通过，共117不同用例；独立定点复审通过。真实零模型doctor READY：Java/MCP/OpenSandbox/Mongo/实际哈希/隔离/清理通过，modelcalls0。本轮无新模型费用，原failed/hash/账目不动。
+整体T67仍blocked：最终gate artifacts/tasks/T67/20261015T055339Z/receipt.json，实际阻塞为原cont3冻结源码变化；完整30校准/六票Stage3仍缺。外部budget_proxy daemon在飞请求迟到usage归档尚未修，stop收据标unverified，已登记续付费前检查/处置；保持付费暂停、不自动新实验/重生成技能。T68不恢复；用户pckl SHA DEB5009D0F95F8E7BBC02B7CB171E9CD1E0D581EF838CC7FC63D33DBDE0F686D保留且不提交。下一步需讨论新运行协议及迟到用量边界，当前没有付费进程。
+
+## T67 新缺口修复获授权，2026-10-15
+用户“你解决一下”。修复连续变换ID404不算新进展、创建SDK时真正max_retries=0、通用文档导航/空结果语义、原生中断收据。先原cont3失败轨迹离线重放和SDK本地503零模型验证；不重生成技能/不覆盖原failed，不恢复T68。当前工作树用户pckl保留。
+
 ## T67 cont3 已主动停止，2026-10-15
 读docs/runtime/t67-cont3-stopped-2026-10-15.md。source78695e2，exec48288已exit，目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont3。3skills生成（9/2/10计算）；首题base128/120预算fail0、83个404，fewshot独立8/13。SIGINT止损后原result仍stale running，不改manifest；scratch/runtime/cont3-stopped-audit.json明确operator_stopped_incomplete，74hash/所有scope及控制资源清理已核对。81网关请求，4个503无usage，已知估41.149440；总155请求已知79.173954，actual未知。SDK表层retry0而sync/async底层2已零模型确认。变换ID探索停滞、可发现性、真实retry和原生终止收据缺口未修，全落T67；等讨论，不继续补丁/模型/Stage3，T68不恢复，pckl不动。最终gate artifacts/tasks/T67/20261015T040106Z/receipt.json BLOCKED exit2，指向cont3。
 

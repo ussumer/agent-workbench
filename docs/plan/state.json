@@ -407,8 +407,8 @@
     "T67": {
       "status": "blocked",
       "review": "not_reviewed",
-      "receipt": "artifacts/tasks/T67/20261015T040106Z/receipt.json",
-      "notes": "2026-10-15cont3止损：3skills生成；首题base128/120失败0，83个404/0成功计算；fewshot独立8/13。SIGINT主进程已退出，全资源观察清理，74manifest hash一致。原stale running不改，独立operator审计stopped。81请求77known/4HTTP503未知usage，已知估41.149440；累计155请求已知79.173954。真正SDK retries仍2、变换ID停滞判定/发现及中断收据未解决；等讨论不补跑，无Stage3，T68blocked。"
+      "receipt": "artifacts/tasks/T67/20261015T055339Z/receipt.json",
+      "notes": "2026-10-15已授权代码修复交付：真实cont3轨迹128工具请求在46处离线停止；SDK构造retry0、sync/async本地503各1请求；同值状态哈希与原生中断/取消优先、终末成绩保留。115回归+后续受影响38通过（117不同用例）；真实doctor READY/model0/Java/Mongo/OpenSandbox/隔离清理通过，新增模型费0。整体gate blocked冻结源码变化，完整校准/六票Stage3未完成；外部网关迟到usage归档未解决，付费保持暂停，原失败/hash/历史费用保留，T68不恢复。详见t67-discovery-retry-stop-repairs-2026-10-15.md。"
     },
     "T68": {
       "status": "blocked",

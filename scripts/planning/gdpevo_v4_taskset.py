@@ -56,6 +56,11 @@ Detail response: {"data":{...},"request_id":...}. Document details contain raw
 records and source versions. No answer, score, or financial aggregate endpoint exists.
 Example call: path="/api/sourcing/programs/PRG-021", params={}.
 Example filtered list: path="/api/sourcing/quotes", params={"program_id":"PRG-021","offset":0,"limit":50}.
+Use exact document IDs returned by records: document_id, *_document_id,
+*_document_ids and replaces_document_id. Fetch those IDs as written. There is no
+/api/sourcing/documents list or search route. A filtered list with items=[] and
+total=0 is a complete successful empty result. Use total and offset to page through
+nonempty results; filter by the business identifier to avoid oversized global lists.
 Use only these paths; aliases such as /programs or /sourcing are not accepted.'''
 
 def validate_published_sourcing_tool(tools):
@@ -166,7 +171,7 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None, reuse_from=Non
         frozen.update({str(p): digest(p) for p in paths})
     # Runtime/config identities are operator evidence, never copied into Actor inputs.
     for path in (Path(__file__).resolve(), ROOT / 'uv.lock', CONFIG, ROOT / 'scripts/planning/gdpevo_v4_control.py',
-                 ROOT / 'scripts/planning/gdpevo_v4_reuse.py'):
+                 ROOT / 'scripts/planning/gdpevo_v4_reuse.py', ROOT / 'src/agent/config.py'):
         if path.is_file():
             frozen[str(path)] = digest(path)
     runtime_identity = {}
@@ -204,7 +209,7 @@ def prepare(group=GROUP, output=DEFAULT_OUTPUT, config_path=None, reuse_from=Non
         'official_gpt_calibration': False, 'learning_gain_proven': False, 'runtime_versions': LOCKED,
         'max_model_calls_per_session': session_limits('solve')['model_calls'], 'max_tool_calls': session_limits('solve')['tool_calls'], 'max_output_tokens': 8192,
         'recursion_limit': session_limits('solve')['recursion_limit'], 'skill_generation_limits': session_limits('skill'),
-        'no_progress_rule': '8 completed rounds repeating identical request/result pairs; distinct discoveries reset', 'repairs_or_retries': 0, 'runtime_identity': runtime_identity})
+        'no_progress_rule': '8 completed rounds or 12 tool results without new usable facts; errors/empty/repeated facts do not reset', 'repairs_or_retries': 0, 'runtime_identity': runtime_identity})
     write(output / 'source-hashes.json', frozen)
     write(output / 'source-inventories.json', inventories)
     if reuse_from is not None:
@@ -233,6 +238,8 @@ def validate_domain_request(path, params):
     match = re.fullmatch(r'/api/sourcing/(programs|forecasts|quotes|documents|engineering|contracts|payments|suppliers)(?:/([A-Za-z0-9_-]+))?', path)
     if not match or (match[2] and match[1] not in {'programs', 'documents'}):
         raise ValueError('domain path denied')
+    if match[1] == 'documents' and not match[2]:
+        raise ValueError('documents requires an exact returned document_id; no document list/search route exists')
     if not isinstance(params, dict) or set(params) - {'program_id', 'supplier_id', 'query', 'offset', 'limit'}:
         raise ValueError('query parameter denied')
     for key, value in params.items():
@@ -451,6 +458,23 @@ print(json.dumps(results))
     finally:
         backend.close()
 
+def actual_retry_policy(model):
+    values = {'sync_sdk_max_retries': model.root_client.max_retries,
+              'async_sdk_max_retries': model.root_async_client.max_retries}
+    if any(type(v) is not int or v != 0 for v in values.values()):
+        raise ValueError('actual SDK retries must be disabled before calibration')
+    return values
+
+
+def bind_actual_scope(row, directory):
+    path = directory / 'scope.json'
+    if path.is_file():
+        scope = read(path)
+        for key in ('owner', 'thread'):
+            if scope.get(key):
+                row[key] = scope[key]
+
+
 def doctor(output, config_path):
     import importlib.metadata
     result = {'status': 'blocked', 'model_calls': 0, 'calibration_complete': False, 'checks': {}, 'reasons': []}
@@ -472,6 +496,12 @@ def doctor(output, config_path):
         result['checks']['versions'] = versions
         model, identity = model_config(config)
         result['model_identity'] = model.redacted()
+        client = model.create_chat_model(max_retries=0)
+        try:
+            result['checks']['model_retry_policy'] = actual_retry_policy(client)
+        finally:
+            client.root_client.close()
+            asyncio.run(client.root_async_client.close())
         from deepagents import create_deep_agent
         from langchain_mcp_adapters.client import MultiServerMCPClient
         result['checks']['signatures'] = {'create_deep_agent': str(inspect.signature(create_deep_agent)), 'mcp_client': str(inspect.signature(MultiServerMCPClient))}
@@ -559,6 +589,7 @@ def mcp_worker(config_path, output, owner, thread, network):
             proxy = manager.get_or_create(owner)
             write(output / 'sandbox-inspection.json', inspect_sandbox(proxy.id, network))
             value = service.execute(owner, thread, code, read_names=read_names or [], session=session, timeout=timeout)
+            value['state_hashes'] = service.status(owner, thread, session=session)['data']
             write(output / 'executions.json', list(service.executions.find({'owner_user_id': owner, 'thread_id': thread}, {'_id': 0})))
             return value
         return trace_tool_call(trace, 'computation_execute', request, operation)
@@ -668,10 +699,42 @@ def session_limits(kind):
     return {'model_calls': 60, 'tool_calls': 120, 'recursion_limit': 600}
 
 
-def no_progress_reason(messages, stale_rounds=8):
-    """Stop repeated request/result pairs; distinct discoveries and revised facts reset it."""
+def usable_tool_facts(call, reply):
+    """Fingerprint returned facts; request spelling and transport metadata are not progress."""
+    if reply.get('status') == 'error':
+        return set()
+    content = reply.get('content', '')
+    if not isinstance(content, str):
+        content = text_content(content)
+    try:
+        value = json.loads(content)
+    except ValueError:
+        # Errors and offloaded-result notices are not usable business records.
+        return set()
+    if not isinstance(value, dict) or value.get('status') in {'failed', 'error', 'running', 'cancelled'} or value.get('error'):
+        return set()
+    if 'data' in value:
+        data = value['data']
+        if not isinstance(data, dict) or not data:
+            return set()
+        if isinstance(data.get('items'), list):
+            records = data['items']
+        elif isinstance(data.get('record'), dict):
+            records = [data['record']]
+        else:
+            records = [data]
+    elif call.get('name') == 'computation_execute' and value.get('status') == 'completed':
+        ignored = {'operation_id', 'worker_pid', 'terminated_pids', 'base_version', 'version'}
+        records = [{k: v for k, v in value.items() if k not in ignored}]
+    else:
+        return set()
+    return {json.dumps(record, sort_keys=True, default=str) for record in records if record}
+
+
+def no_progress_reason(messages, stale_rounds=8, stale_tool_results=12):
+    """Stop unproductive discovery even when the model keeps inventing different document IDs."""
     rows = [m if isinstance(m, dict) else m.model_dump(mode='json') for m in messages]
-    seen, consecutive = set(), 0
+    seen, rounds_without_facts, results_without_facts = set(), 0, 0
     for index, row in enumerate(rows):
         calls = row.get('tool_calls') or []
         if row.get('type') != 'ai' or not calls:
@@ -684,30 +747,15 @@ def no_progress_reason(messages, stale_rounds=8):
                 replies[following.get('tool_call_id')] = following
         if any(call.get('id') not in replies for call in calls):
             continue
-        new_result = False
-        for call in calls:
-            reply = replies[call['id']]
-            content = reply.get('content', '')
-            if not isinstance(content, str):
-                content = text_content(content)
-            try:
-                value = json.loads(content)
-                if isinstance(value, dict):
-                    ignored = {'request_id'}
-                    if call.get('name') == 'computation_execute':
-                        ignored |= {'operation_id', 'worker_pid', 'terminated_pids'}
-                        if not value.get('saved_names') and not value.get('deleted_names'):
-                            ignored |= {'base_version', 'version'}
-                    value = {k: v for k, v in value.items() if k not in ignored}
-            except ValueError:
-                value = content
-            key = json.dumps([call.get('name'), call.get('args'), reply.get('status'), value], sort_keys=True, default=str)
-            if key not in seen:
-                new_result = True
-                seen.add(key)
-        consecutive = 0 if new_result else consecutive + 1
-        if consecutive >= stale_rounds:
-            return f'repeated tool requests produced no new results for {consecutive} rounds'
+        facts = set().union(*(usable_tool_facts(call, replies[call['id']]) for call in calls))
+        if facts - seen:
+            rounds_without_facts, results_without_facts = 0, 0
+            seen |= facts
+        else:
+            rounds_without_facts += 1
+            results_without_facts += len(calls)
+        if rounds_without_facts >= stale_rounds or results_without_facts >= stale_tool_results:
+            return f'no new usable facts for {rounds_without_facts} rounds / {results_without_facts} tool results'
     return None
 
 
@@ -753,31 +801,38 @@ async def actor_session(model, config_path, directory, task_input, skill, networ
     try:
         async with client.session('business') as mcp:
             try:
+                from langchain_mcp_adapters.tools import load_mcp_tools
+                tools = actor_tools(await load_mcp_tools(mcp))
+                system = SYSTEM + ('\nTrain-derived skill:\n' + skill if skill else '')
+                if kind == 'skill':
+                    system = SKILL_SYSTEM
+                graph = create_deep_agent(model=model, tools=tools, backend=StateBackend(),
+                    checkpointer=resources.checkpointer, store=UserScopedStore(resources.store, owner),
+                    system_prompt=system, middleware=actor_middlewares(kind, directory))
+                payload = {'messages': [HumanMessage(content=json.dumps(task_input, ensure_ascii=False))]}
+                scope = {'configurable': {'thread_id': thread, 'owner_user_id': owner},
+                         'recursion_limit': session_limits(kind)['recursion_limit'], 'callbacks': [recorder]}
+                async for state in graph.astream(payload, config=scope, stream_mode='values'):
+                    messages = state.get('messages', [])
+                    write(directory / 'messages.json', [m.model_dump(mode='json') for m in messages])
+                if not messages:
+                    raise ValueError('Actor returned no messages')
+                content = text_content(messages[-1].content)
+                (directory / 'final-content.txt').write_text(content, encoding='utf-8')
+            except (Exception, KeyboardInterrupt, asyncio.CancelledError) as error:
+                pending_error = error
+            finally:
                 try:
-                    from langchain_mcp_adapters.tools import load_mcp_tools
-                    tools = actor_tools(await load_mcp_tools(mcp))
-                    system = SYSTEM + ('\nTrain-derived skill:\n' + skill if skill else '')
-                    if kind == 'skill':
-                        system = SKILL_SYSTEM
-                    graph = create_deep_agent(model=model, tools=tools, backend=StateBackend(),
-                        checkpointer=resources.checkpointer, store=UserScopedStore(resources.store, owner),
-                        system_prompt=system, middleware=actor_middlewares(kind, directory))
-                    payload = {'messages': [HumanMessage(content=json.dumps(task_input, ensure_ascii=False))]}
-                    scope = {'configurable': {'thread_id': thread, 'owner_user_id': owner},
-                             'recursion_limit': session_limits(kind)['recursion_limit'], 'callbacks': [recorder]}
-                    async for state in graph.astream(payload, config=scope, stream_mode='values'):
-                        messages = state.get('messages', [])
-                        write(directory / 'messages.json', [m.model_dump(mode='json') for m in messages])
-                    if not messages:
-                        raise ValueError('Actor returned no messages')
-                    content = text_content(messages[-1].content)
-                    (directory / 'final-content.txt').write_text(content, encoding='utf-8')
-                finally:
                     cleanup = mcp_json(await mcp.call_tool('finish_session', {}))
                     if cleanup.get('recycled') is not True or cleanup.get('container_absent') is not True:
                         raise ValueError('explicit Actor MCP cleanup failed')
-            except Exception as error:
-                pending_error = error
+                except (Exception, KeyboardInterrupt, asyncio.CancelledError) as error:
+                    write(directory / 'actor-cleanup-error.json', failure_details(error))
+                    if pending_error is None:
+                        pending_error = error
+                    elif isinstance(error, (KeyboardInterrupt, asyncio.CancelledError)) and not isinstance(pending_error, (KeyboardInterrupt, asyncio.CancelledError)):
+                        write(directory / 'actor-error.json', failure_details(pending_error))
+                        pending_error = error
         # Mark only an actual successful context exit, independent of answer parsing.
         closed = True
         if pending_error is not None:
@@ -795,6 +850,11 @@ async def actor_session(model, config_path, directory, task_input, skill, networ
             write(directory / 'submission.json', parse_json_answer(content))
             result['submission'] = str(directory / 'submission.json')
         return result
+    except Exception as error:
+        if isinstance(pending_error, (KeyboardInterrupt, asyncio.CancelledError)):
+            write(directory / 'context-exit-error.json', failure_details(error))
+            raise pending_error from error
+        raise
     finally:
         write(directory / 'stdio-cleanup.json', {'closed': closed, 'owner': owner, 'thread': thread})
         resources.close()
@@ -1130,6 +1190,7 @@ def run(output, config_path):
         result['reused_usage'] = bound['reused_usage']
         result['prior_failed_usage'] = bound['prior_failed_usage']
     budget = None
+    active_row, active_directory, active_kind = None, None, None
     try:
         if protocol.get('reuse'):
             from scripts.planning.gdpevo_v4_reuse import import_skills
@@ -1140,8 +1201,8 @@ def run(output, config_path):
         remaining = remaining_skill_sessions(result['skills'])
         with (run_dir / 'model-calls.jsonl').open('x', encoding='utf-8') as log:
             with gateway(original, policy(identity), log, identity.get('model_extra_body')) as (url, budget):
-                model = dataclasses.replace(original, base_url=url, api_key='evaluation-proxy', max_tokens=8192).create_chat_model()
-                model.max_retries = 0
+                model = dataclasses.replace(original, base_url=url, api_key='evaluation-proxy', max_tokens=8192).create_chat_model(max_retries=0)
+                result['model_retry_policy'] = actual_retry_policy(model)
                 register_profile(model)
                 with isolated_control(config, run_dir / 'sandbox-control') as network:
                     control = read(run_dir / 'sandbox-control/control-runtime.json')
@@ -1153,6 +1214,7 @@ def run(output, config_path):
                     for repeat in remaining:
                         skill_dir = run_dir / 'skills' / f'session-{repeat}'
                         skill_row = {'session': repeat, 'status': 'started', 'ledger_source': 'current', 'model_calls_before': budget.calls}
+                        active_row, active_directory, active_kind = skill_row, skill_dir, 'skill'
                         result['skills'].append(skill_row)
                         write(run_dir / 'result.json', result)
                         try:
@@ -1165,15 +1227,18 @@ def run(output, config_path):
                                              sha256=digest(skill_dir / 'SKILL.md'), model_calls_after=budget.calls)
                         except Exception as error:
                             skill_row.update(status='failed', error=failure_details(error, [original.api_key]), model_calls_after=budget.calls)
+                            bind_actual_scope(skill_row, skill_dir)
                             raise
                         finally:
                             write(run_dir / 'result.json', result)
+                        active_row, active_directory, active_kind = None, None, None
                     failures = 0
                     for entry in protocol['schedule']:
                         task = next(t for t in protocol['tasks'] if t['task_id'] == entry['task_id'])
                         directory = run_dir / 'attempts' / f"r{entry['repeat']}-{entry['task_id']}-{entry['arm']}"
                         row = {**entry, 'status': 'started', 'ledger_source': 'current',
                                'grade': {'score': 0.0, 'points': []}, 'model_calls_before': budget.calls}
+                        active_row, active_directory, active_kind = row, directory, 'solve'
                         started = time.monotonic()
                         try:
                             skill = None if entry['arm'] == 'base' else (run_dir / 'skills' / f"session-{entry['repeat']}" / 'SKILL.md').read_text(encoding='utf-8')
@@ -1188,11 +1253,13 @@ def run(output, config_path):
                             failures = 0
                         except Exception as error:
                             row.update(status='failed', error=failure_details(error, [original.api_key]))
+                            bind_actual_scope(row, directory)
                             failures += 1
                         row.update(model_calls_after=budget.calls, elapsed_seconds=round(time.monotonic() - started, 3))
                         result['rows'].append(row)
                         write(directory / 'result.json', row)
                         write(run_dir / 'result.json', result)
+                        active_row, active_directory, active_kind = None, None, None
                         if row.get('mandatory_evidence_failed'):
                             raise RuntimeError('mandatory session mechanism/cleanup evidence failed; stop before more paid calls')
                         if failures >= 2:
@@ -1203,13 +1270,39 @@ def run(output, config_path):
                 result['control_cleanup'] = read(run_dir / 'sandbox-control/control-cleanup.json')
                 if result['control_cleanup']['status'] != 'passed':
                     raise ValueError('trusted control cleanup failed')
+    except (KeyboardInterrupt, asyncio.CancelledError) as error:
+        details = failure_details(error, [original.api_key])
+        result.update(status='stopped', calibration_complete=False, error=details)
+        if active_row is not None:
+            if active_row.get('status') == 'started':
+                active_row.update(status='interrupted', error=details)
+            active_row['model_calls_after'] = budget.calls if budget else active_row.get('model_calls_before', 0)
+            bind_actual_scope(active_row, active_directory)
+            if active_kind == 'solve' and not any(row is active_row for row in result['rows']):
+                result['rows'].append(active_row)
+            write(active_directory / 'result.json', active_row)
+        result['stop'] = {'reason': type(error).__name__, 'active_kind': active_kind,
+                          'active_directory': str(active_directory) if active_directory else None,
+                          'scope': {k: active_row[k] for k in ('owner', 'thread') if active_row and k in active_row}}
     except Exception as error:
         result.update(status='failed', error=failure_details(error, [original.api_key]))
     finally:
+        cleanup_path = run_dir / 'sandbox-control/control-cleanup.json'
+        if cleanup_path.is_file():
+            result['control_cleanup'] = read(cleanup_path)
         result['usage'] = budget.summary() if budget else {'model_calls': 0, 'actual_cost_cny': None}
         if protocol.get('reuse'):
             from scripts.planning.gdpevo_v4_reuse import accounting
             result['usage_accounting'] = accounting(result['usage'], result['reused_usage'], result['prior_failed_usage'])
+        if result['status'] == 'stopped':
+            actor_cleanup = {}
+            for kind, relative in [('mcp', 'mcp/cleanup.json'), ('stdio', 'stdio-cleanup.json'), ('error', 'actor-cleanup-error.json')]:
+                path = active_directory / relative if active_directory else None
+                actor_cleanup[kind] = read(path) if path and path.is_file() else {'status': 'unverified'}
+            write(run_dir / 'stop-receipt.json', {**result['stop'], 'status': 'stopped',
+                  'source_hashes_sha256': result['source_hashes_sha256'], 'usage': result['usage'],
+                  'actor_cleanup': actor_cleanup, 'late_gateway_results': 'unverified',
+                  'control_cleanup': result.get('control_cleanup', {'status': 'unverified'})})
         write(run_dir / 'result.json', result)
         freeze_manifest(run_dir)
     return result
@@ -1370,7 +1463,7 @@ def main():
     except Exception as error:
         value = {'status': 'blocked', 'error': {'type': type(error).__name__, 'message': str(error)[:600]}, 'calibration_complete': False}
     print(json.dumps(value, ensure_ascii=False, default=str))
-    if value['status'] in {'blocked', 'failed'}:
+    if value['status'] in {'blocked', 'failed', 'stopped'}:
         raise SystemExit(2)
 
 if __name__ == '__main__':

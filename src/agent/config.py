@@ -81,8 +81,14 @@ class ModelConfig:
             timeout_seconds=float(resolved_env.get("MODEL_TIMEOUT_SECONDS", "120") or 120),
         )
 
-    def create_chat_model(self) -> Any:
-        """Build the chat model. Imported lazily so config stays import-light."""
+    def create_chat_model(self, *, max_retries: int | None = None) -> Any:
+        """Build the model, applying retry policy before the SDK clients exist.
+
+        Omitting max_retries preserves the SDK default. Imported lazily so config
+        stays import-light.
+        """
+        if max_retries is not None and (type(max_retries) is not int or max_retries < 0):
+            raise ValueError("max_retries must be a nonnegative integer or None")
         from langchain_openai import ChatOpenAI
 
         kwargs: dict[str, Any] = {
@@ -94,6 +100,8 @@ class ModelConfig:
         }
         if self.max_tokens is not None:
             kwargs["max_tokens"] = self.max_tokens
+        if max_retries is not None:
+            kwargs["max_retries"] = max_retries
         return ChatOpenAI(**kwargs)
 
     def redacted(self) -> dict[str, Any]:

@@ -88,3 +88,14 @@ PATCH /api/planning/{thread}/goal接受expected_revision、可选budget、局部
 
 ## 2026-10-03 用户批准的新 T38（覆盖旧 kernel 约定）
 持久计算指Mongo权威版本化JSON数据，每步OpenSandbox内独立Python进程。通用load_state/save_state；Agent自行计算，无固定planner。按owner/thread/session、operation ID/base version与容器generation隔离；临时结果正常退出、JSON校验、进程树清理确认后CAS发布。失败/取消/超时不更新旧状态；无法确认停止则隔离环境。仅复制read_names所需数据，未变化数据复用；函数/模块/DataFrame下次显式重建，不保持对象身份。API/容器重建加载数据，不重放代码；无任意文件/网络副作用回滚保证，订单仍MCP审批。T40 Actor工具/提示与T41轨迹、T43版本变化需按新语义回归；旧交付组件证据不证明新计算机制。旧Jupyter补丁与失败证据保留但不再继续维护。
+
+
+## T67 发现停滞、客户端重试与中断协议（2026-10-15）
+
+ModelConfig.create_chat_model 新增可选关键字 max_retries:int|None；省略保持原SDK默认，非负整数覆盖在ChatOpenAI构造时传入，bool拒绝。既有调用者无参数兼容；T67 doctor/run显式0且核实sync/async root客户端均0，不用构造后字段赋值。模型身份仍由原配置决定。
+
+T67 sourcing_read只公开实际域接口与通用导航：documents必须用记录返回的精确document_id，空items/total0表示成功但无记录。8个完整回合或12个工具返回连续无新可用事实，在下一次模型调用前停止；真实新记录/分页数据和变化的计算结果放行，404、猜ID、空列表、重复事实、operation/PID/version不计进展。T67 computation_execute响应向后兼容增加state_hashes，取当前owner/thread/session真实ComputationService.status.data（数据名→bytes/sha256），不暴露其他会话，不在宿主重算业务。
+
+run捕获KeyboardInterrupt/CancelledError，记stopped（CLI退出2），保留当前scope及调用区间、终末scored/generated/failed，只有started改interrupted。stop-receipt.json纳入manifest，分列真实控制容器/MCP/stdio清理；缺失标unverified。取消优先普通异常，清理/退出异常另存且不伪造清理成功。本协议覆盖可处理的中断，不承诺SIGKILL/宿主断电下自动收据。
+
+未完成边界：外部procurement_eval.budget_proxy现有daemon HTTP线程不等待在飞请求，迟到回包的用量不能保证在关闭账本后落盘；stop receipt显式late_gateway_results=unverified。必须保留已预留调用和未知usage，不能称停止即完整费用归档；完整付费续跑前须在T67解决或明确处置，不能以组件通过视为整体验收。
