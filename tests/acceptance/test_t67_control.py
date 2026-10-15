@@ -70,3 +70,33 @@ def test_cleanup_includes_stopped_owned_sandboxes(control,monkeypatch):
     result=control.cleanup_control('ctrl','exec','mgmt')
     assert ('rm','-f','sandbox-stopped') in calls
     assert result['removed_sandboxes']==['sandbox-stopped']
+
+
+@pytest.mark.parametrize('listening',[False,True])
+def test_control_port_preflight_distinguishes_time_wait_from_live_listener(control,tmp_path,monkeypatch,listening):
+    import socket
+    from types import SimpleNamespace
+    image='sha256:'+'a'*64
+    class ReachedNetworkCreation(Exception):pass
+    def docker(*args):
+        if args[:2]==('image','inspect'):
+            return json.dumps([{'Id':image,'Config':{'Labels':{'t67.source_snapshot_sha256':'b'*64,'t67.server_version':'0.2.3'}}}])
+        if args[:2]==('network','create'):raise ReachedNetworkCreation()
+        raise AssertionError('unexpected Docker operation')
+    monkeypatch.setattr(control,'docker',docker)
+    monkeypatch.setattr(control.subprocess,'run',lambda *a,**kw:SimpleNamespace(stdout='',stderr=''))
+    with socket.socket() as listener:
+        listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+        listener.bind(('127.0.0.1',0));listener.listen();port=listener.getsockname()[1]
+        if not listening:
+            with socket.create_connection(('127.0.0.1',port)) as client:
+                accepted,_=listener.accept();accepted.close()
+                assert client.recv(1)==b''
+            listener.close()
+            # Prove a real TIME_WAIT false positive, independent of the deployment function.
+            with socket.socket() as raw:
+                with pytest.raises(OSError):raw.bind(('127.0.0.1',port))
+        expected=OSError if listening else ReachedNetworkCreation
+        with pytest.raises(expected):
+            with control.isolated_control({'sandbox_port':port,'sandbox_control_image':image},tmp_path/'attempt'):
+                pytest.fail('test must not start a real control service')

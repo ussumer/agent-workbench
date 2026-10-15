@@ -1,3 +1,6 @@
+## T67 cont4零调用端口失败已保留，cont5准备，2026-10-15
+读docs/runtime/t67-cont4-port-failure-2026-10-15.md与t67-cont5-protocol-2026-10-15.md。cont4 exec52497已exit，doctorREADY，run failed EADDRINUSE/0skills0rows0calls0fee；6manifest哈希审计原样。TIME_WAIT真实红绿/12控制回归/review通过；实际锁定服务同18125端口连续两次健康启动及清理通过，model0。仅本地probe设置SO_REUSEADDR，活跃listener仍拒绝。一次新证据修订后独立cont5，先commit新source/freeze/actualdoctor再3fresh+30；gate指cont5，不恢复原failed，同类故障再现即停讨论。旧155calls/79.173954已知部分估/4unknown不改，T68不恢复，用户pckl保留。
+
 ## T67 cont4 已启动，2026-10-15
 源码d7c7dfb07250f05240a3776a6e76419c5c090941；exec session52497（仅本应用会话有效）。目录artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont4，日志scratch/runtime/full-calibration-cont4.log；runtime/gateway/modelconfig实际快照及SHA已保存，新prepare30匹配行，正在真实零模型doctor，当前未见业务结果。不重复启动、不修改冻结代码、不失败自动重试；完成后只读verify当前cont4/六票Stage3/gate。旧155请求/79.173954已知部分估/4unknown单列，新费用另算。T68不恢复，用户pckl不提交。
 

@@ -73,7 +73,9 @@ def isolated_control(config,directory):
     nonce=uuid.uuid4().hex[:12];execution='t67-exec-'+nonce;management='t67-mgmt-'+nonce;control='t67-control-'+nonce
     created=[];primary=None;old=os.environ.get('T67_CONTROL_CONTAINER')
     try:
-        with socket.socket() as sock:sock.bind(('127.0.0.1',config['sandbox_port']))
+        with socket.socket() as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(('127.0.0.1',config['sandbox_port']))
         docker('network','create','--internal','--opt','com.docker.network.bridge.gateway_mode_ipv4=isolated','--label','purpose=t67',execution);created.append(execution)
         docker('network','create','--label','purpose=t67',management);created.append(management)
         subnet=json.loads(docker('network','inspect',management))[0]['IPAM']['Config'][0]['Subnet']

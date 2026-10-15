@@ -408,7 +408,7 @@
       "status": "in_progress",
       "review": "not_reviewed",
       "receipt": "artifacts/tasks/T67/20261015T055339Z/receipt.json",
-      "notes": "2026-10-15 cont4已启动，源码d7c7dfb，exec52497，独立artifacts/experiments/t67-gdpevo-group025-ds-20261015-cont4。网关排空70回归/review通过；新prepare后真实doctor中，再3fresh+30，同120/60/600+事实进展保护。旧3skill两份隐藏重试/unknown账本不能严格复用，guard不弱化；旧155calls/79.173954已知估/4unknown保留。禁重复/自动失败重试，未完整校准/无Stage3，T68blocked。"
+      "notes": "cont4 doctor READY后裸bind失败，0skills0rows0calls0fee，原6hash保留；TIME_WAIT真TCP红绿、12控制回归/review与实际同端口两次生命周期通过，新证据一次修订后cont5独立新freeze/3fresh+30。原失败不恢复，同类再失败即停讨论，T68不恢复。"
     },
     "T68": {
       "status": "blocked",
